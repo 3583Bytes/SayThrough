@@ -1,0 +1,1425 @@
+================================================================================
+  AAC APP — FREE OPEN-SOURCE ALTERNATIVE TO TD SNAP
+  REQUIREMENTS DOCUMENT
+  Version 1.0 — April 2026
+================================================================================
+
+Project name: SayThrough
+Purpose: A free, open-source Augmentative and Alternative Communication (AAC)
+         application for users who cannot afford or access commercial solutions
+         such as TD Snap ($9.99/mo) or Proloquo2Go ($249.99).
+Target users: Children and adults with autism, cerebral palsy, ALS, aphasia,
+              developmental delays, and other complex communication needs.
+         — and the teachers, parents, speech-language pathologists (SLPs),
+              and caregivers who support them.
+
+================================================================================
+SECTION 1 — BACKGROUND & RESEARCH SUMMARY
+================================================================================
+
+1.1  WHAT IS AAC?
+──────────────────
+Augmentative and Alternative Communication (AAC) encompasses all forms of
+communication beyond natural speech — picture boards, symbol grids, speech-
+generating devices, and software apps.  AAC users span a huge range of needs:
+  • Nonverbal children with autism or cerebral palsy who need a lifelong voice
+  • Adults recovering from stroke or brain injury (aphasia)
+  • People with ALS or progressive motor conditions (voice banking priority)
+  • Individuals with intellectual disabilities using symbol-based communication
+  • Literate users who need word prediction and keyboard-based generation
+
+Core vocabulary principle: A small set of ~200–500 high-frequency words accounts
+for approximately 80% of all daily communication.  "Core words" (I, want, go,
+more, help, stop, like, make, feel…) are central to most evidence-based AAC
+approaches.
+
+1.2  THE COMMERCIAL LANDSCAPE (RESEARCH FINDINGS)
+───────────────────────────────────────────────────
+TD Snap (Tobii Dynavox)
+  • Changed from one-time $79.99 → $9.99/month subscription (2024)
+  • Enterprise license: $149.99 one-time for organizations with Apple
+    Business/School Manager accounts
+  • iPad-first; also Windows; requires Tobii Dynavox hardware for eye gaze
+  • Previously called "Snap Core First" before rebranding
+  • Includes: Core First, Motor Plan, Express, Text, Scanning, Aphasia page
+    sets; PODD and Gateway available as add-on subscriptions
+  • 75,000+ Picture Communication Symbols (PCS/Boardmaker — proprietary)
+  • Acapela TTS voices including custom "My-Own-Voice" voice banking
+  • Data tracking synced to myTobiiDynavox cloud portal
+
+Proloquo2Go (AssistiveWare)
+  • $249.99 one-time; iOS only
+  • 7,000+ core words, 100+ voices, multiple grid sizes
+  • Considered "gold standard" in symbol-based AAC
+  • Strong motor planning support
+
+TouchChat (Saltillo)
+  • Multiple vocabulary systems (Basic 4 to WordPower)
+  • Multiple languages including English, Spanish, Hebrew, Arabic
+  • Highly customizable; family sharing
+
+LAMP Words for Life (PRC-Saltillo)
+  • $149.99; evidence-based motor planning (Minspeak)
+  • English/Spanish/French
+  • Strong data logging
+
+Speak for Yourself
+  • $149.99–$299.99; 14,000+ vocabulary; motor learning / automaticity
+  • Split-view screen; cloud backup
+
+CoughDrop
+  • $9/month or $295 one-time; web + iOS + Android + Windows
+  • Cloud-based; team sharing; strong reporting
+  • Supports Open Board Format
+
+Proloquo (AssistiveWare, newer)
+  • Updated successor to Proloquo2Go with more modern interface
+
+Free/Open-Source Options
+  • Cboard: React + PWA, web/iOS/Android; ARASAAC + Mulberry symbols;
+    Browser Speech Synthesis API; 40+ languages; GPLv3
+    GitHub: https://github.com/cboard-org/cboard
+  • LifeCompanion: Free open-source; desktop-focused
+    GitHub: https://github.com/lifecompanionaac/lifecompanion
+  • AsTeRICS Grid: Web-based; open source; strong scanning support
+  • The Open Voice Factory: Generates printable communication books
+
+1.3  OPEN STANDARDS TO ADOPT
+──────────────────────────────
+Open Board Format (.obf / .obz)
+  • JSON-based standard for communication boards
+  • .obf = single board JSON; .obz = ZIP of boards + media
+  • Supported by CoughDrop, Snap, and others
+  • Spec: https://www.openboardformat.org/
+  • Enables import/export interoperability with all major AAC apps
+
+OpenSymbols API
+  • Aggregates 60,000+ open-licensed symbols from multiple libraries
+  • https://www.opensymbols.org/
+
+ARASAAC Symbol Library
+  • 13,000+ colorful symbols; CC BY-NC-SA 4.0
+  • Free for non-profit/educational use
+  • https://arasaac.org/
+  • Available as downloadable packages in 10+ language sets
+
+Mulberry Symbol Set
+  • ~3,000 symbols; CC BY-SA 4.0
+  • https://mulberrysymbols.org/
+
+Sclera Symbol Set
+  • ~11,000 high-contrast black-and-white symbols; CC BY-NC
+  • Ideal for low-vision users
+
+OpenMoji
+  • ~3,000 emoji-based symbols; CC BY-SA 4.0
+
+Global Symbols
+  • Culturally-specific; CC BY-SA; includes translation tools
+
+Web Speech API / SAPI5 / platform TTS
+  • Browser Speech Synthesis API (cross-platform, free)
+  • SAPI5 (Windows)
+  • AVSpeechSynthesizer (iOS/macOS)
+  • Android TTS API
+
+1.4  KEY TAKEAWAYS FOR THIS PROJECT
+─────────────────────────────────────
+  • No proprietary symbol library — use ARASAAC + Mulberry + OpenSymbols
+  • Support Open Board Format for import/export from day one
+  • Use platform-native TTS (free) with optional premium voice support
+  • Web-first progressive web app (PWA) so it works on any device
+  • Cloud sync must be free and not required — local-first design
+  • Vocabulary Filter and data tracking are must-haves for SLP workflows
+  • Motor planning / consistent button placement is clinically important
+  • Multiple access methods (touch, switch scanning, eye gaze) needed
+
+================================================================================
+SECTION 2 — TARGET USER PERSONAS
+================================================================================
+
+2.1  PRIMARY USERS (COMMUNICATORS)
+────────────────────────────────────
+  P1 — Child with autism (nonverbal or minimally verbal, age 3–18)
+       • Needs symbol-based grid with large touch targets
+       • May be in school setting with 1:1 aide
+       • Motor planning consistency is critical for habit formation
+
+  P2 — Child with cerebral palsy
+       • May have limited motor control; needs switch scanning or eye gaze
+       • Needs auditory feedback for navigation
+       • May use a mounted tablet or dedicated device
+
+  P3 — Adult with ALS / progressive neurological condition
+       • Voice banking before voice loss is a priority
+       • Needs text + word prediction; keyboard-dominant
+       • Increasingly relies on eye gaze or switch as motor function declines
+
+  P4 — Adult with aphasia (post-stroke)
+       • Needs simplified interface; photo-supported communication
+       • Rating scales, scripted conversations, whiteboard for drawing
+       • May regain some language — interface must support recovery
+
+  P5 — Adult with intellectual disability
+       • Symbol-based; may have limited literacy
+       • Express/phrase-based vocabulary
+       • Needs minimal UI complexity
+
+2.2  SECONDARY USERS (SUPPORT TEAM)
+─────────────────────────────────────
+  S1 — Parent / Family caregiver
+       • Sets up and customizes the device at home
+       • Needs easy add/edit vocabulary without technical knowledge
+       • Wants to track word usage and progress
+
+  S2 — Speech-Language Pathologist (SLP)
+       • Designs the vocabulary system and page sets
+       • Needs robust editing tools, vocabulary filter for therapy
+       • Needs data export for documentation and insurance billing
+
+  S3 — Special Education Teacher
+       • Configures device for classroom; may share with multiple students
+       • Needs per-user profiles; classroom-safe locked mode
+       • May use visual supports/schedules for classroom routine
+
+  S4 — Paraprofessional / Aide
+       • Operates the device with the user daily
+       • Needs simplicity in daily use mode; minimal setup access
+
+================================================================================
+SECTION 3 — PLATFORM & TECHNICAL REQUIREMENTS
+================================================================================
+
+3.1  PLATFORM TARGETS (PRIORITY ORDER)
+────────────────────────────────────────
+  [P0] iPad (iOS 15+) — primary AAC device for most users
+  [P0] Web Browser (Chrome/Firefox/Safari) — maximum accessibility,
+       enables use on any existing hardware including Chromebooks
+  [P1] Android tablet (Android 9+) — lower cost devices
+  [P1] Windows (10/11) — school lab computers, AAC desktops
+  [P2] macOS — SLP evaluation and configuration
+  [P2] Android phone — lightweight / on-the-go
+
+3.2  ARCHITECTURE APPROACH
+───────────────────────────
+  • DECIDED (July 2026): single React Native + Expo codebase, web first.
+    Phase 1 ships an installable web PWA via react-native-web; Phase 2
+    ships the same codebase as native iOS/Android apps via EAS Build.
+    See technical-specification.md for the full stack.
+  • Progressive Web App (PWA) as the Phase 1 deliverable
+    - Works offline via Service Worker + Cache API
+    - Installable to home screen on any platform
+    - Single codebase for web + mobile
+  • Local-first data model: all user data stored on device; cloud sync
+    is optional and never required to use the app
+  • Open Board Format (.obf/.obz) as the native data format
+  • Tech stack: React Native + Expo + TypeScript, Zustand, expo-sqlite
+    (IndexedDB-backed on web), expo-speech (Web Speech API on web),
+    expo-audio (recorded button audio), expo-crypto (PIN hashing),
+    i18next, Jest (jest-expo) + React Native Testing Library
+    (unit/component), Playwright (web E2E)
+    - An earlier draft recommended a pure-web React/Dexie/Workbox stack
+      (informed by Cboard); superseded by the Expo decision so native
+      apps reuse the same code
+
+3.3  ACCESSIBILITY BASELINE
+────────────────────────────
+  • WCAG 2.1 AA minimum for all UI chrome (settings, menus)
+  • ARIA roles on all interactive elements
+  • Keyboard navigable (for switch access via keyboard emulation)
+  • High contrast mode built in
+  • Minimum touch target size: 44×44pt (Apple HIG) / 48×48dp (Material)
+  • No time limits on interactions (or configurable)
+
+================================================================================
+SECTION 4 — FEATURE REQUIREMENTS
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.1  VOCABULARY / PAGE SET SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A "page set" is a complete vocabulary system — a tree of linked grid pages that
+forms the user's complete communication vocabulary.  Multiple page sets will be
+bundled with the app and users can create or import custom ones.
+
+4.1.1  BUNDLED PAGE SETS
+
+  [PS-01] CORE VOCABULARY PAGE SET
+  (Equivalent to TD Snap "Core First")
+  Priority: MUST HAVE
+
+  Description: A symbol-supported vocabulary system centered on core words —
+  the ~200–500 high-frequency words that form the backbone of all
+  communication.  Designed for language learners at any stage.
+
+  Requirements:
+  - Organize vocabulary into: Core Words, Topic Words (fringe), and Quick
+    Phrases (pre-stored messages)
+  - Core words always accessible from every page (persistent row or overlay)
+  - Topic words organized semantically (People, Actions, Food, Places,
+    Feelings, School, Home, Body, etc.)
+  - Grid size options: 9-button (3×3), 20-button, 30-button (5×6),
+    40-button (5×8), 66-button (6×11) — user selects based on motor ability
+  - Symbols displayed above word labels on each button
+  - High-contrast variant: dark background, reduced visual complexity,
+    high-contrast symbols for low-vision users
+  - Printable low-tech companion boards generated from the same vocabulary
+    (PDF export of any page or page set)
+  - Path-to-literacy: keyboard always accessible; sight words and spelling
+    integrated at higher vocabulary levels
+  - Bilingual toggle: switch between two languages without losing layout
+    (code-switching; e.g., English ↔ Spanish)
+  - Support morphological endings (verb tenses, plurals) via Word Forms
+    (e.g., pressing "go" → see "goes, going, went, gone")
+
+  [PS-02] MOTOR PLAN VOCABULARY PAGE SET
+  (Equivalent to TD Snap "Motor Plan")
+  Priority: SHOULD HAVE
+
+  Description: Designed for learners with complex access needs.  Every word
+  has a consistent, fixed location requiring 3 or fewer selections from any
+  point.  Motor memory rather than reading/cognitive load drives access.
+
+  Requirements:
+  - Each word lives at the same button position on every page in the set
+    (motor planning principle — no word moves from its home location)
+  - Words accessible in ≤3 selections from any page
+  - Grid size options: 30, 40, 66 buttons
+  - Custom space on every page for personalized fringe vocabulary
+  - Available in English, Spanish, bilingual English/Spanish
+  - Vocabulary Filter support (see 4.8)
+  - Printable motor plan boards and posters
+
+  [PS-03] QUICK PHRASE / TOPIC-BASED PAGE SET
+  (Equivalent to TD Snap "Express")
+  Priority: MUST HAVE
+
+  Description: An 18-button single-grid page set optimized for users who
+  communicate primarily through pre-stored phrases and topic-based vocabulary.
+  Minimal navigation; everything in immediate reach.
+
+  Requirements:
+  - 18-button grid (3×6 or 2×9 layout)
+  - Organized by communication themes/topics
+  - Pre-stored phrase buttons that speak a full sentence in one hit
+  - Built-in keyboard for spelling/literacy practice
+  - Book and photo creation tools
+  - Whiteboard (see 4.7.5)
+  - Languages: English, Spanish, bilingual English/Spanish
+
+  [PS-04] TEXT & KEYBOARD PAGE SET
+  (Equivalent to TD Snap "Text")
+  Priority: MUST HAVE
+
+  Description: For literate users or those transitioning away from symbols.
+  Keyboard-centric with word prediction, phrase banks, and smart assistant
+  access.
+
+  Requirements:
+  - Full on-screen keyboard (QWERTY, ABC, frequency-sorted layouts)
+  - Word prediction engine (see 4.5)
+  - Abbreviation expansion (type "omw" → speaks "On my way!")
+  - Phrase bank: user-created categorized phrase libraries
+  - Quick access to commonly used phrases organized by topic
+  - Smart assistant integration (Google Assistant, Siri, Alexa) via
+    pre-programmed launch pages
+  - No symbol requirement; text-label-only buttons
+  - Multiple keyboard language support
+
+  [PS-05] SCANNING-OPTIMIZED PAGE SET
+  (Equivalent to TD Snap "Scanning")
+  Priority: SHOULD HAVE
+
+  Description: Core vocabulary restructured for efficient switch scanning.
+  Content pre-grouped into scanning-friendly clusters to minimize switch
+  activations.
+
+  Requirements:
+  - Based on Core Vocabulary set content but reorganized for scan patterns
+  - Pre-defined scan groups (clusters of related buttons highlighted together)
+  - Customizable auditory cues per scan group (read group name aloud
+    when highlighted)
+  - Scroll-free toolbar navigation
+  - Timing settings for auto-scan speed, dwell time, selection delay
+  - Compatible with 1-switch and 2-switch scanning
+  - Word lists organized by frequency of use
+
+  [PS-06] APHASIA PAGE SET
+  (Equivalent to TD Snap "Aphasia")
+  Priority: SHOULD HAVE
+
+  Description: Simplified communication tools designed for adults with aphasia,
+  supporting both immediate communication needs and language recovery.  Mirrors
+  tools used in speech-language therapy.
+
+  Requirements:
+  - Whiteboard / digital notepad (draw, write, annotate; shared view mode)
+  - Rating scales: numeric (1–10) and visual (emoji/face) pain/mood scales
+  - Word lists: category-organized vocabulary (body parts, feelings, places,
+    daily routines, medical, social)
+  - Scripts: pre-rehearsed conversation templates for common situations
+    (doctor visit, restaurant, phone call) — user can customize
+  - Photo album: store and share personal photos to support communication
+    about memories, people, and events
+  - All tools adjustable for complexity, size, and color
+  - Large button sizes by default (low motor demand assumption)
+  - Symbol + photo combination buttons
+
+  [PS-07] PRAGMATIC PAGE SET
+  (Equivalent to TD Snap "PODD")
+  Priority: NICE TO HAVE
+
+  Description: Vocabulary organized by communicative function/pragmatic intent
+  rather than semantic category.  Based on PODD (Pragmatic Organization Dynamic
+  Display) principles by Gayle Porter.
+
+  Requirements:
+  - 15-cell primary page representing core pragmatic functions
+    (comment, question, refuse, request, describe, tell about, chat, etc.)
+  - Language prediction from pragmatic context
+  - Designed for 1–4 keyword utterances
+  - For pre-school and early school-age learners with complex bodies
+  - Note: PODD is a licensed methodology — implement "PODD-inspired" design
+    or partner with licensed PODD trainers
+
+4.1.2  USER-CREATED PAGE SETS
+  - Create new page sets from scratch or by cloning a bundled set
+  - Import page sets via Open Board Format (.obf / .obz)
+  - Export any page set to .obf / .obz for backup or sharing
+  - Page set metadata: name, description, language, author, version
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.2  BUTTON / CELL SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Buttons (also called "cells" or "tiles") are the fundamental interactive unit.
+Each button can speak, navigate, or trigger an action.
+
+4.2.1  BUTTON CONTENT
+  - Text label (required; used as speech if no recorded audio)
+  - Symbol/image (optional; from library, web search, or camera/gallery)
+  - Recorded audio (replaces TTS for that button)
+  - Audio cue (spoken when button is highlighted during scanning; may differ
+    from the spoken message)
+
+4.2.2  BUTTON ACTIONS
+  Each button can trigger one or more sequenced actions:
+  - [BA-01] Append text to message bar
+  - [BA-02] Speak message bar contents
+  - [BA-03] Speak button label/recorded audio immediately (without appending)
+  - [BA-04] Navigate to a page (link)
+  - [BA-05] Navigate back
+  - [BA-06] Navigate to home page
+  - [BA-07] Clear message bar
+  - [BA-08] Delete last word/character from message bar
+  - [BA-09] Add space to message bar
+  - [BA-10] Open/show a vocabulary list
+  - [BA-11] Toggle vocabulary filter list
+  - [BA-12] Open whiteboard
+  - [BA-13] Start/stop a visual timer
+  - [BA-14] Open a visual schedule item
+  - [BA-15] Open a script
+  - [BA-16] Open photo album
+  - [BA-17] Open rating scale
+  - [BA-18] Launch external app / URL (smart assistant, YouTube, etc.)
+  - [BA-19] Play a video clip
+  - [BA-20] Open a Boardmaker-compatible activity (future / plugin)
+  - [BA-21] Change access method (toggle between configured methods)
+  - [BA-22] Change page set / user profile
+  - [BA-23] Lock / unlock device (kiosk mode)
+
+4.2.3  BUTTON STYLING
+  - Background color (per button, custom color picker)
+  - Border color and thickness
+  - Label: font family, size, color, bold, position (top/bottom/hidden)
+  - Symbol position within button (top/center/bottom)
+  - Symbol size (fill button vs. fixed size)
+  - Rounded vs. square corners
+  - Drop shadow toggle
+  - Button visibility toggle (show/hide without deleting)
+
+4.2.4  BUTTON GRID & LAYOUT
+  - Fixed grid: user selects rows × columns; buttons snap to uniform cells
+  - Grid sizes supported: 2×2, 2×3, 3×3, 3×4, 4×5, 5×6, 5×7, 5×8,
+    6×10, 6×11, and custom (up to 10×15)
+  - Multi-cell buttons: a single button can span multiple grid cells
+  - Empty cells (spacers): invisible non-interactive placeholder
+  - Per-page background color or image
+  - Page label (name displayed in navigation path)
+  - Page symbol (icon shown on buttons that link to this page)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.3  MESSAGE BAR & SPEECH OUTPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The message bar is the composed-message area at the top (or bottom) of the
+screen where selected words accumulate before being spoken.
+
+4.3.1  MESSAGE BAR FEATURES
+  - Text display of accumulated message
+  - Symbol display (shows symbol for each appended word above the text)
+  - Speak button (activates TTS for full message)
+  - Speak-on-select option (speaks each word immediately when pressed,
+    while still adding it to the accumulating message)
+  - Clear button (clears entire message)
+  - Delete/backspace (removes last word or last character in keyboard mode)
+  - Undo / Redo (restore previous message states)
+  - Copy message to clipboard
+  - Share message (native share sheet: SMS, email, notes, etc.)
+  - Message history (scroll back through recent messages; re-speak any)
+  - Chat mode: display a running chat-like log of both sides of a
+    conversation (user's messages on one side, partner's typed responses
+    on the other) — useful in face-to-face communication
+
+4.3.2  PARTNER WINDOW
+  - A mirrored read-only display of the message bar
+  - Designed to face the conversation partner during face-to-face interaction
+  - Can be shown on a secondary connected display or in split-screen
+  - User controls whether partner window is visible (privacy toggle)
+  - Options: show text while composing, show text only when Speak is pressed
+  - Font size adjustable for partner window independently
+
+4.3.3  QUICK FIRES / SAVED PHRASES
+  - Dedicated page or toolbar area for pre-stored complete utterances
+  - Categories: Greetings, Requests, Social, Emergency, Custom
+  - One-tap to speak (bypasses message bar)
+  - User can add/edit/organize quick phrases
+  - Emergency quick fire: always-accessible button that speaks an emergency
+    message and optionally activates an alert sound
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.4  TEXT-TO-SPEECH (TTS) ENGINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [TTS-01] Platform-native TTS (default, free)
+  - Web Speech API (browser)
+  - AVSpeechSynthesizer (iOS/macOS)
+  - Android TTS
+  - Windows SAPI5 / OneCore voices
+  - List all available system voices; user selects preferred voice
+
+  [TTS-02] Voice settings
+  - Rate control (slow / normal / fast; numeric slider)
+  - Pitch control
+  - Volume control
+  - Per-user voice preferences saved to profile
+
+  [TTS-03] Voice selection
+  - Gender filter (male / female)
+  - Age variant where available (child / teen / adult)
+  - Language-specific voices
+  - Preview voice before selecting
+
+  [TTS-04] Voice banking (future / plugin)
+  - Allow user to record phrases to build a personal voice model
+  - Integration with Acapela my-own-voice, Model Talker, or The Voice Keeper
+    for users facing voice loss (ALS, laryngectomy, etc.)
+  - Import custom SAPI5 voice files (Windows)
+  - Store recorded button audio as a fallback for any TTS voice
+
+  [TTS-05] Pronunciation editor
+  - Custom pronunciation overrides (e.g., a child's name pronounced correctly)
+  - SSML support for prosody, pauses, and phoneme control where available
+
+  [TTS-06] Acapela Vocal Smiley codes (optional/advanced)
+  - Support emotion/expression tags in speech for supported TTS engines
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.5  WORD PREDICTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Word prediction bar appears above/below keyboard showing top 3–6
+    predicted next words based on:
+      a) Letters typed so far (prefix match)
+      b) Previous word in the message (bigram/trigram model)
+      c) Personal usage history (learned preferences)
+  - Phrase prediction: predict the next 2–3 words as a unit
+  - Word completion: complete partially-typed words
+  - Personal learning: app learns from user's communication patterns over time
+  - Reset learning model without resetting other settings
+  - Language model per user profile
+  - Prediction base vocabulary: 150,000+ word core list (minimum)
+  - Domain-specific word lists (medical, school, sports) can be loaded
+  - No internet required for prediction (fully offline model)
+  - Abbreviation expansion (user-defined shorthand → full phrase)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.6  ACCESS METHODS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Access methods determine how the user physically interacts with the app.
+All six access methods listed by TD Snap must be supported.
+
+  [AM-01] DIRECT TOUCH
+  - Standard tap-to-activate
+  - Adjustable touch acceptance delay (reduces accidental activations)
+  - Minimum touch duration setting
+  - No accidental touch guard (ignore palm/multiple simultaneous touches)
+
+  [AM-02] TOUCH ENTER (Release to Select)
+  - Touch and drag onto a button; lift finger to activate
+  - Shows visual hover state while dragging
+  - Good for users with intention tremors
+
+  [AM-03] TOUCH EXIT (Drag Off to Select)
+  - Tap button, then drag away to confirm activation
+  - Prevents accidental activations from resting hand
+
+  [AM-04] MOUSE / POINTER DWELL
+  - Hover cursor over button for a configurable time to select
+  - Visual dwell progress indicator on button (ring, fill, or border)
+  - Configurable dwell time (0.3–5.0 seconds)
+  - Dwell on message bar and toolbar buttons too
+  - Move-to-cancel: moving off button cancels dwell
+  - Works with trackpads, head mice, joysticks, and eye gaze hardware
+    that emulates a mouse pointer
+
+  [AM-05] SWITCH SCANNING
+  Scanning is the primary access method for users with the most severe
+  motor impairments.  The app highlights items sequentially and the user
+  activates a switch when the desired item is highlighted.
+
+  Scan types:
+  - Auto-scan: highlights advance automatically at a set speed
+  - Step scan: each switch press advances highlight one step
+  - Inverse scan (hold to scan): hold switch to advance; release to select
+  - Two-switch scanning: one switch advances, one selects
+
+  Scan patterns:
+  - Linear (left to right, top to bottom, one button at a time)
+  - Row-column: highlight entire row first, then individual button
+  - Block: highlight quadrant, then row, then button (3-step for large grids)
+  - Custom groups: SLP defines which buttons are highlighted together
+
+  Scan highlighting:
+  - Visual: colored border/overlay on highlighted button(s)
+  - Auditory: speak button label or group name when highlighted
+  - Combined: both visual and auditory simultaneously
+  - Configurable highlight color and border thickness
+  - Auditory cue can differ from button speech (group name vs. button name)
+
+  Scan settings:
+  - Scan speed (delay between auto-advances): 0.3–8.0 seconds
+  - First item delay (pause before first scan)
+  - Re-scan: number of times to loop before giving up
+  - Scan restart after selection
+  - Button boundary feedback (visual flash on selection)
+  - Audio feedback volume separate from speech volume
+
+  Switch configuration:
+  - External Bluetooth switch (emulates keyboard key or screen tap)
+  - Map switch to keyboard key (Space, Enter, or custom)
+  - Two-switch mapping (advance key + select key)
+  - Switch interface device support (via keyboard emulation)
+
+  [AM-06] AUDITORY TOUCH
+  - Touch and drag to hear audio cue for each button
+  - Lift to select the last heard button
+  - Or: touch once to hear, touch again to select
+  - Good for users with visual impairments who can use touch
+
+  [AM-07] EYE GAZE (future/optional)
+  - Integration with eye tracking hardware that emulates a mouse pointer
+    (Tobii, Irisbond, etc.)
+  - Dwell selection mode automatically used
+  - Calibration flow UI
+  - Note: requires platform-level eye gaze driver support; initial release
+    may support via pointer-dwell mode without deep hardware integration
+
+  Access method switching:
+  - User or caregiver can set 1 or 2 access methods
+  - A button action can toggle between 2 configured methods
+  - Pause access method button (accessible via scanning too)
+  - Per-user access method settings saved to profile
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.7  VISUAL SUPPORTS & SUPPLEMENTARY TOOLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These tools support receptive language, self-regulation, routine management,
+and multi-modal communication.
+
+  [VS-01] VISUAL SCHEDULE
+  - Create sequences of steps/activities with symbol and text for each step
+  - Check off steps as completed (visual progress)
+  - First-Then boards (simple 2-step version for early learners)
+  - Supports both horizontal (timeline) and vertical (checklist) layouts
+  - Steps can include: symbol, photo, text, recorded audio for each item
+  - Countdown timer per step (optional)
+  - Alarm/alert when step timer completes
+  - Schedules saved and reusable
+  - Share schedule via QR code or link for caregivers to open on their device
+
+  [VS-02] VISUAL TIMER
+  - Countdown timer with visual circle/bar depleting
+  - Set time in seconds or minutes
+  - Configurable alert sound when time expires
+  - Pause/resume and reset controls
+  - Can be embedded in a schedule step or activated from a button
+
+  [VS-03] SCRIPTS
+  - Pre-written conversation outlines for predictable social situations
+    (at the doctor, ordering food, calling someone, classroom introductions)
+  - Each script has: title, context description, and ordered utterance list
+  - User can read through the script, tapping each line to speak it
+  - SLP/caregiver can create custom scripts
+  - Scripts appear in the visual supports section and can be linked from
+    vocabulary buttons
+
+  [VS-04] RATING SCALES
+  - Numeric scale (1–10) with visual indicator
+  - Emoji/face scale (happy face to sad face, 5 or 7 points)
+  - Pain scale (standard medical 0–10 with faces)
+  - Custom label scale (e.g., "Never / Sometimes / Always")
+  - Color-coded zones
+  - Scale selection/response is logged in data tracking
+  - Customizable colors, size, complexity level
+
+  [VS-05] WHITEBOARD
+  - Freehand drawing canvas (finger or stylus)
+  - Line thickness options (thin / medium / thick)
+  - Color palette
+  - Eraser tool
+  - Clear canvas button
+  - Text tool (on-screen keyboard → add text anywhere on canvas)
+  - Insert symbol/photo from library onto canvas
+  - Save whiteboard as image (PNG/JPEG)
+  - Share whiteboard image via system share sheet
+  - Partner view mode: communication partner can see the whiteboard on
+    their own device or in a shared window
+  - Templates: body outline for indicating pain location, simple house
+    diagram, family tree, etc.
+
+  [VS-06] PHOTO ALBUM
+  - Organized collection of personal photos
+  - Albums/folders (People, Places, Events, etc.)
+  - Photos from device camera, camera roll, or web search
+  - Captions (text + TTS)
+  - Slide show mode
+  - Photos can be attached to buttons as symbols
+  - Share individual photos or albums
+
+  [VS-07] VIDEO SUPPORT
+  - Link YouTube videos to buttons (plays in-app)
+  - Play locally stored video files
+  - Loop video, auto-close on finish
+  - Video scene display (VSD): a video frame as background with interactive
+    hotspot buttons overlaid at specific positions
+    (e.g., a kitchen scene where tapping the fridge opens food vocabulary)
+
+  [VS-08] VISUAL SCENE DISPLAYS (VSD)
+  - Upload a photo or image as a scene background
+  - Place interactive hotspot buttons at any location on the image
+  - Each hotspot has a button label, symbol, and action (speak, navigate, etc.)
+  - VSDs can be linked from vocabulary pages
+  - Good for context-specific communication (bedroom, classroom, playground)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.8  VOCABULARY FILTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Vocabulary Filter is a clinical tool that lets caregivers/SLPs limit which
+vocabulary words are available to the user at any given time.  This supports
+therapy sessions focused on specific words and allows gradual vocabulary growth.
+
+  - Toggle Vocabulary Filter on/off from toolbar (quick access)
+  - When active: only words in the current "active word list" are shown;
+    all other buttons appear dimmed/hidden
+  - Create word lists: named collections of selected vocabulary words
+  - Word list management: add, remove, rename, duplicate, delete lists
+  - Import word lists from a .txt file (one word per line)
+  - Export/share word lists
+  - Multiple lists can be created (e.g., "Week 1 Words", "Therapy Focus",
+    "Holiday Vocabulary")
+  - Switch between lists without leaving the filter mode
+  - Caregiver PIN lock for filter settings (prevent user from disabling)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.9  SYMBOL LIBRARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Primary library: ARASAAC (~13,000 colorful CC BY-NC-SA symbols)
+  - Secondary library: Mulberry (~3,000 CC BY-SA symbols)
+  - Extended library: OpenSymbols API access (60,000+ symbols across
+    multiple open-licensed sets) — requires internet
+  - Optional Sclera set (~11,000 high-contrast black-and-white)
+  - Optional OpenMoji emoji set (~3,000)
+  - Symbol search by keyword (search across all loaded libraries)
+  - Web image search integration (user can find and use any web image
+    as a button symbol — stored locally)
+  - Camera capture: take a photo directly to use as a button symbol
+  - Photo library import from device gallery
+  - Symbol editing:
+    - Diversity/skin tone variants where symbols support it
+    - Hair color/shade variants
+    - Resize and crop symbol within button
+  - Symbol suggestions: when a new button is added with a word label,
+    suggest matching symbols from the library
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.10  SYMBOL SEARCH (GLOBAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Global search bar accessible from any page (tap search icon in toolbar)
+  - Searches the entire vocabulary tree for any word or phrase
+  - Results show button label, the page it lives on, and path to reach it
+  - "Show me how to find it" — highlights the navigation path
+  - Tap result to navigate directly to the page containing the button,
+    OR speak the button immediately from the search result
+  - Search also covers vocabulary in current active word list
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.11  EDITING & CUSTOMIZATION TOOLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4.11.1  EDIT MODE
+  - Clearly distinct "Use Mode" (communication) vs "Edit Mode" (setup)
+  - Tap-and-hold on any button to enter edit mode for that button
+  - Or: Enter Edit Mode globally from settings to edit any element
+  - PIN / password lock to prevent user from accidentally entering edit mode
+  - Visual distinction: edit mode shows grid lines, button handles, edit UI
+
+4.11.2  BUTTON EDITING
+  - Add new button (tap empty cell)
+  - Delete button (with undo)
+  - Move button (drag to new position; swap with target)
+  - Resize button (drag handles to span multiple cells)
+  - Copy / Paste button (copies all properties including actions)
+  - Select multiple buttons (long-press + tap others, or marquee drag)
+  - Apply action to multiple buttons at once (bulk color, bulk hide, etc.)
+  - Alphabetical sort of selected buttons
+  - Undo / Redo (minimum 25 steps)
+
+4.11.3  PAGE EDITING
+  - Add new page
+  - Delete page (with undo)
+  - Rename page
+  - Change page symbol (shows on navigation buttons linking here)
+  - Change grid size for individual page
+  - Change page background color or image
+  - Show/hide message bar on this page
+  - Import page from another page set (within app)
+  - Duplicate page
+
+4.11.4  PAGE SET ORGANIZATION
+  - Tree/hierarchy view of all pages in the page set
+  - See which pages link to which (page relationship map)
+  - Move pages within the hierarchy
+  - Detect orphaned pages (pages with no links to them)
+  - Detect broken links (buttons linking to deleted pages)
+
+4.11.5  REMOTE / COLLABORATIVE EDITING
+  - Share a page set with another user via link or QR code
+  - Two modes of sharing:
+    a) Copy: recipient gets a copy; edits are independent
+    b) Collaborative sync: changes made by either party sync to both
+  - Version history for collaborative page sets
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.12  NAVIGATION INTERFACE (USE MODE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Top bar (configurable, can be hidden):
+  - Back button (navigate to previous page)
+  - Home button (return to root/home page)
+  - Dashboard button (jump to dashboard overview)
+  - Search button
+  - Vocabulary filter toggle
+  - Data tracking indicator
+  - Sync status icon
+  - Edit mode toggle (PIN-protected)
+  - Access method pause button
+
+  Persistent toolbar (bottom or side, configurable):
+  - Core Words quick access
+  - Quick Fires / Phrases
+  - Topics / Category navigation
+  - Keyboard
+  - Dashboard
+  - Word Forms (morphology)
+  - Visual Supports (schedules, scripts, whiteboard)
+
+  Navigation aids:
+  - Breadcrumb trail showing current path in the page hierarchy
+  - Navigation history within session (back stack)
+  - "Return to where I was" after using search or tools
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.13  DATA TRACKING & ANALYTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Data tracking is critical for SLPs to document communication progress and
+justify AAC device funding to insurance companies and school districts.
+
+  [DT-01] What is tracked (per user, with timestamps):
+  - Every button press (button label, page, timestamp, access method used)
+  - Modeling counts (separate tracking when SLP is demonstrating)
+  - Spoken messages (full message bar content when Speak is pressed)
+  - Vocabulary filter activation/deactivation events
+  - Session start/end times
+
+  [DT-02] In-app display:
+  - Toggle "show button usage count" overlays on buttons (number badge)
+  - Button heat-map visualization (color intensity shows frequency)
+  - Most used words/buttons for current session or date range
+  - Data Tracking visible in top bar (button count for current session)
+
+  [DT-03] Reports:
+  - Calendar heatmap: color-coded activity by day
+  - Selectable date range for all reports
+  - Most frequently used buttons / words
+  - Least used / never used vocabulary (to guide expansion)
+  - Communication acts per hour/day/week trend
+  - Export formats: CSV, XLSX
+  - Report PDF generation for SLP documentation
+  - Note field on reports (SLP can annotate for context)
+
+  [DT-04] Modeling mode:
+  - Toggle "modeling mode" so SLP's interactions are logged separately
+    from user's own button presses
+  - Modeling count overlaid on buttons separately from user count
+
+  [DT-05] Privacy:
+  - Tracking is OFF by default; a caregiver/guardian must explicitly
+    enable it (consent)
+  - All data stored locally on device by default
+  - Optional cloud sync (must be opt-in, not required)
+  - User/guardian consent mechanism for cloud data storage
+  - Data export + delete for COPPA/GDPR compliance
+  - No advertising or analytics SDKs that touch user communication data
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.14  USER PROFILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Multiple user profiles on a single device (e.g., classroom with multiple
+    students, or multiple family members)
+  - Per-profile settings:
+    - Name, avatar photo
+    - Active page set and page set customizations
+    - Vocabulary filter lists
+    - Access method configuration
+    - TTS voice settings
+    - Language preference
+    - Learned word prediction model
+    - Data tracking history
+    - Visual theme and UI scale
+  - Profile switching: quick user switcher (PIN-protected per profile)
+  - Guest mode: temporary session that does not save data
+  - Caregiver/admin profile: access to all settings; can lock user profiles
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.15  CLOUD SYNC & BACKUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Local-first: all features work fully without any account or internet
+  - Optional free account for cloud backup and sync
+  - Backup types:
+    - Full user backup (page set + settings + data tracking)
+    - Page set only backup (vocabulary without user settings)
+  - Restore from backup: on new device, import from local file or cloud
+  - Sync across devices: changes made on iPad sync to Windows and vice versa
+  - Sync modes:
+    a) Manual sync (user triggers sync)
+    b) Auto-sync when connected to WiFi
+  - Sharing:
+    - Share page set with communication team member via link/email/QR
+    - Shared copy mode (independent edits)
+    - Collaborative sync mode (real-time or periodic merge)
+  - Team/classroom management (future):
+    - SLP account can manage multiple student profiles
+    - Push page set updates to all students simultaneously
+  - Export to Open Board Format (.obz) at any time for portability
+  - Import .obz file from any compatible AAC app
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.16  DEVICE / KIOSK MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Kiosk/guided access mode: locks device into the AAC app only
+    (no home button, no other apps accessible to user)
+  - On iOS: integrates with iOS Guided Access
+  - On Android: integrates with Android Kiosk mode / Screen Pinning
+  - On Windows: Windows Kiosk mode
+  - The app provides its own PIN-based lock as a fallback on all platforms
+  - Configurable: which buttons/areas are locked (e.g., lock settings but
+    allow edit mode; or lock everything except communication pages)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.17  MULTILINGUAL SUPPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - App UI translated into: English, Spanish, French, Portuguese,
+    German, Italian, Arabic (RTL), Simplified Chinese, Japanese
+    (expand based on contributor availability)
+  - Symbol labels translated into available language for all ARASAAC symbols
+    (ARASAAC provides translations in 10+ languages)
+  - Page set language: each page set has a language tag; TTS selects the
+    matching voice automatically
+  - Bilingual toggle on bundled page sets (true code-switching):
+    - User toggles between Language A and Language B on the same buttons
+    - Both TTS voices configured simultaneously
+    - Symbol labels change to match active language
+  - RTL (right-to-left) layout support for Arabic, Hebrew page sets
+  - Morphology support: verb conjugations, noun plurals for supported languages
+    (English, Spanish, French, Italian initially)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.18  PRINT & LOW-TECH SUPPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Print any page or page set as a communication board (PDF)
+  - Print options: symbol size, labels, grid lines, black & white or color
+  - Low-tech book generation: export a complete vocabulary as a printable
+    communication book (multiple pages, bound in order)
+  - Print visual schedules
+  - Print scripts and phrase cards
+  - QR code on each printed board that links back to the corresponding
+    digital page (bridge between print and digital)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.19  WORD FORMS (MORPHOLOGY ENGINE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - When user selects a core word (especially verbs/nouns), a Word Forms
+    popup shows grammatical variants:
+    - Verbs: base, -s, -ing, -ed, irregular forms (go / goes / going / went)
+    - Nouns: singular, plural, possessive
+    - Adjectives: comparative, superlative (big / bigger / biggest)
+  - Word Forms accessible from toolbar or via long-press on a word button
+  - Morphological rules configurable per language
+  - User can select any form to append to message bar
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4.20  DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  - Customizable home dashboard accessible from toolbar
+  - Cards/widgets for frequently used items:
+    - Favorite/pinned pages (quick jump)
+    - Today's visual schedule
+    - Recent messages
+    - Today's communication stats (buttons pressed, messages spoken)
+    - Active vocabulary filter status
+    - Weather widget (via integration or web)
+    - Time and date
+  - User can add/remove/reorder dashboard cards
+  - Can serve as the "home page" of the app
+
+================================================================================
+SECTION 5 — SLP / PROFESSIONAL FEATURES
+================================================================================
+
+5.1  SLP / PROFESSIONAL ACCOUNT
+  - Free optional account type for speech-language pathologists and educators
+  - SLP account can:
+    - Create and store multiple student configurations
+    - Switch between student profiles (with consent)
+    - Push vocabulary updates to student devices
+    - Access all student data tracking reports
+    - Download report PDFs for session notes / funding documentation
+  - Professional access does NOT require purchasing anything
+
+5.2  ASSESSMENT TOOLS (future)
+  - Feature vocabulary and communication milestones checklist
+  - Track progress toward IEP communication goals
+  - Tag specific messages/utterances as "spontaneous" vs "prompted"
+  - Session notes field linked to data tracking session
+
+5.3  TRAINING RESOURCES (built-in)
+  - Onboarding tutorial for new users/caregivers
+  - Quick-start guides per page set
+  - Video tutorials linked from help
+  - In-app contextual help ("?" button on any feature)
+  - Link to community forum / support site
+
+================================================================================
+SECTION 6 — SETTINGS ARCHITECTURE
+================================================================================
+
+6.1  USER SETTINGS (per profile)
+  - Page set and active vocabulary
+  - Access method configuration
+  - TTS voice, rate, pitch, volume
+  - Language and bilingual toggle
+  - Message bar position (top / bottom)
+  - Toolbar position (top / bottom / left / right / hidden)
+  - Button label position (above / below symbol / hidden)
+  - Grid border visibility
+  - Animation speed (reduce motion option)
+  - Scan speed and behavior
+  - Vocabulary filter lists
+  - Word prediction enable/disable
+  - Data tracking enable/disable
+
+6.2  DEVICE / GLOBAL SETTINGS
+  - App language (UI language)
+  - Account / cloud sync
+  - Storage management (clear cache, manage downloaded symbol packs)
+  - Privacy controls (data sharing, analytics opt-out)
+  - App lock PIN management
+  - Software updates
+  - Open Board Format import/export
+
+6.3  CAREGIVER / ADMIN SETTINGS
+  - PIN lock for settings access
+  - Kiosk mode configuration
+  - Which settings user can access
+  - Vocabulary filter lock (prevent user from disabling)
+  - Remote management (cloud-based, future)
+
+================================================================================
+SECTION 7 — NON-FUNCTIONAL REQUIREMENTS
+================================================================================
+
+7.1  PERFORMANCE
+  - Cold start to communication-ready: < 3 seconds on mid-range hardware
+    (2018+ tablet or phone)
+  - Button press → speech: < 200ms latency
+  - Page navigation: < 100ms transition
+  - Symbol search results: < 500ms for local library
+  - App must not crash during a communication session
+  - Memory usage < 300MB on constrained devices
+  - Works reliably without internet (fully offline)
+
+7.2  RELIABILITY
+  - Auto-save all edits; no manual save required
+  - Crash recovery: restore last known state on next launch
+  - Battery optimization: scanning mode active but screen-efficient
+  - Graceful degradation: if symbol CDN unavailable, show text-only buttons
+
+7.3  SECURITY & PRIVACY
+  - No user communication data sent to third parties
+  - No advertising SDKs
+  - All cloud sync encrypted in transit (TLS 1.3) and at rest (AES-256)
+  - COPPA compliant (children's privacy)
+  - GDPR compliant (EU data rights: access, portability, deletion)
+  - Minimal permission requests (no microphone unless voice banking active)
+
+7.4  LICENSING
+  - Application code: MIT License (permissive, allows commercial forks)
+  - Bundled ARASAAC symbols: CC BY-NC-SA 4.0 (free for non-profit use)
+  - Bundled Mulberry symbols: CC BY-SA 4.0
+  - Note: symbol license allows free non-commercial use; organizations
+    using this for paid services should review license implications
+
+7.5  DEVELOPMENT STANDARDS
+  - All source code on GitHub under an open-source license
+  - Automated test coverage ≥ 80% for core business logic
+  - CI/CD pipeline for automated builds, tests, and releases
+  - Semantic versioning (major.minor.patch)
+  - Public roadmap and issue tracker
+
+================================================================================
+SECTION 8 — COMPETITOR DIFFERENTIATION
+================================================================================
+
+Features to launch that TD Snap either lacks or charges extra for:
+
+  [D-01] Completely free with no subscription — core promise
+  [D-02] Cross-platform from day one (web/iOS/Android/Windows in one codebase)
+  [D-03] Open Board Format import/export — no vendor lock-in
+  [D-04] Multiple open-licensed symbol libraries (not dependent on PCS/Boardmaker)
+  [D-05] ARASAAC symbols in 10+ languages (TD Snap PCS is English-dominant)
+  [D-06] Full offline capability — works without WiFi or account
+  [D-07] SLP account features free (TD Snap charges professionals)
+  [D-08] Transparent open-source code — community can verify privacy claims
+  [D-09] Community-contributed page sets (GitHub or built-in marketplace)
+  [D-10] Free printable companion boards generated from any page
+  [D-11] No proprietary hardware required for any feature including eye gaze
+         (via pointer dwell on any eye tracking hardware)
+
+================================================================================
+SECTION 9 — PHASED IMPLEMENTATION ROADMAP
+================================================================================
+
+PHASE 1 — FOUNDATION (MVP)
+Target: Working app usable by a child with autism in a classroom
+  ✦ Symbol-based grid display (touch access)
+  ✦ Touch accommodations (hold-to-activate, repeat-tap debounce,
+    second-touch guard)
+  ✦ ARASAAC + Mulberry symbol libraries with search (~16,500 symbols);
+    skin-tone variants for core-set person symbols
+  ✦ Vocabulary Filter (word lists)
+  ✦ Data tracking (local, off by default) + modeling mode
+  ✦ Message bar with TTS (Web Speech API / platform TTS)
+  ✦ Core Vocabulary page set (bundled, English)
+  ✦ Basic button editing (add, edit, delete, rearrange)
+  ✦ Page linking and navigation
+  ✦ Quick Phrases / saved messages
+  ✦ Basic keyboard (type-to-speak; word prediction comes in Phase 2)
+  ✦ Multiple user profiles
+  ✦ Try-it/guest mode (zero-setup demo session)
+  ✦ Local backup (export .obz file)
+  ✦ Installable web PWA (Chromebook, iPad Safari, desktop browsers)
+    deployed to free static hosting
+  ✦ Symbols self-hosted with the PWA (same origin — works behind school
+    content filters); offline caching + optional full offline pack (~180 MB)
+
+PHASE 2 — NATIVE APPS, ACCESS & CLINICAL TOOLS
+  ✦ Native iOS + Android builds via EAS (App Store / Play Store) with
+    bundled offline symbol library (symbols.zip)
+  ✦ Switch scanning (all scan types and patterns)
+  ✦ Auditory cues and dwell selection
+  ✦ Message history (re-speak recent messages)
+  ✦ Emergency quick-fire phrase
+  ✦ Word prediction engine (offline)
+  ✦ Visual Supports: schedule, timer, whiteboard
+  ✦ Aphasia page set
+  ✦ Express (Quick Phrase) page set
+  ✦ Motor Plan page set
+
+PHASE 3 — PLATFORM EXPANSION & ADVANCED FEATURES
+  ✦ Windows distribution (installable PWA or Electron wrapper)
+  ✦ Cloud sync + optional account
+  ✦ Team sharing (SLP ↔ parent ↔ teacher)
+  ✦ Cloud data tracking reports
+  ✦ Text/keyboard page set with word prediction
+  ✦ Word Forms / morphology
+  ✦ Visual Scene Displays
+  ✦ Partner window (mirrored display) + chat mode
+  ✦ Bilingual toggle / code switching
+  ✦ High contrast variant
+  ✦ Print / low-tech companion boards
+
+PHASE 4 — ECOSYSTEM & INTEGRATIONS
+  ✦ Eye gaze hardware support (via pointer emulation + native APIs)
+  ✦ Voice banking integration (Model Talker, Voice Keeper)
+  ✦ Smart assistant integration (Google, Siri, Alexa)
+  ✦ Community page set marketplace
+  ✦ SLP professional dashboard (multi-student management)
+  ✦ IEP goal tracking
+  ✦ Assessment tools
+  ✦ Boardmaker activity import (via open format bridge)
+
+================================================================================
+SECTION 10 — MEDIA RESOURCES & REFERENCE LINKS
+================================================================================
+
+10.1  TD SNAP OFFICIAL RESOURCES
+  Product page:
+  https://us.tobiidynavox.com/pages/td-snap
+
+  App Store (screenshots of interface):
+  https://apps.apple.com/us/app/td-snap/id1072799231
+
+  User's Manual (PDF):
+  https://download.mytobiidynavox.com/Snap/documents/TD_Snap_UsersManual_en-US.pdf
+
+  Core First page set details + photos:
+  https://us.tobiidynavox.com/pages/td-snap-core-first
+
+  Motor Plan page set details:
+  https://us.tobiidynavox.com/pages/td-snap-motor-plan
+
+  Express page set details:
+  https://us.tobiidynavox.com/pages/td-snap-express
+
+  Text page set details:
+  https://us.tobiidynavox.com/pages/td-snap-text
+
+  Scanning page set details:
+  https://us.tobiidynavox.com/pages/td-snap-scanning
+
+  Aphasia page set details:
+  https://us.tobiidynavox.com/pages/td-snap-aphasia
+
+  PODD page set details:
+  https://www.tobiidynavox.com/pages/td-snap-podd
+
+  Google Assistant integration:
+  https://us.tobiidynavox.com/pages/td-snap-google-assistant
+
+  Data tracking how-to:
+  https://us.tobiidynavox.com/blogs/support-articles/how-to-use-data-tracking-and-access-the-data-tracking-for-td-snap-on-mytobiidynavox-com
+
+  Product discovery blog (feature articles, tutorial videos):
+  https://www.tobiidynavox.com/blogs/product-discovery/tagged/td-snap
+
+  Core First PDF guide (vocabulary guide):
+  https://download.mytobiidynavox.com/Snap/documents/TobiiDynavox_CoreFirst_English_PageSet_Guide_v1-1_en-US_WEB.pdf
+
+  Motor Plan training cards (PDF):
+  https://download.mytobiidynavox.com/Snap/documents/Training%20Cards/TDSnapMotorPlan_TrainingCards_en-US_1000235.pdf
+
+  Scanning implementation guide (PDF):
+  https://downloads.tobiidynavox.com/Software/TD_Snap/TobiiDynavox_Snap_Scanning_ImplementationGuide_en-US.pdf
+
+  Aphasia training cards (PDF):
+  https://download.mytobiidynavox.com/Aphasia/TDSnapAphasia_TrainingCards_en-US_13000303_WEB.pdf
+
+  Page set comparison table (PDF):
+  https://download.mytobiidynavox.com/Snap/documents/TDSnap_PageSetComparison_en-INT.pdf
+
+  OKABLE Tech TD Snap Guide (PDF — third party, good overview with screenshots):
+  https://www.okabletech.org/wp-content/uploads/2023/07/TD-Snap-Guide.pdf
+
+  Word prediction how-to:
+  https://www.tobiidynavox.com/blogs/product-discovery/td-talk-talk-faster-with-word-and-phrase-prediction
+
+10.2  TD SNAP VIDEO TUTORIALS (YouTube)
+  Tobii Dynavox official YouTube channel:
+  https://www.youtube.com/@TobiiDynavox
+
+  Product support videos page:
+  https://www.tobiidynavox.com/pages/td-snap-product-support
+
+  Adding alert bell to TD Snap (OMazing Kids, 2023):
+  https://omazingkidsllc.com/2023/02/05/td-snap-aac-how-to-add-an-alert-bell-to-gain-attention-video-tutorial/
+
+  Adding video clips and VSDs with hotspots (OMazing Kids, 2024):
+  https://omazingkidsllc.com/2024/02/10/adding-video-clips-and-vsds-with-hotspots-to-td-snap-aac-on-ipad/
+
+  New resource - videos and visual scenes via Boardmaker 7 (2024):
+  https://omazingkidsllc.com/2024/03/04/new-resource-how-to-add-videos-visual-scenes-with-hotspots-in-td-snap-via-boardmaker-7/
+
+  OMazing Kids AAC Consulting (extensive TD Snap tutorial blog):
+  https://omazingkidsllc.com/tag/td-snap-aac/
+
+10.3  COMPETITOR RESOURCES
+  Proloquo2Go:
+  https://www.assistiveware.com/products/proloquo2go
+
+  LAMP Words for Life:
+  https://www.prc-saltillo.com/lamp-words-for-life
+
+  CoughDrop (cloud-based, cross-platform):
+  https://www.mycoughdrop.com/
+
+  TouchChat:
+  https://touchchatapp.com/
+
+  Snap Core First (older TD Snap branding, legacy articles):
+  https://us.tobiidynavox.com/pages/snap-core-first
+
+10.4  OPEN SOURCE AAC IMPLEMENTATIONS (study these)
+  Cboard (React/PWA, closest to what we want to build):
+  https://github.com/cboard-org/cboard
+  https://www.cboard.io/
+
+  LifeCompanion (Java desktop, full-featured open source):
+  https://github.com/lifecompanionaac/lifecompanion
+
+  AsTeRICS Grid (web-based, very strong scanning support):
+  https://github.com/asterics/AsTeRICS-Grid
+  https://grid.asterics.eu/
+
+  The Open Voice Factory (printable communication books):
+  https://theopenvoicefactory.org/
+
+10.5  OPEN STANDARDS & SYMBOL RESOURCES
+  Open Board Format specification:
+  https://www.openboardformat.org/
+
+  Open Board Format GitHub:
+  https://github.com/open-aac/openboardformat
+
+  OpenAAC initiative:
+  https://www.openaac.org/
+
+  OpenSymbols (60,000+ open-licensed symbols, API):
+  https://www.opensymbols.org/
+
+  OpenAAC symbol libraries list:
+  https://www.openaac.org/symbols.html
+
+  ARASAAC symbol library (13,000+ CC BY-NC-SA):
+  https://arasaac.org/
+
+  Mulberry symbols (3,000 CC BY-SA):
+  https://mulberrysymbols.org/
+
+  Sclera symbols (11,000 high-contrast, CC BY-NC):
+  https://www.sclera.be/en/picto/overview
+
+  Global Symbols (culturally inclusive, CC BY-SA):
+  https://globalsymbols.com/
+
+  OpenMoji (emoji-style, CC BY-SA):
+  https://openmoji.org/
+
+10.6  AAC RESEARCH & CLINICAL RESOURCES
+  PrAACtical AAC (clinical research blog):
+  https://praacticalaac.org/
+
+  AAC Language Lab:
+  https://aaclanguagelab.com/
+
+  OMazing Kids AAC Consulting (extensive tutorials):
+  https://omazingkidsllc.com/
+
+  ASHA AAC resources:
+  https://www.asha.org/public/speech/disorders/augmentative-and-alternative-communication/
+
+  AAC Institute:
+  https://aacinstitute.org/
+
+  Voice banking resources:
+  https://us.tobiidynavox.com/pages/voice-banking-message-banking-voice-preservation
+
+  Model Talker (free voice banking):
+  https://modeltalker.org/
+
+  CARE Score (vocabulary quality evaluation):
+  https://www.openaac.org/care.html
+
+10.7  PRICING CONTEXT (why this project matters)
+  TD Snap subscription change announcement (community discussion):
+  https://community.at3center.net/t/p8ymxld/tobii-dynovoxs-td-snap-is-changing-to-a-subscription-model
+
+  TD Snap App Store (current pricing visible):
+  https://apps.apple.com/us/app/td-snap/id1072799231
+
+  TD Snap pricing FAQ:
+  https://us.tobiidynavox.com/blogs/support-articles/td-snap%C2%AE-1-32-faqs
+
+  SLP community reaction to pricing change (TikTok):
+  https://www.tiktok.com/@bakerspeechtherapy_/video/7371964992502893866
+
+================================================================================
+SECTION 11 — OPEN QUESTIONS FOR STAKEHOLDER INPUT
+================================================================================
+
+Before beginning development, resolve the following:
+
+  Q1. Which platform should MVP prioritize: iPad (iOS PWA) or web browser?
+      RESOLVED (July 2026): Web PWA first, built on the React Native +
+      Expo codebase (react-native-web) so the same code ships as native
+      iOS/Android apps in Phase 2. Rationale: zero-install distribution
+      to teachers/SLPs, Chromebook coverage, and deferring the ~180 MB
+      symbol-bundle / app store distribution problems to Phase 2.
+      See technical-specification.md §15 for the web-first MVP scope.
+
+  Q2. Should we use ARASAAC symbols as the primary set?
+      ARASAAC is CC BY-NC-SA — commercial forks or paid services would need
+      a different license. Mulberry (CC BY-SA) is more permissive. Recommend
+      shipping both with ARASAAC as default and noting license restriction.
+
+  Q3. Eye gaze in Phase 1 or Phase 2?
+      Eye gaze hardware support is complex but critical for a subset of users.
+      Pointer-dwell mode (AM-04) covers many eye gaze scenarios via hardware
+      that emulates a mouse. Recommend Pointer Dwell in Phase 1,
+      deep eye gaze integration in Phase 3.
+
+  Q4. Backend for cloud sync: build custom vs. use Supabase / Firebase?
+      Given open-source goals, recommend Supabase (open source, self-hostable)
+      over Firebase (proprietary).
+
+  Q5. Voice banking: build vs. integrate?
+      Building is complex. Recommend linking to Model Talker (free) and
+      documenting how to install custom SAPI5/AVSpeech voices.
+
+  Q6. Should we apply for grants?
+      AAC development qualifies for NIH, NSF, and charitable foundation grants.
+      RESNA, ATIA, and AAC Institute may have funding resources.
+      This could fund full-time developer time.
+
+  Q7. Community governance model?
+      Consider registering as a nonprofit (501c3 in US) to accept donations,
+      apply for grants, and maintain credibility with school districts.
+
+================================================================================
+END OF REQUIREMENTS DOCUMENT
+Version 1.0 — Research compiled April 2026
+================================================================================
