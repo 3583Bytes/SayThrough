@@ -1,7 +1,9 @@
 import { useNavigation } from '@react-navigation/native'
+import * as DocumentPicker from 'expo-document-picker'
 import { useEffect, useState } from 'react'
 import {
   Modal,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -13,6 +15,7 @@ import {
 } from 'react-native'
 import type * as Speech from 'expo-speech'
 import { UI_COLORS } from '../constants/colors'
+import { exportPageSet, importPageSet } from '../services/OBFService'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import { useNavigationStore } from '../stores/navigationStore'
@@ -88,6 +91,39 @@ export function SettingsScreen() {
   const selectPageSet = async (pageSet: PageSet) => {
     await updateActiveUser({ activePageSetId: pageSet.id })
     useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
+  }
+
+  // §14 — web implementation; native paths (expo-file-system/-sharing)
+  // arrive with the Phase 2 builds
+  const [backupStatus, setBackupStatus] = useState<string | undefined>()
+
+  const exportActive = async () => {
+    if (Platform.OS !== 'web') return
+    setBackupStatus('Exporting…')
+    const blob = await exportPageSet(activeUser.activePageSetId)
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'saythrough-pageset.obz'
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setBackupStatus('Exported.')
+  }
+
+  const importObz = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: false,
+    })
+    if (result.canceled || !result.assets?.[0]) return
+    setBackupStatus('Importing…')
+    try {
+      const response = await fetch(result.assets[0].uri)
+      const imported = await importPageSet(await response.arrayBuffer())
+      setPageSets(await storage.getPageSets())
+      setBackupStatus(`Imported "${imported.name}" — select it under Vocabulary.`)
+    } catch (error) {
+      setBackupStatus(`Import failed: ${String(error)}`)
+    }
   }
 
   return (
@@ -258,7 +294,26 @@ export function SettingsScreen() {
           </View>
         </View>
 
-        {/* 5. About */}
+        {/* 5. Backup & Restore */}
+        <Text style={styles.sectionTitle}>Backup & Restore</Text>
+        <View style={styles.card}>
+          <Text style={styles.hint}>
+            Open Board Format (.obz) — works with CoughDrop, TD Snap, and
+            other AAC apps. Back up regularly: browser storage can be
+            evicted.
+          </Text>
+          <View style={styles.chipRow}>
+            <Chip
+              label="Export active page set (.obz)"
+              selected={false}
+              onPress={exportActive}
+            />
+            <Chip label="Import .obz" selected={false} onPress={importObz} />
+          </View>
+          {backupStatus ? <Text style={styles.hint}>{backupStatus}</Text> : null}
+        </View>
+
+        {/* 6. About */}
         <Text style={styles.sectionTitle}>About</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>
