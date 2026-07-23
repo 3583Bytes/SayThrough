@@ -1,30 +1,38 @@
 import { Pressable, StyleSheet, Text } from 'react-native'
-import { POS_COLORS, UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
-import type { GridButton } from '../../data/corePage'
+import type { Button } from '../../types/models'
 
 interface SymbolButtonProps {
-  button: GridButton
-  onPress: (button: GridButton) => void
+  button: Button
+  onPress: (button: Button) => void
+  onLongPress?: (button: Button) => void
 }
 
 // Text-only rendering for now (§6.1 case d) — symbol images arrive with
 // the asset pipeline.
-export function SymbolButton({ button, onPress }: SymbolButtonProps) {
+export function SymbolButton({ button, onPress, onLongPress }: SymbolButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={button.label}
+      accessibilityLabel={
+        button.isNavigationButton ? `${button.label}, opens page` : button.label
+      }
       onPress={() => onPress(button)}
+      onLongPress={onLongPress ? () => onLongPress(button) : undefined}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: POS_COLORS[button.pos] },
+        {
+          backgroundColor: button.backgroundColor,
+          borderColor: button.borderColor,
+          borderWidth: button.borderWidth,
+        },
         pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.label} numberOfLines={2}>
+      <Text style={[styles.label, { color: button.labelColor }]} numberOfLines={2}>
         {button.label}
       </Text>
+      {button.isNavigationButton && <Text style={styles.navArrow}>➜</Text>}
     </Pressable>
   )
 }
@@ -35,8 +43,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: LAYOUT.buttonRadius,
-    borderWidth: 1,
-    borderColor: UI_COLORS.buttonBorder,
     minHeight: LAYOUT.minButtonSize,
     padding: 4,
   },
@@ -47,7 +53,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: UI_COLORS.label,
     textAlign: 'center',
+  },
+  navArrow: {
+    position: 'absolute',
+    bottom: 4,
+    right: 6,
+    fontSize: 11,
+    color: '#888888',
   },
 })

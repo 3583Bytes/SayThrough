@@ -1,17 +1,26 @@
 import { StyleSheet, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
-import type { GridButton } from '../../data/corePage'
+import type { Button } from '../../types/models'
 import { SymbolButton } from './SymbolButton'
 
 interface SymbolGridProps {
   rows: number
   columns: number
-  buttons: GridButton[]
-  onButtonPress: (button: GridButton) => void
+  buttons: Button[]
+  onButtonPress: (button: Button) => void
+  onButtonLongPress?: (button: Button) => void
 }
 
-export function SymbolGrid({ rows, columns, buttons, onButtonPress }: SymbolGridProps) {
-  const byPosition = new Map(buttons.map((b) => [`${b.row}:${b.column}`, b]))
+export function SymbolGrid({
+  rows,
+  columns,
+  buttons,
+  onButtonPress,
+  onButtonLongPress,
+}: SymbolGridProps) {
+  const byPosition = new Map(
+    buttons.filter((b) => !b.isHidden).map((b) => [`${b.row}:${b.column}`, b]),
+  )
 
   return (
     <View style={styles.grid}>
@@ -20,9 +29,14 @@ export function SymbolGrid({ rows, columns, buttons, onButtonPress }: SymbolGrid
           {Array.from({ length: columns }, (_, column) => {
             const button = byPosition.get(`${row}:${column}`)
             return button ? (
-              <SymbolButton key={column} button={button} onPress={onButtonPress} />
+              <SymbolButton
+                key={button.id}
+                button={button}
+                onPress={onButtonPress}
+                onLongPress={onButtonLongPress}
+              />
             ) : (
-              <View key={column} style={styles.emptyCell} />
+              <View key={`empty-${column}`} style={styles.emptyCell} />
             )
           })}
         </View>
