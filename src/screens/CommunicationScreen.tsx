@@ -10,7 +10,10 @@ import { SymbolGrid } from '../components/communication/SymbolGrid'
 import { Toolbar } from '../components/communication/Toolbar'
 import { TopBar } from '../components/communication/TopBar'
 import { PinEntryModal } from '../components/common/PinEntryModal'
-import { ButtonEditorPanel } from '../components/edit/ButtonEditorPanel'
+import {
+  ButtonEditorPanel,
+  type ButtonEditorChanges,
+} from '../components/edit/ButtonEditorPanel'
 import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
 import { usePageButtons } from '../hooks/usePageButtons'
@@ -203,9 +206,7 @@ export function CommunicationScreen() {
 
   const selectedButton = buttons.find((b) => b.id === selectedButtonId)
 
-  const handleEditorSave = async (
-    changes: Pick<Button, 'label' | 'backgroundColor'>,
-  ) => {
+  const handleEditorSave = async (changes: ButtonEditorChanges) => {
     if (!selectedButton) return
     await storage.updateButton({
       ...selectedButton,
