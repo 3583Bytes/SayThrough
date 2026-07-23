@@ -42,6 +42,7 @@ export function SymbolGrid({
                   key={button.id}
                   button={button}
                   isSelected={isEditMode && button.id === selectedButtonId}
+                  accommodate={!isEditMode}
                   onPress={onButtonPress}
                   onLongPress={onButtonLongPress}
                 />

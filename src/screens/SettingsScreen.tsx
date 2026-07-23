@@ -35,6 +35,12 @@ const PITCH_PRESETS: Array<[string, number]> = [
   ['Normal', 1.0],
   ['High', 1.2],
 ]
+const HOLD_PRESETS: Array<[string, number]> = [
+  ['Off', 0],
+  ['0.3s', 300],
+  ['0.6s', 600],
+  ['1s', 1000],
+]
 
 // §5.8 — reachable only via edit mode. Access-method, display, filter,
 // tracking, and backup sections arrive with their features.
@@ -100,6 +106,7 @@ export function SettingsScreen() {
   const exportActive = async () => {
     if (Platform.OS !== 'web') return
     setBackupStatus('Exporting…')
+    await storage.setMeta('lastObzExportAt', String(Date.now())) // §12.5
     const blob = await exportPageSet(activeUser.activePageSetId)
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -253,7 +260,47 @@ export function SettingsScreen() {
           </View>
         </View>
 
-        {/* 3. Vocabulary */}
+        {/* 3. Access Method (touch accommodations — AM-01) */}
+        <Text style={styles.sectionTitle}>Access Method</Text>
+        <View style={styles.card}>
+          <Text style={styles.fieldLabel}>Hold to activate</Text>
+          <View style={styles.chipRow}>
+            {HOLD_PRESETS.map(([label, value]) => (
+              <Chip
+                key={label}
+                label={label}
+                selected={(activeUser.touchHoldDuration ?? 0) === value}
+                onPress={() => updateActiveUser({ touchHoldDuration: value })}
+              />
+            ))}
+          </View>
+          <Text style={styles.fieldLabel}>Ignore repeat taps for</Text>
+          <View style={styles.chipRow}>
+            {HOLD_PRESETS.map(([label, value]) => (
+              <Chip
+                key={label}
+                label={label}
+                selected={(activeUser.touchDebounce ?? 0) === value}
+                onPress={() => updateActiveUser({ touchDebounce: value })}
+              />
+            ))}
+          </View>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>
+              Ignore second touch while pressing (palm guard)
+            </Text>
+            <Switch
+              value={activeUser.ignoreSecondTouch ?? false}
+              onValueChange={(value) => updateActiveUser({ ignoreSecondTouch: value })}
+              accessibilityLabel="Ignore second touch"
+            />
+          </View>
+          <Text style={styles.hint}>
+            Dwell and switch scanning arrive in a later release.
+          </Text>
+        </View>
+
+        {/* 4. Vocabulary */}
         <Text style={styles.sectionTitle}>Vocabulary</Text>
         <View style={styles.card}>
           <Text style={styles.fieldLabel}>Active page set</Text>

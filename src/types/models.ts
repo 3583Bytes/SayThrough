@@ -14,6 +14,11 @@ export interface UserProfile {
   ttsPitch: number // 0.5–2.0 (default 1.0)
   ttsVolume: number // 0.0–1.0 (default 1.0)
   speakOnSelect: boolean
+  // Touch accommodations (AM-01) — optional so profiles created before
+  // these fields existed read as "off"
+  touchHoldDuration?: number // ms a button must be held before activating
+  touchDebounce?: number // ms after an activation ignoring further taps
+  ignoreSecondTouch?: boolean // palm / second-hand guard
   editPinHash?: string // SHA-256(salt:pin) via expo-crypto (§13.1)
   editPinSalt?: string
   createdAt: number

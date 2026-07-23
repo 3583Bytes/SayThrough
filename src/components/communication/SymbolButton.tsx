@@ -1,22 +1,77 @@
 import { Image } from 'expo-image'
+import { useRef } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
 import { getSymbolUri } from '../../services/SymbolService'
+import { useUserStore } from '../../stores/userStore'
 import type { Button } from '../../types/models'
 
 interface SymbolButtonProps {
   button: Button
   isSelected?: boolean // edit mode: blue selection border (§5.6)
+  accommodate?: boolean // apply touch accommodations (use mode only)
   onPress: (button: Button) => void
   onLongPress?: (button: Button) => void
 }
 
+// Shared across all buttons: repeat-tap debounce + second-touch guard
+let lastActivationAt = 0
+let touchInProgress = false
+
 export function SymbolButton({
   button,
   isSelected,
+  accommodate,
   onPress,
   onLongPress,
 }: SymbolButtonProps) {
+  const activeUser = useUserStore((s) => s.activeUser)
+  const holdDuration = accommodate ? (activeUser?.touchHoldDuration ?? 0) : 0
+  const debounce = accommodate ? (activeUser?.touchDebounce ?? 0) : 0
+  const guardSecondTouch = accommodate ? (activeUser?.ignoreSecondTouch ?? false) : false
+
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const firedByHold = useRef(false)
+  const blocked = useRef(false)
+
+  const activate = () => {
+    const now = Date.now()
+    if (debounce > 0 && now - lastActivationAt < debounce) return
+    lastActivationAt = now
+    onPress(button)
+  }
+
+  const handlePressIn = () => {
+    if (guardSecondTouch && touchInProgress) {
+      blocked.current = true
+      return
+    }
+    touchInProgress = true
+    blocked.current = false
+    firedByHold.current = false
+    if (holdDuration > 0) {
+      // AM-01 hold-to-activate: fires while still touching, once the
+      // hold duration elapses; releasing earlier cancels
+      holdTimer.current = setTimeout(() => {
+        firedByHold.current = true
+        activate()
+      }, holdDuration)
+    }
+  }
+
+  const handlePressOut = () => {
+    touchInProgress = false
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current)
+      holdTimer.current = null
+    }
+  }
+
+  const handlePress = () => {
+    if (blocked.current) return
+    if (holdDuration > 0) return // hold path activates via the timer
+    activate()
+  }
   const symbolUri = button.customSymbolUri
     ? button.customSymbolUri
     : button.symbolId
@@ -29,7 +84,9 @@ export function SymbolButton({
       accessibilityLabel={
         button.isNavigationButton ? `${button.label}, opens page` : button.label
       }
-      onPress={() => onPress(button)}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onLongPress={onLongPress ? () => onLongPress(button) : undefined}
       style={({ pressed }) => [
         styles.button,

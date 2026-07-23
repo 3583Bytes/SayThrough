@@ -1,0 +1,165 @@
+import { useState } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { UI_COLORS } from '../../constants/colors'
+import { useMessageStore } from '../../stores/messageStore'
+
+// §5.5 v1.0 basic keyboard: QWERTY, typed text becomes a message-bar
+// token on space/period/Speak. Prediction bar and alternate layouts
+// arrive in v1.1 (§18). This is the escape hatch for any word without
+// a button.
+const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+
+export function KeyboardView() {
+  const [buffer, setBuffer] = useState('')
+  const [shift, setShift] = useState(false)
+  const appendToken = useMessageStore((s) => s.appendToken)
+  const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
+  const speakMessage = useMessageStore((s) => s.speakMessage)
+
+  const commit = () => {
+    const word = buffer.trim()
+    if (word) appendToken(word)
+    setBuffer('')
+  }
+
+  const typeKey = (key: string) => {
+    setBuffer((b) => b + (shift ? key.toUpperCase() : key))
+    setShift(false)
+  }
+
+  const backspace = () => {
+    if (buffer) setBuffer((b) => b.slice(0, -1))
+    else deleteLastToken()
+  }
+
+  return (
+    <View style={styles.keyboard}>
+      <Text style={styles.buffer} accessibilityLiveRegion="polite">
+        {buffer || ' '}
+      </Text>
+      {ROWS.map((row, index) => (
+        <View key={row} style={styles.row}>
+          {index === 2 && (
+            <Key label="⇧" onPress={() => setShift((s) => !s)} active={shift} wide />
+          )}
+          {row.split('').map((key) => (
+            <Key
+              key={key}
+              label={shift ? key.toUpperCase() : key}
+              onPress={() => typeKey(key)}
+            />
+          ))}
+          {index === 2 && <Key label="⌫" onPress={backspace} wide />}
+        </View>
+      ))}
+      <View style={styles.row}>
+        <Key label="space" onPress={commit} space />
+        <Key label="." onPress={commit} />
+        <Key
+          label="▶ Speak"
+          onPress={() => {
+            commit()
+            speakMessage()
+          }}
+          speak
+        />
+      </View>
+    </View>
+  )
+}
+
+function Key({
+  label,
+  onPress,
+  wide,
+  space,
+  speak,
+  active,
+}: {
+  label: string
+  onPress: () => void
+  wide?: boolean
+  space?: boolean
+  speak?: boolean
+  active?: boolean
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label === '⌫' ? 'Backspace key' : `${label} key`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.key,
+        wide && styles.keyWide,
+        space && styles.keySpace,
+        speak && styles.keySpeak,
+        active && styles.keyActive,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[styles.keyText, speak && styles.keySpeakText]}>{label}</Text>
+    </Pressable>
+  )
+}
+
+const styles = StyleSheet.create({
+  keyboard: {
+    backgroundColor: '#ECEFF1',
+    padding: 6,
+    gap: 6,
+    borderTopWidth: 1,
+    borderTopColor: UI_COLORS.barBorder,
+  },
+  buffer: {
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+    minHeight: 28,
+    color: '#333333',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  key: {
+    minWidth: 44,
+    minHeight: 48,
+    flexGrow: 1,
+    flexBasis: 0,
+    maxWidth: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: UI_COLORS.buttonBorder,
+  },
+  keyWide: {
+    maxWidth: 110,
+    flexGrow: 1.4,
+  },
+  keySpace: {
+    maxWidth: 420,
+    flexGrow: 6,
+  },
+  keySpeak: {
+    backgroundColor: UI_COLORS.speakGreen,
+    borderColor: UI_COLORS.speakGreen,
+    maxWidth: 140,
+    flexGrow: 2,
+  },
+  keySpeakText: {
+    color: '#FFFFFF',
+  },
+  keyActive: {
+    backgroundColor: '#BBDEFB',
+  },
+  keyText: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+})

@@ -250,5 +250,7 @@ export async function importPageSet(data: ArrayBuffer): Promise<PageSet> {
     }
   }
 
+  await storage.setMeta('vocabChangedAt', String(Date.now())) // §12.5
+
   return pageSet
 }
