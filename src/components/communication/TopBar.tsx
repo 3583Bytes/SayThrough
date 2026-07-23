@@ -5,11 +5,12 @@ import { useNavigationStore } from '../../stores/navigationStore'
 
 interface TopBarProps {
   pageName: string
+  onEditPress: () => void // PIN-gated by the caller (§13.1)
 }
 
-// §5.3 top bar — back/home on the left; search, filter, and edit-mode
-// entries arrive with their features
-export function TopBar({ pageName }: TopBarProps) {
+// §5.3 top bar — back/home left, edit right; search and filter entries
+// arrive with their features
+export function TopBar({ pageName, onEditPress }: TopBarProps) {
   const canGoBack = useNavigationStore((s) => s.pageHistory.length > 0)
   const navigateBack = useNavigationStore((s) => s.navigateBack)
   const navigateHome = useNavigationStore((s) => s.navigateHome)
@@ -40,7 +41,16 @@ export function TopBar({ pageName }: TopBarProps) {
         </Pressable>
       </View>
       <Text style={styles.pageName}>{pageName}</Text>
-      <View style={styles.side} />
+      <View style={[styles.side, styles.right]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Edit mode"
+          onPress={onEditPress}
+          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.icon}>⚙</Text>
+        </Pressable>
+      </View>
     </View>
   )
 }
@@ -59,6 +69,9 @@ const styles = StyleSheet.create({
   side: {
     flexDirection: 'row',
     minWidth: 96,
+  },
+  right: {
+    justifyContent: 'flex-end',
   },
   iconButton: {
     minWidth: 44,

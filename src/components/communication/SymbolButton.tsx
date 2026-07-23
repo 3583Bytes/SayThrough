@@ -4,13 +4,19 @@ import type { Button } from '../../types/models'
 
 interface SymbolButtonProps {
   button: Button
+  isSelected?: boolean // edit mode: blue selection border (§5.6)
   onPress: (button: Button) => void
   onLongPress?: (button: Button) => void
 }
 
 // Text-only rendering for now (§6.1 case d) — symbol images arrive with
 // the asset pipeline.
-export function SymbolButton({ button, onPress, onLongPress }: SymbolButtonProps) {
+export function SymbolButton({
+  button,
+  isSelected,
+  onPress,
+  onLongPress,
+}: SymbolButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -26,6 +32,7 @@ export function SymbolButton({ button, onPress, onLongPress }: SymbolButtonProps
           borderColor: button.borderColor,
           borderWidth: button.borderWidth,
         },
+        isSelected && styles.selected,
         pressed && styles.pressed,
       ]}
     >
@@ -45,6 +52,10 @@ const styles = StyleSheet.create({
     borderRadius: LAYOUT.buttonRadius,
     minHeight: LAYOUT.minButtonSize,
     padding: 4,
+  },
+  selected: {
+    borderWidth: 3,
+    borderColor: '#1976D2',
   },
   pressed: {
     opacity: 0.85,
