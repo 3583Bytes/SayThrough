@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import * as DocumentPicker from 'expo-document-picker'
 import { useEffect, useState } from 'react'
 import {
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native'
 import type * as Speech from 'expo-speech'
+import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
 import { exportPageSet, importPageSet } from '../services/OBFService'
 import { ttsService } from '../services/TTSService'
@@ -47,7 +49,7 @@ const HOLD_PRESETS: Array<[string, number]> = [
 // §5.8 — reachable only via edit mode. Access-method, display, filter,
 // tracking, and backup sections arrive with their features.
 export function SettingsScreen() {
-  const navigation = useNavigation()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const activeUser = useUserStore((s) => s.activeUser)
   const users = useUserStore((s) => s.users)
   const updateActiveUser = useUserStore((s) => s.updateActiveUser)
@@ -436,7 +438,32 @@ export function SettingsScreen() {
           </View>
         </View>
 
-        {/* 5. Backup & Restore */}
+        {/* 5b. Data Tracking (§4.13 — consent-gated, DT-05) */}
+        <Text style={styles.sectionTitle}>Data Tracking</Text>
+        <View style={styles.card}>
+          <Text style={styles.hint}>
+            Off by default. When a caregiver turns it on, button presses and
+            spoken messages are recorded ON THIS DEVICE ONLY — nothing is
+            sent anywhere. SLPs use this to document progress.
+          </Text>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Track communication data</Text>
+            <Switch
+              value={activeUser.trackingEnabled ?? false}
+              onValueChange={(value) => updateActiveUser({ trackingEnabled: value })}
+              accessibilityLabel="Data tracking enabled"
+            />
+          </View>
+          <View style={styles.chipRow}>
+            <Chip
+              label="View report"
+              selected={false}
+              onPress={() => navigation.navigate('TrackingReport')}
+            />
+          </View>
+        </View>
+
+        {/* 6. Backup & Restore */}
         <Text style={styles.sectionTitle}>Backup & Restore</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>

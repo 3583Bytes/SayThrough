@@ -24,8 +24,25 @@ export interface UserProfile {
   // Vocabulary filter (§4.8)
   activeWordListId?: string
   filterEnabled?: boolean
+  // Data tracking (§4.13) — default OFF: caregiver must opt in
+  // (COPPA/GDPR consent; requirements DT-05)
+  trackingEnabled?: boolean
   createdAt: number
   updatedAt: number
+}
+
+// §4.7 — one row per communication event
+export interface TrackingEvent {
+  id: string
+  userId: string
+  timestamp: number
+  eventType: 'button_press' | 'message_spoken' | 'session_start'
+  buttonId?: string
+  buttonLabel?: string // snapshot at time of press
+  pageId?: string
+  accessMethod: string // DT-01: how the selection was made
+  isModeling: boolean // modeling mode arrives with the SLP tooling
+  sessionId: string
 }
 
 // §4.6 — a word list maps to specific BUTTONS, not labels, so the same

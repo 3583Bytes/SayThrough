@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { logMessageSpoken } from '../services/TrackingService'
 import { ttsService } from '../services/TTSService'
 import { useUserStore } from './userStore'
 
@@ -41,6 +42,7 @@ export const useMessageStore = create<MessageState>((set, get) => ({
       .join(' ')
     if (message) {
       ttsService.speak(message)
+      logMessageSpoken(message) // no-op unless caregiver opted in
     }
   },
 }))

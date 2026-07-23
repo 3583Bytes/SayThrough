@@ -1,12 +1,19 @@
 import * as SQLite from 'expo-sqlite'
-import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
+import type {
+  Button,
+  Page,
+  PageSet,
+  TrackingEvent,
+  UserProfile,
+  WordList,
+} from '../types/models'
 import type { Storage } from './types'
 
 // Native driver: expo-sqlite, schema per technical-specification.md §8.1.
 // Metro resolves createStorage.web.ts for web builds, so this file only
 // ships to iOS/Android.
 
-const SCHEMA_VERSION = 3 // v2: users; v3: word lists
+const SCHEMA_VERSION = 4 // v2: users; v3: word lists; v4: tracking events
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -94,9 +101,23 @@ CREATE TABLE IF NOT EXISTS word_list_items (
   FOREIGN KEY (word_list_id) REFERENCES word_lists(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS tracking_events (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  timestamp INTEGER NOT NULL,
+  event_type TEXT NOT NULL,
+  button_id TEXT,
+  button_label TEXT,
+  page_id TEXT,
+  access_method TEXT,
+  is_modeling INTEGER NOT NULL DEFAULT 0,
+  session_id TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_pages_page_set ON pages(page_set_id);
 CREATE INDEX IF NOT EXISTS idx_buttons_page ON buttons(page_id);
 CREATE INDEX IF NOT EXISTS idx_word_list_items_list ON word_list_items(word_list_id);
+CREATE INDEX IF NOT EXISTS idx_tracking_user_time ON tracking_events(user_id, timestamp);
 `
 
 interface ButtonRow {
@@ -230,8 +251,58 @@ class SqliteStorage implements Storage {
 
   async clearAll(): Promise<void> {
     await this.db.execAsync(
-      'DELETE FROM word_list_items; DELETE FROM word_lists; DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM users; DELETE FROM meta;',
+      'DELETE FROM tracking_events; DELETE FROM word_list_items; DELETE FROM word_lists; DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM users; DELETE FROM meta;',
     )
+  }
+
+  async logTrackingEvent(e: TrackingEvent): Promise<void> {
+    await this.db.runAsync(
+      `INSERT INTO tracking_events
+       (id, user_id, timestamp, event_type, button_id, button_label,
+        page_id, access_method, is_modeling, session_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      e.id,
+      e.userId,
+      e.timestamp,
+      e.eventType,
+      e.buttonId ?? null,
+      e.buttonLabel ?? null,
+      e.pageId ?? null,
+      e.accessMethod,
+      e.isModeling ? 1 : 0,
+      e.sessionId,
+    )
+  }
+
+  async getTrackingEvents(userId: string, sinceTs: number): Promise<TrackingEvent[]> {
+    const rows = await this.db.getAllAsync<{
+      id: string
+      user_id: string
+      timestamp: number
+      event_type: TrackingEvent['eventType']
+      button_id: string | null
+      button_label: string | null
+      page_id: string | null
+      access_method: string | null
+      is_modeling: number
+      session_id: string
+    }>(
+      'SELECT * FROM tracking_events WHERE user_id = ? AND timestamp >= ?',
+      userId,
+      sinceTs,
+    )
+    return rows.map((r) => ({
+      id: r.id,
+      userId: r.user_id,
+      timestamp: r.timestamp,
+      eventType: r.event_type,
+      buttonId: r.button_id ?? undefined,
+      buttonLabel: r.button_label ?? undefined,
+      pageId: r.page_id ?? undefined,
+      accessMethod: r.access_method ?? 'touch',
+      isModeling: r.is_modeling === 1,
+      sessionId: r.session_id,
+    }))
   }
 
   async searchButtons(pageSetId: string, query: string) {

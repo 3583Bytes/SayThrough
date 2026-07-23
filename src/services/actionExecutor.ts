@@ -1,12 +1,15 @@
 import { useMessageStore } from '../stores/messageStore'
 import { useNavigationStore } from '../stores/navigationStore'
 import type { Button } from '../types/models'
+import { logButtonPress } from './TrackingService'
 import { ttsService } from './TTSService'
 
 // §12.1: button actions execute in order on a single tap
 export function executeButtonActions(button: Button): void {
   const message = useMessageStore.getState()
   const navigation = useNavigationStore.getState()
+
+  logButtonPress(button, button.pageId) // no-op unless caregiver opted in
 
   for (const action of button.actions) {
     switch (action.type) {

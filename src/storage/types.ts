@@ -1,4 +1,11 @@
-import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
+import type {
+  Button,
+  Page,
+  PageSet,
+  TrackingEvent,
+  UserProfile,
+  WordList,
+} from '../types/models'
 
 // Repository interface — technical-specification.md §8. The schema and
 // models are identical across platforms; only the driver differs:
@@ -45,4 +52,8 @@ export interface Storage {
   getWordListButtonIds(wordListId: string): Promise<string[]>
   addWordToList(wordListId: string, buttonId: string): Promise<void>
   removeWordFromList(wordListId: string, buttonId: string): Promise<void>
+
+  // §4.13 data tracking (caregiver opt-in)
+  logTrackingEvent(event: TrackingEvent): Promise<void>
+  getTrackingEvents(userId: string, sinceTs: number): Promise<TrackingEvent[]>
 }

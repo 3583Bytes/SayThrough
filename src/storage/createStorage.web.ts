@@ -1,4 +1,11 @@
-import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
+import type {
+  Button,
+  Page,
+  PageSet,
+  TrackingEvent,
+  UserProfile,
+  WordList,
+} from '../types/models'
 import type { Storage } from './types'
 
 // Web driver: plain IndexedDB. Object stores mirror the SQLite tables
@@ -6,7 +13,7 @@ import type { Storage } from './types'
 // document-shaped — the repository interface keeps callers agnostic.
 
 const DB_NAME = 'saythrough'
-const DB_VERSION = 3 // v2: users; v3: word lists
+const DB_VERSION = 4 // v2: users; v3: word lists; v4: tracking events
 
 function promisify<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -48,6 +55,10 @@ class WebStorage implements Storage {
           const items = db.createObjectStore('wordListItems', { keyPath: 'id' })
           items.createIndex('wordListId', 'wordListId')
         }
+        if (!has('trackingEvents')) {
+          const events = db.createObjectStore('trackingEvents', { keyPath: 'id' })
+          events.createIndex('userId', 'userId')
+        }
       }
       open.onsuccess = () => resolve(open.result)
       open.onerror = () => reject(open.error)
@@ -59,10 +70,30 @@ class WebStorage implements Storage {
   }
 
   async clearAll(): Promise<void> {
-    const names = ['meta', 'pageSets', 'pages', 'buttons', 'users', 'wordLists', 'wordListItems']
+    const names = [
+      'meta',
+      'pageSets',
+      'pages',
+      'buttons',
+      'users',
+      'wordLists',
+      'wordListItems',
+      'trackingEvents',
+    ]
     for (const name of names) {
       await promisify(this.store(name, 'readwrite').clear())
     }
+  }
+
+  async logTrackingEvent(event: TrackingEvent): Promise<void> {
+    await promisify(this.store('trackingEvents', 'readwrite').put(event))
+  }
+
+  async getTrackingEvents(userId: string, sinceTs: number): Promise<TrackingEvent[]> {
+    const all = (await promisify(
+      this.store('trackingEvents').index('userId').getAll(userId),
+    )) as TrackingEvent[]
+    return all.filter((event) => event.timestamp >= sinceTs)
   }
 
   async searchButtons(pageSetId: string, query: string) {
