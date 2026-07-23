@@ -1,12 +1,12 @@
 import * as SQLite from 'expo-sqlite'
-import type { Button, Page, PageSet, UserProfile } from '../types/models'
+import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
 import type { Storage } from './types'
 
 // Native driver: expo-sqlite, schema per technical-specification.md §8.1.
 // Metro resolves createStorage.web.ts for web builds, so this file only
 // ships to iOS/Android.
 
-const SCHEMA_VERSION = 2 // v2: users table
+const SCHEMA_VERSION = 3 // v2: users; v3: word lists
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (
@@ -79,8 +79,24 @@ CREATE TABLE IF NOT EXISTS buttons (
   FOREIGN KEY (page_id) REFERENCES pages(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS word_lists (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS word_list_items (
+  id TEXT PRIMARY KEY,
+  word_list_id TEXT NOT NULL,
+  button_id TEXT NOT NULL,
+  FOREIGN KEY (word_list_id) REFERENCES word_lists(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_pages_page_set ON pages(page_set_id);
 CREATE INDEX IF NOT EXISTS idx_buttons_page ON buttons(page_id);
+CREATE INDEX IF NOT EXISTS idx_word_list_items_list ON word_list_items(word_list_id);
 `
 
 interface ButtonRow {
@@ -214,7 +230,77 @@ class SqliteStorage implements Storage {
 
   async clearAll(): Promise<void> {
     await this.db.execAsync(
-      'DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM users; DELETE FROM meta;',
+      'DELETE FROM word_list_items; DELETE FROM word_lists; DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM users; DELETE FROM meta;',
+    )
+  }
+
+  async searchButtons(pageSetId: string, query: string) {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return []
+    const rows = await this.db.getAllAsync<ButtonRow & { page_name: string }>(
+      `SELECT b.*, p.name AS page_name FROM buttons b
+       JOIN pages p ON p.id = b.page_id
+       WHERE p.page_set_id = ? AND LOWER(b.label) LIKE ?`,
+      pageSetId,
+      `%${needle}%`,
+    )
+    return rows.map((row) => ({ button: toButton(row), pageName: row.page_name }))
+  }
+
+  async getWordLists(userId: string): Promise<WordList[]> {
+    const rows = await this.db.getAllAsync<{
+      id: string
+      user_id: string
+      name: string
+      created_at: number
+      updated_at: number
+    }>('SELECT * FROM word_lists WHERE user_id = ?', userId)
+    return rows.map((r) => ({
+      id: r.id,
+      userId: r.user_id,
+      name: r.name,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    }))
+  }
+
+  async createWordList(list: WordList): Promise<void> {
+    await this.db.runAsync(
+      'INSERT OR REPLACE INTO word_lists (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      list.id,
+      list.userId,
+      list.name,
+      list.createdAt,
+      list.updatedAt,
+    )
+  }
+
+  async deleteWordList(id: string): Promise<void> {
+    await this.db.runAsync('DELETE FROM word_lists WHERE id = ?', id)
+    await this.db.runAsync('DELETE FROM word_list_items WHERE word_list_id = ?', id)
+  }
+
+  async getWordListButtonIds(wordListId: string): Promise<string[]> {
+    const rows = await this.db.getAllAsync<{ button_id: string }>(
+      'SELECT button_id FROM word_list_items WHERE word_list_id = ?',
+      wordListId,
+    )
+    return rows.map((r) => r.button_id)
+  }
+
+  async addWordToList(wordListId: string, buttonId: string): Promise<void> {
+    await this.db.runAsync(
+      'INSERT OR REPLACE INTO word_list_items (id, word_list_id, button_id) VALUES (?, ?, ?)',
+      `${wordListId}:${buttonId}`,
+      wordListId,
+      buttonId,
+    )
+  }
+
+  async removeWordFromList(wordListId: string, buttonId: string): Promise<void> {
+    await this.db.runAsync(
+      'DELETE FROM word_list_items WHERE id = ?',
+      `${wordListId}:${buttonId}`,
     )
   }
 

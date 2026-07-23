@@ -7,10 +7,12 @@ interface NavigationState {
   rootPageId: string | null
   currentPageId: string | null
   pageHistory: string[]
+  flashButtonId: string | null // §12.4: pulse a button after search-jump
   setActivePageSet: (pageSetId: string, rootPageId: string) => void
   navigateTo: (pageId: string) => void
   navigateBack: () => void
   navigateHome: () => void
+  flashButton: (buttonId: string | null) => void
 }
 
 export const useNavigationStore = create<NavigationState>((set) => ({
@@ -18,6 +20,9 @@ export const useNavigationStore = create<NavigationState>((set) => ({
   rootPageId: null,
   currentPageId: null,
   pageHistory: [],
+  flashButtonId: null,
+
+  flashButton: (buttonId) => set({ flashButtonId: buttonId }),
 
   setActivePageSet: (pageSetId, rootPageId) =>
     set({

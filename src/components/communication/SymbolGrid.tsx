@@ -9,6 +9,9 @@ interface SymbolGridProps {
   buttons: Button[]
   isEditMode?: boolean
   selectedButtonId?: string | null
+  flashButtonId?: string | null
+  // §4.8: 'filtering' dims buttons NOT in ids; 'editing' badges those in ids
+  filterState?: { mode: 'filtering' | 'editing'; ids: Set<string> }
   onButtonPress: (button: Button) => void
   onButtonLongPress?: (button: Button) => void
   onEmptyCellPress?: (row: number, column: number) => void // edit mode only
@@ -20,6 +23,8 @@ export function SymbolGrid({
   buttons,
   isEditMode,
   selectedButtonId,
+  flashButtonId,
+  filterState,
   onButtonPress,
   onButtonLongPress,
   onEmptyCellPress,
@@ -42,6 +47,13 @@ export function SymbolGrid({
                   key={button.id}
                   button={button}
                   isSelected={isEditMode && button.id === selectedButtonId}
+                  isFlashing={button.id === flashButtonId}
+                  dimmed={
+                    filterState?.mode === 'filtering' && !filterState.ids.has(button.id)
+                  }
+                  showCheck={
+                    filterState?.mode === 'editing' && filterState.ids.has(button.id)
+                  }
                   accommodate={!isEditMode}
                   onPress={onButtonPress}
                   onLongPress={onButtonLongPress}

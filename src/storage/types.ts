@@ -1,4 +1,4 @@
-import type { Button, Page, PageSet, UserProfile } from '../types/models'
+import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
 
 // Repository interface — technical-specification.md §8. The schema and
 // models are identical across platforms; only the driver differs:
@@ -31,4 +31,18 @@ export interface Storage {
   createButton(button: Button): Promise<void>
   updateButton(button: Button): Promise<void>
   deleteButton(id: string): Promise<void>
+
+  // §12.4 vocabulary search — substring match over labels in a page set
+  searchButtons(
+    pageSetId: string,
+    query: string,
+  ): Promise<Array<{ button: Button; pageName: string }>>
+
+  // §4.8 vocabulary filter word lists
+  getWordLists(userId: string): Promise<WordList[]>
+  createWordList(list: WordList): Promise<void>
+  deleteWordList(id: string): Promise<void>
+  getWordListButtonIds(wordListId: string): Promise<string[]>
+  addWordToList(wordListId: string, buttonId: string): Promise<void>
+  removeWordFromList(wordListId: string, buttonId: string): Promise<void>
 }

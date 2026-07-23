@@ -21,6 +21,19 @@ export interface UserProfile {
   ignoreSecondTouch?: boolean // palm / second-hand guard
   editPinHash?: string // SHA-256(salt:pin) via expo-crypto (§13.1)
   editPinSalt?: string
+  // Vocabulary filter (§4.8)
+  activeWordListId?: string
+  filterEnabled?: boolean
+  createdAt: number
+  updatedAt: number
+}
+
+// §4.6 — a word list maps to specific BUTTONS, not labels, so the same
+// word on different pages can be included independently
+export interface WordList {
+  id: string
+  userId: string
+  name: string
   createdAt: number
   updatedAt: number
 }

@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import type { RootStackParamList } from '../../App'
 import { KeyboardView } from '../components/communication/KeyboardView'
 import { MessageBar } from '../components/communication/MessageBar'
+import { SearchModal } from '../components/communication/SearchModal'
 import { SymbolGrid } from '../components/communication/SymbolGrid'
 import { Toolbar } from '../components/communication/Toolbar'
 import { TopBar } from '../components/communication/TopBar'
@@ -30,14 +31,56 @@ export function CommunicationScreen() {
   const [pinError, setPinError] = useState<string | undefined>()
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [showBackupNudge, setShowBackupNudge] = useState(false)
+  const [searchVisible, setSearchVisible] = useState(false)
+  const [wordListIds, setWordListIds] = useState<Set<string>>(new Set())
+  const [wordListName, setWordListName] = useState<string | undefined>()
 
   const currentPageId = useNavigationStore((s) => s.currentPageId)
+  const flashButtonId = useNavigationStore((s) => s.flashButtonId)
   const { page, buttons, refresh } = usePageButtons(currentPageId)
 
   const isEditMode = useEditStore((s) => s.isEditMode)
   const selectedButtonId = useEditStore((s) => s.selectedButtonId)
   const isEditorOpen = useEditStore((s) => s.isEditorOpen)
+  const wordListEditingId = useEditStore((s) => s.wordListEditingId)
   const edit = useEditStore.getState
+
+  const activeUser = useUserStore((s) => s.activeUser)
+  const filterListId =
+    wordListEditingId ??
+    (activeUser?.filterEnabled ? activeUser.activeWordListId : undefined)
+
+  // Load the relevant word list (for filtering in use mode, or badges
+  // while selecting words in edit mode)
+  useEffect(() => {
+    if (!filterListId || !activeUser) {
+      setWordListIds(new Set())
+      setWordListName(undefined)
+      return
+    }
+    let cancelled = false
+    Promise.all([
+      storage.getWordListButtonIds(filterListId),
+      storage.getWordLists(activeUser.id),
+    ]).then(([ids, lists]) => {
+      if (cancelled) return
+      setWordListIds(new Set(ids))
+      setWordListName(lists.find((l) => l.id === filterListId)?.name)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [filterListId, activeUser])
+
+  // §12.4: clear the search-jump flash after a short pulse
+  useEffect(() => {
+    if (!flashButtonId) return
+    const timer = setTimeout(
+      () => useNavigationStore.getState().flashButton(null),
+      1600,
+    )
+    return () => clearTimeout(timer)
+  }, [flashButtonId])
 
   // §12.5: nudge on edit-mode entry when there are unexported changes
   // and the last export is >30 days old (or never) — never in use mode
@@ -87,9 +130,22 @@ export function CommunicationScreen() {
     }
   }
 
-  const handleButtonPress = (button: Button) => {
+  const handleButtonPress = async (button: Button) => {
     if (!isEditMode) {
       executeButtonActions(button)
+      return
+    }
+    // §12.2: while selecting words for a list, taps toggle membership
+    if (wordListEditingId) {
+      const next = new Set(wordListIds)
+      if (next.has(button.id)) {
+        next.delete(button.id)
+        await storage.removeWordFromList(wordListEditingId, button.id)
+      } else {
+        next.add(button.id)
+        await storage.addWordToList(wordListEditingId, button.id)
+      }
+      setWordListIds(next)
       return
     }
     // edit mode: first tap selects, tapping the selected button opens
@@ -180,11 +236,32 @@ export function CommunicationScreen() {
         {isEditMode ? (
           <EditBar
             pageName={page.name}
-            onDone={() => edit().exitEditMode()}
+            wordListName={wordListEditingId ? wordListName : undefined}
+            onDone={() =>
+              wordListEditingId
+                ? edit().setWordListEditing(null) // back to normal edit mode
+                : edit().exitEditMode()
+            }
             onSettings={() => navigation.navigate('Settings')}
           />
         ) : (
-          <TopBar pageName={page.name} onEditPress={requestEditAccess} />
+          <TopBar
+            pageName={page.name}
+            onEditPress={requestEditAccess}
+            onSearchPress={() => setSearchVisible(true)}
+            filter={
+              activeUser?.activeWordListId
+                ? {
+                    available: true,
+                    enabled: activeUser.filterEnabled ?? false,
+                    onToggle: () =>
+                      useUserStore.getState().updateActiveUser({
+                        filterEnabled: !(activeUser.filterEnabled ?? false),
+                      }),
+                  }
+                : undefined
+            }
+          />
         )}
         {isEditMode && showBackupNudge && (
           <View style={styles.nudge}>
@@ -218,8 +295,16 @@ export function CommunicationScreen() {
           buttons={buttons}
           isEditMode={isEditMode}
           selectedButtonId={selectedButtonId}
+          flashButtonId={flashButtonId}
+          filterState={
+            wordListEditingId
+              ? { mode: 'editing', ids: wordListIds }
+              : filterListId && !isEditMode
+                ? { mode: 'filtering', ids: wordListIds }
+                : undefined
+          }
           onButtonPress={handleButtonPress}
-          onEmptyCellPress={handleEmptyCellPress}
+          onEmptyCellPress={wordListEditingId ? undefined : handleEmptyCellPress}
         />
         {isEditMode && isEditorOpen && selectedButton && (
           <ButtonEditorPanel
@@ -245,6 +330,7 @@ export function CommunicationScreen() {
         onCancel={() => setPinModalVisible(false)}
         error={pinError}
       />
+      <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </SafeAreaView>
   )
 }

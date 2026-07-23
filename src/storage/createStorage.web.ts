@@ -1,4 +1,4 @@
-import type { Button, Page, PageSet, UserProfile } from '../types/models'
+import type { Button, Page, PageSet, UserProfile, WordList } from '../types/models'
 import type { Storage } from './types'
 
 // Web driver: plain IndexedDB. Object stores mirror the SQLite tables
@@ -6,7 +6,7 @@ import type { Storage } from './types'
 // document-shaped — the repository interface keeps callers agnostic.
 
 const DB_NAME = 'saythrough'
-const DB_VERSION = 2 // v2: users store
+const DB_VERSION = 3 // v2: users; v3: word lists
 
 function promisify<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -42,6 +42,12 @@ class WebStorage implements Storage {
           buttons.createIndex('pageId', 'pageId')
         }
         if (!has('users')) db.createObjectStore('users', { keyPath: 'id' })
+        if (!has('wordLists')) db.createObjectStore('wordLists', { keyPath: 'id' })
+        if (!has('wordListItems')) {
+          // key = `${wordListId}:${buttonId}`
+          const items = db.createObjectStore('wordListItems', { keyPath: 'id' })
+          items.createIndex('wordListId', 'wordListId')
+        }
       }
       open.onsuccess = () => resolve(open.result)
       open.onerror = () => reject(open.error)
@@ -53,9 +59,67 @@ class WebStorage implements Storage {
   }
 
   async clearAll(): Promise<void> {
-    for (const name of ['meta', 'pageSets', 'pages', 'buttons', 'users']) {
+    const names = ['meta', 'pageSets', 'pages', 'buttons', 'users', 'wordLists', 'wordListItems']
+    for (const name of names) {
       await promisify(this.store(name, 'readwrite').clear())
     }
+  }
+
+  async searchButtons(pageSetId: string, query: string) {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return []
+    const pages = await this.getPagesForPageSet(pageSetId)
+    const results: Array<{ button: Button; pageName: string }> = []
+    for (const page of pages) {
+      const buttons = await this.getButtonsForPage(page.id)
+      for (const button of buttons) {
+        if (button.label.toLowerCase().includes(needle)) {
+          results.push({ button, pageName: page.name })
+        }
+      }
+    }
+    return results
+  }
+
+  async getWordLists(userId: string): Promise<WordList[]> {
+    const all = (await promisify(this.store('wordLists').getAll())) as WordList[]
+    return all.filter((list) => list.userId === userId)
+  }
+
+  async createWordList(list: WordList): Promise<void> {
+    await promisify(this.store('wordLists', 'readwrite').put(list))
+  }
+
+  async deleteWordList(id: string): Promise<void> {
+    await promisify(this.store('wordLists', 'readwrite').delete(id))
+    const items = this.db
+      .transaction('wordListItems', 'readwrite')
+      .objectStore('wordListItems')
+    const keys = await promisify(items.index('wordListId').getAllKeys(id))
+    for (const key of keys) await promisify(items.delete(key))
+  }
+
+  async getWordListButtonIds(wordListId: string): Promise<string[]> {
+    const items = (await promisify(
+      this.store('wordListItems').index('wordListId').getAll(wordListId),
+    )) as Array<{ buttonId: string }>
+    return items.map((item) => item.buttonId)
+  }
+
+  async addWordToList(wordListId: string, buttonId: string): Promise<void> {
+    await promisify(
+      this.store('wordListItems', 'readwrite').put({
+        id: `${wordListId}:${buttonId}`,
+        wordListId,
+        buttonId,
+      }),
+    )
+  }
+
+  async removeWordFromList(wordListId: string, buttonId: string): Promise<void> {
+    await promisify(
+      this.store('wordListItems', 'readwrite').delete(`${wordListId}:${buttonId}`),
+    )
   }
 
   async getUsers(): Promise<UserProfile[]> {

@@ -9,6 +9,9 @@ import type { Button } from '../../types/models'
 interface SymbolButtonProps {
   button: Button
   isSelected?: boolean // edit mode: blue selection border (§5.6)
+  isFlashing?: boolean // §12.4: pulse after a search jump
+  dimmed?: boolean // §12.2: filtered out — visible for modeling, inert
+  showCheck?: boolean // word-list editing: included badge
   accommodate?: boolean // apply touch accommodations (use mode only)
   onPress: (button: Button) => void
   onLongPress?: (button: Button) => void
@@ -21,6 +24,9 @@ let touchInProgress = false
 export function SymbolButton({
   button,
   isSelected,
+  isFlashing,
+  dimmed,
+  showCheck,
   accommodate,
   onPress,
   onLongPress,
@@ -35,6 +41,7 @@ export function SymbolButton({
   const blocked = useRef(false)
 
   const activate = () => {
+    if (dimmed) return // filtered out — visible so a partner can model
     const now = Date.now()
     if (debounce > 0 && now - lastActivationAt < debounce) return
     lastActivationAt = now
@@ -96,7 +103,9 @@ export function SymbolButton({
           borderWidth: button.borderWidth,
         },
         isSelected && styles.selected,
-        pressed && styles.pressed,
+        isFlashing && styles.flashing,
+        dimmed && styles.dimmed,
+        pressed && !dimmed && styles.pressed,
       ]}
     >
       {symbolUri ? (
@@ -121,6 +130,7 @@ export function SymbolButton({
         </Text>
       )}
       {button.isNavigationButton && <Text style={styles.navArrow}>➜</Text>}
+      {showCheck && <Text style={styles.checkBadge}>✓</Text>}
     </Pressable>
   )
 }
@@ -137,6 +147,21 @@ const styles = StyleSheet.create({
   selected: {
     borderWidth: 3,
     borderColor: '#1976D2',
+  },
+  flashing: {
+    borderWidth: 3,
+    borderColor: '#FF9800',
+  },
+  dimmed: {
+    opacity: 0.3,
+  },
+  checkBadge: {
+    position: 'absolute',
+    top: 2,
+    left: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2E7D32',
   },
   pressed: {
     opacity: 0.85,

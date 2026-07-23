@@ -6,11 +6,16 @@ import { useNavigationStore } from '../../stores/navigationStore'
 interface TopBarProps {
   pageName: string
   onEditPress: () => void // PIN-gated by the caller (§13.1)
+  onSearchPress: () => void // §12.4
+  filter?: {
+    available: boolean // user has a word list selected
+    enabled: boolean
+    onToggle: () => void
+  }
 }
 
-// §5.3 top bar — back/home left, edit right; search and filter entries
-// arrive with their features
-export function TopBar({ pageName, onEditPress }: TopBarProps) {
+// §5.3 top bar — back/home/search left, filter/edit right
+export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarProps) {
   const canGoBack = useNavigationStore((s) => s.pageHistory.length > 0)
   const navigateBack = useNavigationStore((s) => s.navigateBack)
   const navigateHome = useNavigationStore((s) => s.navigateHome)
@@ -39,9 +44,33 @@ export function TopBar({ pageName, onEditPress }: TopBarProps) {
         >
           <Text style={styles.icon}>⌂</Text>
         </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Search vocabulary"
+          onPress={onSearchPress}
+          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.icon}>🔍</Text>
+        </Pressable>
       </View>
       <Text style={styles.pageName}>{pageName}</Text>
       <View style={[styles.side, styles.right]}>
+        {filter?.available && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              filter.enabled ? 'Disable vocabulary filter' : 'Enable vocabulary filter'
+            }
+            onPress={filter.onToggle}
+            style={({ pressed }) => [
+              styles.iconButton,
+              filter.enabled && styles.filterActive,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={[styles.icon, filter.enabled && styles.filterActiveIcon]}>⊘</Text>
+          </Pressable>
+        )}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Edit mode"
@@ -68,7 +97,7 @@ const styles = StyleSheet.create({
   },
   side: {
     flexDirection: 'row',
-    minWidth: 96,
+    minWidth: 140,
   },
   right: {
     justifyContent: 'flex-end',
@@ -81,6 +110,13 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 20,
+  },
+  filterActive: {
+    backgroundColor: '#FFF3E0',
+    borderRadius: 8,
+  },
+  filterActiveIcon: {
+    color: '#E65100',
   },
   disabled: {
     opacity: 0.3,

@@ -4,13 +4,14 @@ import { LAYOUT } from '../../constants/layout'
 
 interface EditBarProps {
   pageName: string
+  wordListName?: string // §12.2: selecting words for this list
   onDone: () => void
   onSettings: () => void // §5.8: settings are reachable via edit mode only
 }
 
 // §5.6 — replaces the top bar while editing; changes save immediately,
 // Done just exits
-export function EditBar({ pageName, onDone, onSettings }: EditBarProps) {
+export function EditBar({ pageName, wordListName, onDone, onSettings }: EditBarProps) {
   return (
     <View style={styles.bar}>
       <Pressable
@@ -21,7 +22,11 @@ export function EditBar({ pageName, onDone, onSettings }: EditBarProps) {
       >
         <Text style={styles.doneText}>✓ Done</Text>
       </Pressable>
-      <Text style={styles.title}>Editing: {pageName}</Text>
+      <Text style={styles.title}>
+        {wordListName
+          ? `Tap words for list: ${wordListName}`
+          : `Editing: ${pageName}`}
+      </Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Open settings"

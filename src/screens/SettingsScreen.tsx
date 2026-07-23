@@ -18,10 +18,12 @@ import { UI_COLORS } from '../constants/colors'
 import { exportPageSet, importPageSet } from '../services/OBFService'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
+import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
 import { useUserStore } from '../stores/userStore'
-import type { PageSet } from '../types/models'
+import type { PageSet, WordList } from '../types/models'
 import { generatePinSalt, hashPin } from '../utils/pin'
+import { uuid } from '../utils/uuid'
 
 const PREVIEW_TEXT = 'Hi! This is what I sound like.'
 
@@ -55,6 +57,12 @@ export function SettingsScreen() {
   const [name, setName] = useState(activeUser?.name ?? '')
   const [newUserName, setNewUserName] = useState('')
   const [pinModalVisible, setPinModalVisible] = useState(false)
+  const [wordLists, setWordLists] = useState<WordList[]>([])
+  const [newListName, setNewListName] = useState('')
+
+  useEffect(() => {
+    if (activeUser) storage.getWordLists(activeUser.id).then(setWordLists)
+  }, [activeUser?.id])
 
   useEffect(() => {
     ttsService.init().then(() => {
@@ -316,7 +324,94 @@ export function SettingsScreen() {
           </View>
         </View>
 
-        {/* 4. Security */}
+        {/* 4b. Vocabulary Filter (§4.8) */}
+        <Text style={styles.sectionTitle}>Vocabulary Filter</Text>
+        <View style={styles.card}>
+          <Text style={styles.hint}>
+            Limit which words are active during therapy. Words not in the
+            list stay visible (so a partner can model) but don't respond.
+          </Text>
+          {wordLists.length > 0 && <Text style={styles.fieldLabel}>Word lists</Text>}
+          <View style={styles.chipRow}>
+            {wordLists.map((list) => (
+              <Chip
+                key={list.id}
+                label={list.name}
+                selected={list.id === activeUser.activeWordListId}
+                onPress={() => updateActiveUser({ activeWordListId: list.id })}
+              />
+            ))}
+          </View>
+          {activeUser.activeWordListId && (
+            <View style={styles.chipRow}>
+              <Chip
+                label="Select words (tap them in the grid)"
+                selected={false}
+                onPress={() => {
+                  useEditStore.getState().enterEditMode()
+                  useEditStore
+                    .getState()
+                    .setWordListEditing(activeUser.activeWordListId!)
+                  navigation.goBack()
+                }}
+              />
+              <Chip
+                label="Delete list"
+                selected={false}
+                onPress={async () => {
+                  await storage.deleteWordList(activeUser.activeWordListId!)
+                  await updateActiveUser({
+                    activeWordListId: undefined,
+                    filterEnabled: false,
+                  })
+                  setWordLists(await storage.getWordLists(activeUser.id))
+                }}
+              />
+            </View>
+          )}
+          <View style={styles.addRow}>
+            <TextInput
+              value={newListName}
+              onChangeText={setNewListName}
+              placeholder="New list name (e.g. Week 1 Words)"
+              style={[styles.input, styles.addInput]}
+              accessibilityLabel="New word list name"
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add word list"
+              onPress={async () => {
+                const trimmed = newListName.trim()
+                if (!trimmed) return
+                const now = Date.now()
+                const list: WordList = {
+                  id: uuid(),
+                  userId: activeUser.id,
+                  name: trimmed,
+                  createdAt: now,
+                  updatedAt: now,
+                }
+                await storage.createWordList(list)
+                await updateActiveUser({ activeWordListId: list.id })
+                setWordLists(await storage.getWordLists(activeUser.id))
+                setNewListName('')
+              }}
+              style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.addButtonText}>+ Add</Text>
+            </Pressable>
+          </View>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Filter on (also in top bar: ⊘)</Text>
+            <Switch
+              value={activeUser.filterEnabled ?? false}
+              onValueChange={(value) => updateActiveUser({ filterEnabled: value })}
+              accessibilityLabel="Vocabulary filter enabled"
+            />
+          </View>
+        </View>
+
+        {/* 5. Security */}
         <Text style={styles.sectionTitle}>Security</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>
