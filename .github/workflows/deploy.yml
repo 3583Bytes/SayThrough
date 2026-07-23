@@ -30,14 +30,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Export web build
-        run: npx expo export --platform web
+      - name: Build web (export + PWA postbuild)
+        run: npm run build
         env:
           EXPO_BASE_URL: /saythrough
           EXPO_PUBLIC_BASE_URL: /saythrough
-
-      - name: SPA fallback for deep links
-        run: cp dist/index.html dist/404.html
 
       - uses: actions/configure-pages@v5
 

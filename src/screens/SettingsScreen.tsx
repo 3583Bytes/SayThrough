@@ -18,6 +18,12 @@ import type * as Speech from 'expo-speech'
 import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
 import { exportPageSet, importPageSet } from '../services/OBFService'
+import {
+  getInstallState,
+  onInstallAvailable,
+  promptInstall,
+  type InstallState,
+} from '../services/pwa'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
@@ -61,6 +67,11 @@ export function SettingsScreen() {
   const [pinModalVisible, setPinModalVisible] = useState(false)
   const [wordLists, setWordLists] = useState<WordList[]>([])
   const [newListName, setNewListName] = useState('')
+  const [installState, setInstallState] = useState<InstallState>(getInstallState())
+
+  useEffect(() => {
+    onInstallAvailable(() => setInstallState(getInstallState()))
+  }, [])
 
   useEffect(() => {
     if (activeUser) storage.getWordLists(activeUser.id).then(setWordLists)
@@ -482,7 +493,47 @@ export function SettingsScreen() {
           {backupStatus ? <Text style={styles.hint}>{backupStatus}</Text> : null}
         </View>
 
-        {/* 6. About */}
+        {/* 6b. Install (§12.6) */}
+        {installState !== 'unavailable' && (
+          <>
+            <Text style={styles.sectionTitle}>Install</Text>
+            <View style={styles.card}>
+              {installState === 'installed' && (
+                <Text style={styles.hint}>
+                  Installed ✓ — SayThrough opens full-screen and works offline.
+                </Text>
+              )}
+              {installState === 'installable' && (
+                <>
+                  <Text style={styles.hint}>
+                    Install SayThrough to the home screen: it opens like a
+                    regular app, works offline, and the browser protects its
+                    storage better.
+                  </Text>
+                  <View style={styles.chipRow}>
+                    <Chip
+                      label="Install app"
+                      selected={false}
+                      onPress={async () => {
+                        await promptInstall()
+                        setInstallState(getInstallState())
+                      }}
+                    />
+                  </View>
+                </>
+              )}
+              {installState === 'ios-instructions' && (
+                <Text style={styles.hint}>
+                  To install on iPad/iPhone: in Safari, tap Share (□↑) →
+                  "Add to Home Screen". SayThrough will open full-screen and
+                  work offline.
+                </Text>
+              )}
+            </View>
+          </>
+        )}
+
+        {/* 7. About */}
         <Text style={styles.sectionTitle}>About</Text>
         <View style={styles.card}>
           <Text style={styles.hint}>
