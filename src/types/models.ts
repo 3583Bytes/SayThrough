@@ -2,6 +2,24 @@
 // app (styling overrides, audio, spans) are included so rows written now
 // stay forward-compatible.
 
+// §4.1 — the fields implemented so far; access-method, layout-preference,
+// and tracking fields arrive with their features
+export interface UserProfile {
+  id: string
+  name: string
+  activePageSetId: string
+  language: string // BCP-47
+  ttsVoiceId?: string // platform voice identifier
+  ttsRate: number // 0.1–2.0 (default 0.9)
+  ttsPitch: number // 0.5–2.0 (default 1.0)
+  ttsVolume: number // 0.0–1.0 (default 1.0)
+  speakOnSelect: boolean
+  editPinHash?: string // SHA-256(salt:pin) via expo-crypto (§13.1)
+  editPinSalt?: string
+  createdAt: number
+  updatedAt: number
+}
+
 export interface PageSet {
   id: string
   name: string

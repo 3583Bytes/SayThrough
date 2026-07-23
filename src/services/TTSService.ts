@@ -15,6 +15,13 @@ export interface SpeakOptions {
 class TTSService {
   private warmedUp = false
   private voices: Speech.Voice[] = []
+  private defaults: SpeakOptions = {}
+
+  // Called whenever the active profile loads/changes — speak() then uses
+  // the profile's voice/rate/pitch/volume unless overridden per call
+  configure(defaults: SpeakOptions): void {
+    this.defaults = defaults
+  }
 
   // §10.4: force the voice list to load at startup — on web it arrives
   // asynchronously and the first speak() would otherwise use a fallback
@@ -36,16 +43,17 @@ class TTSService {
   }
 
   speak(text: string, options: SpeakOptions = {}): void {
+    const o = { ...this.defaults, ...options }
     Speech.stop()
     Speech.speak(text, {
-      voice: options.voiceId,
-      language: options.language ?? 'en-US',
-      rate: options.rate ?? 0.9,
-      pitch: options.pitch ?? 1.0,
-      volume: options.volume ?? 1.0,
-      onStart: options.onStart,
-      onDone: options.onDone,
-      onError: options.onError,
+      voice: o.voiceId,
+      language: o.language ?? 'en-US',
+      rate: o.rate ?? 0.9,
+      pitch: o.pitch ?? 1.0,
+      volume: o.volume ?? 1.0,
+      onStart: o.onStart,
+      onDone: o.onDone,
+      onError: o.onError,
     })
   }
 

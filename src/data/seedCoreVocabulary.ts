@@ -86,11 +86,33 @@ function placeWords(
   )
 }
 
+// §19.4 Quick Phrases — 18 one-tap complete utterances, 3×6 single page
+const QUICK_PHRASES: Array<[string, PartOfSpeech]> = [
+  ['Hello!', 'social'],
+  ['Goodbye!', 'social'],
+  ['How are you?', 'question'],
+  ['Thank you!', 'social'],
+  ['Please!', 'social'],
+  ['I like that!', 'social'],
+  ['I need help.', 'little'],
+  ['I need a break.', 'little'],
+  ['Can I have more?', 'question'],
+  ['I need the bathroom.', 'little'],
+  ["That's funny!", 'social'],
+  ["That's great!", 'social'],
+  ["I don't like that.", 'descriptor'],
+  ['Look at this!', 'social'],
+  ["That's not what I meant.", 'descriptor'],
+  ['Something else.', 'descriptor'],
+  ['Come here please!', 'social'],
+  ['Something is wrong!', 'question'],
+]
+
 const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when seed content changes — pre-release only, wipes local data.
 // Post-release this becomes a proper migration.
-const SEED_VERSION = '2'
+const SEED_VERSION = '3'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
@@ -168,8 +190,60 @@ export async function seedIfNeeded(storage: Storage): Promise<string> {
   await storage.createPageSet(pageSet)
   for (const page of pages) await storage.createPage(page)
   for (const button of buttons) await storage.createButton(button)
+
+  await seedQuickPhrases(storage, now)
+
   await storage.setMeta(SEED_META_KEY, pageSetId)
   await storage.setMeta(SEED_VERSION_KEY, SEED_VERSION)
 
   return pageSetId
+}
+
+// §19.4: each button speaks its full sentence in one tap, bypassing the
+// message bar
+async function seedQuickPhrases(storage: Storage, now: number): Promise<void> {
+  const pageSetId = uuid()
+  const pageId = uuid()
+
+  await storage.createPageSet({
+    id: pageSetId,
+    name: 'Quick Phrases',
+    description: 'Pre-stored phrases spoken with one tap (§19.4)',
+    language: 'en',
+    rootPageId: pageId,
+    schemaVersion: 1,
+    isBuiltIn: true,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  await storage.createPage({
+    id: pageId,
+    pageSetId,
+    name: 'Quick Phrases',
+    rows: 3,
+    columns: 6,
+    backgroundColor: '#FFFFFF',
+    showMessageBar: true,
+    showToolbar: true,
+    isBuiltIn: true,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  for (let i = 0; i < QUICK_PHRASES.length; i++) {
+    const [label, pos] = QUICK_PHRASES[i]
+    await storage.createButton(
+      makeButton(
+        pageId,
+        label,
+        pos,
+        Math.floor(i / 6),
+        i % 6,
+        [{ type: 'speak_label' }],
+        false,
+        now,
+      ),
+    )
+  }
 }

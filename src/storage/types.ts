@@ -1,4 +1,4 @@
-import type { Button, Page, PageSet } from '../types/models'
+import type { Button, Page, PageSet, UserProfile } from '../types/models'
 
 // Repository interface — technical-specification.md §8. The schema and
 // models are identical across platforms; only the driver differs:
@@ -14,6 +14,10 @@ export interface Storage {
   // meta key-value (extraction flags, active ids, …)
   getMeta(key: string): Promise<string | null>
   setMeta(key: string, value: string): Promise<void>
+
+  getUsers(): Promise<UserProfile[]>
+  createUser(user: UserProfile): Promise<void>
+  updateUser(user: UserProfile): Promise<void>
 
   getPageSets(): Promise<PageSet[]>
   getPageSet(id: string): Promise<PageSet | null>

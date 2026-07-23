@@ -49,6 +49,7 @@ export function PinEntryModal({
           <View style={styles.buttons}>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Cancel PIN entry"
               onPress={onCancel}
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             >
@@ -56,6 +57,7 @@ export function PinEntryModal({
             </Pressable>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel="Submit PIN"
               onPress={submit}
               style={({ pressed }) => [
                 styles.button,

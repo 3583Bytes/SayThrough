@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ttsService } from '../services/TTSService'
+import { useUserStore } from './userStore'
 
 export interface MessageToken {
   id: string
@@ -8,7 +9,6 @@ export interface MessageToken {
 
 interface MessageState {
   tokens: MessageToken[]
-  speakOnSelect: boolean
   appendToken: (text: string) => void
   deleteLastToken: () => void
   clearMessage: () => void
@@ -21,13 +21,12 @@ let nextTokenId = 0
 // immediate feedback without giving up sentence building
 export const useMessageStore = create<MessageState>((set, get) => ({
   tokens: [],
-  speakOnSelect: false,
 
   appendToken: (text) => {
     set((state) => ({
       tokens: [...state.tokens, { id: String(nextTokenId++), text }],
     }))
-    if (get().speakOnSelect) {
+    if (useUserStore.getState().activeUser?.speakOnSelect) {
       ttsService.speak(text)
     }
   },

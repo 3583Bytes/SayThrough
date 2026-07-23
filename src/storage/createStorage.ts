@@ -1,17 +1,26 @@
 import * as SQLite from 'expo-sqlite'
-import type { Button, Page, PageSet } from '../types/models'
+import type { Button, Page, PageSet, UserProfile } from '../types/models'
 import type { Storage } from './types'
 
 // Native driver: expo-sqlite, schema per technical-specification.md §8.1.
 // Metro resolves createStorage.web.ts for web builds, so this file only
 // ships to iOS/Android.
 
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2 // v2: users table
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  active_page_set_id TEXT,
+  settings_json TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS page_sets (
@@ -205,8 +214,35 @@ class SqliteStorage implements Storage {
 
   async clearAll(): Promise<void> {
     await this.db.execAsync(
-      'DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM meta;',
+      'DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM users; DELETE FROM meta;',
     )
+  }
+
+  // Profile stored whole in settings_json per §8.1; name and
+  // active_page_set_id are mirrored to columns for queries
+  async getUsers(): Promise<UserProfile[]> {
+    const rows = await this.db.getAllAsync<{ settings_json: string }>(
+      'SELECT settings_json FROM users',
+    )
+    return rows.map((r) => JSON.parse(r.settings_json))
+  }
+
+  async createUser(user: UserProfile): Promise<void> {
+    await this.db.runAsync(
+      `INSERT OR REPLACE INTO users
+       (id, name, active_page_set_id, settings_json, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      user.id,
+      user.name,
+      user.activePageSetId,
+      JSON.stringify(user),
+      user.createdAt,
+      user.updatedAt,
+    )
+  }
+
+  async updateUser(user: UserProfile): Promise<void> {
+    await this.createUser(user)
   }
 
   async getMeta(key: string): Promise<string | null> {

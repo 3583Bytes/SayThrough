@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useState } from 'react'
 import { SafeAreaView, StyleSheet, View } from 'react-native'
+import type { RootStackParamList } from '../../App'
 import { MessageBar } from '../components/communication/MessageBar'
 import { SymbolGrid } from '../components/communication/SymbolGrid'
 import { TopBar } from '../components/communication/TopBar'
@@ -7,24 +10,24 @@ import { PinEntryModal } from '../components/common/PinEntryModal'
 import { ButtonEditorPanel } from '../components/edit/ButtonEditorPanel'
 import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
-import { seedIfNeeded } from '../data/seedCoreVocabulary'
 import { usePageButtons } from '../hooks/usePageButtons'
 import { executeButtonActions } from '../services/actionExecutor'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
+import { useUserStore } from '../stores/userStore'
 import type { Button } from '../types/models'
 import { verifyPin } from '../utils/pin'
 import { uuid } from '../utils/uuid'
 
 export function CommunicationScreen() {
-  const [ready, setReady] = useState(false)
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [pinModalVisible, setPinModalVisible] = useState(false)
   const [pinError, setPinError] = useState<string | undefined>()
 
   const currentPageId = useNavigationStore((s) => s.currentPageId)
-  const setActivePageSet = useNavigationStore((s) => s.setActivePageSet)
   const { page, buttons, refresh } = usePageButtons(currentPageId)
 
   const isEditMode = useEditStore((s) => s.isEditMode)
@@ -32,30 +35,10 @@ export function CommunicationScreen() {
   const isEditorOpen = useEditStore((s) => s.isEditorOpen)
   const edit = useEditStore.getState
 
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      await storage.init()
-      const pageSetId = await seedIfNeeded(storage)
-      const pageSet = await storage.getPageSet(pageSetId)
-      if (cancelled || !pageSet) return
-      setActivePageSet(pageSet.id, pageSet.rootPageId)
-      setReady(true)
-      ttsService.init()
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [setActivePageSet])
-
-  // §13.1: no PIN configured → edit mode opens directly; PIN-setting UI
-  // arrives with the Settings screen
-  const requestEditAccess = async () => {
-    const [hash, salt] = await Promise.all([
-      storage.getMeta('editPinHash'),
-      storage.getMeta('editPinSalt'),
-    ])
-    if (!hash || !salt) {
+  // §13.1: no PIN configured → edit mode opens directly
+  const requestEditAccess = () => {
+    const user = useUserStore.getState().activeUser
+    if (!user?.editPinHash || !user.editPinSalt) {
       edit().enterEditMode()
       return
     }
@@ -64,11 +47,12 @@ export function CommunicationScreen() {
   }
 
   const handlePinSubmit = async (pin: string) => {
-    const [hash, salt] = await Promise.all([
-      storage.getMeta('editPinHash'),
-      storage.getMeta('editPinSalt'),
-    ])
-    if (hash && salt && (await verifyPin(pin, salt, hash))) {
+    const user = useUserStore.getState().activeUser
+    if (
+      user?.editPinHash &&
+      user.editPinSalt &&
+      (await verifyPin(pin, user.editPinSalt, user.editPinHash))
+    ) {
       setPinModalVisible(false)
       edit().enterEditMode()
     } else {
@@ -144,7 +128,7 @@ export function CommunicationScreen() {
     refresh()
   }
 
-  if (!ready || !page) {
+  if (!page) {
     return <SafeAreaView style={styles.screen} />
   }
 
@@ -153,7 +137,11 @@ export function CommunicationScreen() {
       {/* §10.4: first touch anywhere warms the TTS engine */}
       <View style={styles.content} onTouchStart={() => ttsService.warmUp()}>
         {isEditMode ? (
-          <EditBar pageName={page.name} onDone={() => edit().exitEditMode()} />
+          <EditBar
+            pageName={page.name}
+            onDone={() => edit().exitEditMode()}
+            onSettings={() => navigation.navigate('Settings')}
+          />
         ) : (
           <TopBar pageName={page.name} onEditPress={requestEditAccess} />
         )}

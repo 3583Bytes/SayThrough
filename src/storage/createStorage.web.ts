@@ -1,4 +1,4 @@
-import type { Button, Page, PageSet } from '../types/models'
+import type { Button, Page, PageSet, UserProfile } from '../types/models'
 import type { Storage } from './types'
 
 // Web driver: plain IndexedDB. Object stores mirror the SQLite tables
@@ -6,7 +6,7 @@ import type { Storage } from './types'
 // document-shaped — the repository interface keeps callers agnostic.
 
 const DB_NAME = 'saythrough'
-const DB_VERSION = 1
+const DB_VERSION = 2 // v2: users store
 
 function promisify<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -30,12 +30,18 @@ class WebStorage implements Storage {
       const open = indexedDB.open(DB_NAME, DB_VERSION)
       open.onupgradeneeded = () => {
         const db = open.result
-        db.createObjectStore('meta')
-        db.createObjectStore('pageSets', { keyPath: 'id' })
-        const pages = db.createObjectStore('pages', { keyPath: 'id' })
-        pages.createIndex('pageSetId', 'pageSetId')
-        const buttons = db.createObjectStore('buttons', { keyPath: 'id' })
-        buttons.createIndex('pageId', 'pageId')
+        const has = (name: string) => db.objectStoreNames.contains(name)
+        if (!has('meta')) db.createObjectStore('meta')
+        if (!has('pageSets')) db.createObjectStore('pageSets', { keyPath: 'id' })
+        if (!has('pages')) {
+          const pages = db.createObjectStore('pages', { keyPath: 'id' })
+          pages.createIndex('pageSetId', 'pageSetId')
+        }
+        if (!has('buttons')) {
+          const buttons = db.createObjectStore('buttons', { keyPath: 'id' })
+          buttons.createIndex('pageId', 'pageId')
+        }
+        if (!has('users')) db.createObjectStore('users', { keyPath: 'id' })
       }
       open.onsuccess = () => resolve(open.result)
       open.onerror = () => reject(open.error)
@@ -47,9 +53,21 @@ class WebStorage implements Storage {
   }
 
   async clearAll(): Promise<void> {
-    for (const name of ['meta', 'pageSets', 'pages', 'buttons']) {
+    for (const name of ['meta', 'pageSets', 'pages', 'buttons', 'users']) {
       await promisify(this.store(name, 'readwrite').clear())
     }
+  }
+
+  async getUsers(): Promise<UserProfile[]> {
+    return promisify(this.store('users').getAll()) as Promise<UserProfile[]>
+  }
+
+  async createUser(user: UserProfile): Promise<void> {
+    await promisify(this.store('users', 'readwrite').put(user))
+  }
+
+  async updateUser(user: UserProfile): Promise<void> {
+    await promisify(this.store('users', 'readwrite').put(user))
   }
 
   async getMeta(key: string): Promise<string | null> {
