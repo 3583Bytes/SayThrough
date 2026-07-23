@@ -203,6 +203,12 @@ class SqliteStorage implements Storage {
     }
   }
 
+  async clearAll(): Promise<void> {
+    await this.db.execAsync(
+      'DELETE FROM buttons; DELETE FROM pages; DELETE FROM page_sets; DELETE FROM meta;',
+    )
+  }
+
   async getMeta(key: string): Promise<string | null> {
     const row = await this.db.getFirstAsync<{ value: string }>(
       'SELECT value FROM meta WHERE key = ?',

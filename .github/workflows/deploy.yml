@@ -34,6 +34,7 @@ jobs:
         run: npx expo export --platform web
         env:
           EXPO_BASE_URL: /saythrough
+          EXPO_PUBLIC_BASE_URL: /saythrough
 
       - name: SPA fallback for deep links
         run: cp dist/index.html dist/404.html

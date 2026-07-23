@@ -1,0 +1,93 @@
+{
+  "core": [
+    ["I", "pronoun"],
+    ["you", "pronoun"],
+    ["it", "pronoun"],
+    ["want", "verb"],
+    ["like", "verb"],
+    ["more", "little"],
+    ["go", "verb"],
+    ["help", "verb"],
+    ["stop", "verb"],
+    ["do", "verb"],
+    ["feel", "verb"],
+    ["look", "verb"],
+    ["not", "little"],
+    ["yes", "social"],
+    ["no", "social"]
+  ],
+  "topics": {
+    "Food": [
+      ["eat", "verb"],
+      ["hungry", "descriptor"],
+      ["cookie", "noun"],
+      ["apple", "noun"],
+      ["banana", "noun"],
+      ["bread", "noun"],
+      ["pizza", "noun"],
+      ["cheese", "noun"],
+      ["sandwich", "noun"],
+      ["cracker", "noun"],
+      ["yogurt", "noun"],
+      ["cereal", "noun"]
+    ],
+    "Drinks": [
+      ["drink", "verb"],
+      ["thirsty", "descriptor"],
+      ["water", "noun"],
+      ["milk", "noun"],
+      ["juice", "noun"],
+      ["smoothie", "noun"]
+    ],
+    "Play": [
+      ["play", "verb"],
+      ["ball", "noun"],
+      ["blocks", "noun"],
+      ["puzzle", "noun"],
+      ["game", "noun"],
+      ["outside", "noun"],
+      ["swing", "noun"],
+      ["slide", "noun"],
+      ["bubbles", "noun"],
+      ["toy", "noun"],
+      ["my turn", "social"],
+      ["your turn", "social"]
+    ],
+    "People": [
+      ["mom", "noun"],
+      ["dad", "noun"],
+      ["teacher", "noun"],
+      ["friend", "noun"],
+      ["brother", "noun"],
+      ["sister", "noun"],
+      ["grandma", "noun"],
+      ["grandpa", "noun"],
+      ["baby", "noun"],
+      ["nurse", "noun"]
+    ],
+    "Feelings": [
+      ["happy", "descriptor"],
+      ["sad", "descriptor"],
+      ["mad", "descriptor"],
+      ["tired", "descriptor"],
+      ["scared", "descriptor"],
+      ["silly", "descriptor"],
+      ["sick", "descriptor"],
+      ["hurt", "descriptor"],
+      ["excited", "descriptor"],
+      ["calm", "descriptor"],
+      ["bored", "descriptor"]
+    ],
+    "Places": [
+      ["home", "noun"],
+      ["school", "noun"],
+      ["park", "noun"],
+      ["store", "noun"],
+      ["bathroom", "noun"],
+      ["bed", "noun"],
+      ["car", "noun"],
+      ["doctor", "noun"],
+      ["library", "noun"]
+    ]
+  }
+}

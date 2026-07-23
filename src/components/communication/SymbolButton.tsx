@@ -1,5 +1,7 @@
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { Image } from 'expo-image'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
+import { getSymbolUri } from '../../services/SymbolService'
 import type { Button } from '../../types/models'
 
 interface SymbolButtonProps {
@@ -9,14 +11,18 @@ interface SymbolButtonProps {
   onLongPress?: (button: Button) => void
 }
 
-// Text-only rendering for now (§6.1 case d) — symbol images arrive with
-// the asset pipeline.
 export function SymbolButton({
   button,
   isSelected,
   onPress,
   onLongPress,
 }: SymbolButtonProps) {
+  const symbolUri = button.customSymbolUri
+    ? button.customSymbolUri
+    : button.symbolId
+      ? getSymbolUri(button.symbolId)
+      : null
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -36,9 +42,27 @@ export function SymbolButton({
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.label, { color: button.labelColor }]} numberOfLines={2}>
-        {button.label}
-      </Text>
+      {symbolUri ? (
+        // §5.3: symbol fills the top ~65%, label the bottom
+        <View style={styles.withSymbol}>
+          <Image
+            source={{ uri: symbolUri }}
+            style={styles.symbol}
+            contentFit="contain"
+            transition={100}
+          />
+          <Text
+            style={[styles.symbolLabel, { color: button.labelColor }]}
+            numberOfLines={1}
+          >
+            {button.label}
+          </Text>
+        </View>
+      ) : (
+        <Text style={[styles.label, { color: button.labelColor }]} numberOfLines={2}>
+          {button.label}
+        </Text>
+      )}
       {button.isNavigationButton && <Text style={styles.navArrow}>➜</Text>}
     </Pressable>
   )
@@ -60,6 +84,20 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.85,
     transform: [{ scale: 0.95 }],
+  },
+  withSymbol: {
+    flex: 1,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  symbol: {
+    flex: 1,
+    alignSelf: 'stretch',
+  },
+  symbolLabel: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   label: {
     fontSize: 16,

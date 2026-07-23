@@ -46,6 +46,12 @@ class WebStorage implements Storage {
     return this.db.transaction(name, mode).objectStore(name)
   }
 
+  async clearAll(): Promise<void> {
+    for (const name of ['meta', 'pageSets', 'pages', 'buttons']) {
+      await promisify(this.store(name, 'readwrite').clear())
+    }
+  }
+
   async getMeta(key: string): Promise<string | null> {
     const value = await promisify(this.store('meta').get(key))
     return value === undefined ? null : (value as string)

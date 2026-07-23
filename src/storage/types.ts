@@ -8,6 +8,9 @@ import type { Button, Page, PageSet } from '../types/models'
 export interface Storage {
   init(): Promise<void>
 
+  // Wipe everything — dev reseeds and the future "reset app" setting
+  clearAll(): Promise<void>
+
   // meta key-value (extraction flags, active ids, …)
   getMeta(key: string): Promise<string | null>
   setMeta(key: string, value: string): Promise<void>
