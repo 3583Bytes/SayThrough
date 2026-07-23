@@ -27,6 +27,10 @@ export interface UserProfile {
   // Data tracking (§4.13) — default OFF: caregiver must opt in
   // (COPPA/GDPR consent; requirements DT-05)
   trackingEnabled?: boolean
+  // Layout preferences (§6.1 requirements)
+  messageBarPosition?: 'top' | 'bottom' // bottom = easier reach when mounted
+  buttonGap?: 'compact' | 'normal' | 'wide' // wide reduces mis-hits
+  labelTextScale?: number // 0.85–1.4 button-label multiplier
   createdAt: number
   updatedAt: number
 }

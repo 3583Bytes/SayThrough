@@ -287,8 +287,8 @@ export function CommunicationScreen() {
             </Pressable>
           </View>
         )}
-        {/* §5.6: message bar hidden in edit mode */}
-        {!isEditMode && <MessageBar />}
+        {/* §5.6: message bar hidden in edit mode; position per profile */}
+        {!isEditMode && activeUser?.messageBarPosition !== 'bottom' && <MessageBar />}
         <SymbolGrid
           rows={page.rows}
           columns={page.columns}
@@ -296,6 +296,7 @@ export function CommunicationScreen() {
           isEditMode={isEditMode}
           selectedButtonId={selectedButtonId}
           flashButtonId={flashButtonId}
+          gap={{ compact: 2, normal: 4, wide: 8 }[activeUser?.buttonGap ?? 'normal']}
           filterState={
             wordListEditingId
               ? { mode: 'editing', ids: wordListIds }
@@ -314,6 +315,7 @@ export function CommunicationScreen() {
             onClose={() => edit().closeEditor()}
           />
         )}
+        {!isEditMode && activeUser?.messageBarPosition === 'bottom' && <MessageBar />}
         {!isEditMode && keyboardOpen && <KeyboardView />}
         {!isEditMode && page.showToolbar && (
           <Toolbar

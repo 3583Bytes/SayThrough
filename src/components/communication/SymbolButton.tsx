@@ -32,6 +32,7 @@ export function SymbolButton({
   onLongPress,
 }: SymbolButtonProps) {
   const activeUser = useUserStore((s) => s.activeUser)
+  const textScale = activeUser?.labelTextScale ?? 1
   const holdDuration = accommodate ? (activeUser?.touchHoldDuration ?? 0) : 0
   const debounce = accommodate ? (activeUser?.touchDebounce ?? 0) : 0
   const guardSecondTouch = accommodate ? (activeUser?.ignoreSecondTouch ?? false) : false
@@ -118,14 +119,23 @@ export function SymbolButton({
             transition={100}
           />
           <Text
-            style={[styles.symbolLabel, { color: button.labelColor }]}
+            style={[
+              styles.symbolLabel,
+              { color: button.labelColor, fontSize: 13 * textScale },
+            ]}
             numberOfLines={1}
           >
             {button.label}
           </Text>
         </View>
       ) : (
-        <Text style={[styles.label, { color: button.labelColor }]} numberOfLines={2}>
+        <Text
+          style={[
+            styles.label,
+            { color: button.labelColor, fontSize: 16 * textScale },
+          ]}
+          numberOfLines={2}
+        >
           {button.label}
         </Text>
       )}

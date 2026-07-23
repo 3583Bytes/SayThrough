@@ -51,6 +51,12 @@ const HOLD_PRESETS: Array<[string, number]> = [
   ['0.6s', 600],
   ['1s', 1000],
 ]
+const TEXT_SCALES: Array<[string, number]> = [
+  ['A−', 0.85],
+  ['A', 1],
+  ['A+', 1.2],
+  ['A++', 1.4],
+]
 
 // §5.8 — reachable only via edit mode. Access-method, display, filter,
 // tracking, and backup sections arrive with their features.
@@ -319,6 +325,46 @@ export function SettingsScreen() {
           <Text style={styles.hint}>
             Dwell and switch scanning arrive in a later release.
           </Text>
+        </View>
+
+        {/* 3b. Display (§6.1 layout preferences) */}
+        <Text style={styles.sectionTitle}>Display</Text>
+        <View style={styles.card}>
+          <Text style={styles.fieldLabel}>Message bar position</Text>
+          <View style={styles.chipRow}>
+            <Chip
+              label="Top"
+              selected={(activeUser.messageBarPosition ?? 'top') === 'top'}
+              onPress={() => updateActiveUser({ messageBarPosition: 'top' })}
+            />
+            <Chip
+              label="Bottom (easier reach)"
+              selected={activeUser.messageBarPosition === 'bottom'}
+              onPress={() => updateActiveUser({ messageBarPosition: 'bottom' })}
+            />
+          </View>
+          <Text style={styles.fieldLabel}>Space between buttons</Text>
+          <View style={styles.chipRow}>
+            {(['compact', 'normal', 'wide'] as const).map((gap) => (
+              <Chip
+                key={gap}
+                label={gap[0].toUpperCase() + gap.slice(1)}
+                selected={(activeUser.buttonGap ?? 'normal') === gap}
+                onPress={() => updateActiveUser({ buttonGap: gap })}
+              />
+            ))}
+          </View>
+          <Text style={styles.fieldLabel}>Button text size</Text>
+          <View style={styles.chipRow}>
+            {TEXT_SCALES.map(([label, value]) => (
+              <Chip
+                key={label}
+                label={label}
+                selected={(activeUser.labelTextScale ?? 1) === value}
+                onPress={() => updateActiveUser({ labelTextScale: value })}
+              />
+            ))}
+          </View>
         </View>
 
         {/* 4. Vocabulary */}

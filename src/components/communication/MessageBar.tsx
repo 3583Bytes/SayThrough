@@ -1,4 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
+import { useState } from 'react'
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { useMessageStore } from '../../stores/messageStore'
@@ -8,6 +18,27 @@ export function MessageBar() {
   const speakMessage = useMessageStore((s) => s.speakMessage)
   const clearMessage = useMessageStore((s) => s.clearMessage)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
+  const [actionsVisible, setActionsVisible] = useState(false)
+  const [actionFeedback, setActionFeedback] = useState('')
+
+  const messageText = tokens.map((t) => t.text).join(' ')
+
+  // How users hand a message to someone not in the room (texts, email,
+  // Google Classroom) — MVP spec §5.3
+  const copyMessage = async () => {
+    await Clipboard.setStringAsync(messageText)
+    setActionFeedback('Copied!')
+    setTimeout(() => setActionsVisible(false), 600)
+  }
+
+  const shareMessage = async () => {
+    try {
+      await Share.share({ message: messageText })
+      setActionsVisible(false)
+    } catch {
+      await copyMessage() // no share target available — copy instead
+    }
+  }
 
   return (
     <View style={styles.bar}>
@@ -26,6 +57,19 @@ export function MessageBar() {
       </ScrollView>
 
       <View style={styles.actions}>
+        {tokens.length > 0 && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Message actions"
+            onPress={() => {
+              setActionFeedback('')
+              setActionsVisible(true)
+            }}
+            style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.smallButtonText}>⋯</Text>
+          </Pressable>
+        )}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Speak message"
@@ -55,6 +99,39 @@ export function MessageBar() {
           <Text style={styles.clearButtonText}>✕</Text>
         </Pressable>
       </View>
+
+      <Modal
+        visible={actionsVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionsVisible(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setActionsVisible(false)}>
+          <View style={styles.sheet}>
+            <Text style={styles.sheetMessage} numberOfLines={2}>
+              “{messageText}”
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Copy message"
+              onPress={copyMessage}
+              style={({ pressed }) => [styles.sheetButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.sheetButtonText}>
+                {actionFeedback || 'Copy message'}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Share message"
+              onPress={shareMessage}
+              style={({ pressed }) => [styles.sheetButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.sheetButtonText}>Share message</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   )
 }
@@ -132,5 +209,36 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheet: {
+    width: 280,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    gap: 8,
+  },
+  sheetMessage: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  sheetButton: {
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: UI_COLORS.barBorder,
+  },
+  sheetButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 })

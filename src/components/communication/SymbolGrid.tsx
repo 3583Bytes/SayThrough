@@ -10,6 +10,7 @@ interface SymbolGridProps {
   isEditMode?: boolean
   selectedButtonId?: string | null
   flashButtonId?: string | null
+  gap?: number // profile buttonGap preference (§6.1) — wide reduces mis-hits
   // §4.8: 'filtering' dims buttons NOT in ids; 'editing' badges those in ids
   filterState?: { mode: 'filtering' | 'editing'; ids: Set<string> }
   onButtonPress: (button: Button) => void
@@ -24,6 +25,7 @@ export function SymbolGrid({
   isEditMode,
   selectedButtonId,
   flashButtonId,
+  gap = LAYOUT.gridGap,
   filterState,
   onButtonPress,
   onButtonLongPress,
@@ -36,9 +38,9 @@ export function SymbolGrid({
   )
 
   return (
-    <View style={styles.grid}>
+    <View style={[styles.grid, { gap }]}>
       {Array.from({ length: rows }, (_, row) => (
-        <View key={row} style={styles.row}>
+        <View key={row} style={[styles.row, { gap }]}>
           {Array.from({ length: columns }, (_, column) => {
             const button = byPosition.get(`${row}:${column}`)
             if (button) {
