@@ -6,11 +6,16 @@ import { useUserStore } from './userStore'
 export interface MessageToken {
   id: string
   text: string
+  symbolId?: string // §5.3: tokens show the tapped button's symbol
+  customSymbolUri?: string
 }
 
 interface MessageState {
   tokens: MessageToken[]
-  appendToken: (text: string) => void
+  appendToken: (
+    text: string,
+    symbol?: Pick<MessageToken, 'symbolId' | 'customSymbolUri'>,
+  ) => void
   deleteLastToken: () => void
   clearMessage: () => void
   speakMessage: () => void
@@ -23,9 +28,9 @@ let nextTokenId = 0
 export const useMessageStore = create<MessageState>((set, get) => ({
   tokens: [],
 
-  appendToken: (text) => {
+  appendToken: (text, symbol) => {
     set((state) => ({
-      tokens: [...state.tokens, { id: String(nextTokenId++), text }],
+      tokens: [...state.tokens, { id: String(nextTokenId++), text, ...symbol }],
     }))
     if (useUserStore.getState().activeUser?.speakOnSelect) {
       ttsService.speak(text)

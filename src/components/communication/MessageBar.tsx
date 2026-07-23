@@ -1,4 +1,6 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import * as Clipboard from 'expo-clipboard'
+import { Image } from 'expo-image'
 import { useState } from 'react'
 import {
   Modal,
@@ -11,6 +13,8 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
+import { FONTS } from '../../constants/typography'
+import { getSymbolUri } from '../../services/SymbolService'
 import { useMessageStore } from '../../stores/messageStore'
 
 export function MessageBar() {
@@ -49,11 +53,22 @@ export function MessageBar() {
         // §17.1: announce added words without moving screen-reader focus
         accessibilityLiveRegion="polite"
       >
-        {tokens.map((token) => (
-          <View key={token.id} style={styles.tokenPill}>
-            <Text style={styles.tokenText}>{token.text}</Text>
-          </View>
-        ))}
+        {tokens.length === 0 && (
+          <Text style={styles.emptyHint}>Tap buttons to build a message…</Text>
+        )}
+        {tokens.map((token) => {
+          const uri =
+            token.customSymbolUri ??
+            (token.symbolId ? getSymbolUri(token.symbolId) : null)
+          return (
+            <View key={token.id} style={styles.tokenPill}>
+              {uri && (
+                <Image source={{ uri }} style={styles.tokenSymbol} contentFit="contain" />
+              )}
+              <Text style={styles.tokenText}>{token.text}</Text>
+            </View>
+          )
+        })}
       </ScrollView>
 
       <View style={styles.actions}>
@@ -67,7 +82,7 @@ export function MessageBar() {
             }}
             style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}
           >
-            <Text style={styles.smallButtonText}>⋯</Text>
+            <MaterialIcons name="more-horiz" size={22} color="#666666" />
           </Pressable>
         )}
         <Pressable
@@ -76,7 +91,8 @@ export function MessageBar() {
           onPress={speakMessage}
           style={({ pressed }) => [styles.speakButton, pressed && styles.pressed]}
         >
-          <Text style={styles.speakText}>▶ Speak</Text>
+          <MaterialIcons name="play-arrow" size={26} color="#FFFFFF" />
+          <Text style={styles.speakText}>Speak</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -84,7 +100,7 @@ export function MessageBar() {
           onPress={deleteLastToken}
           style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}
         >
-          <Text style={styles.smallButtonText}>⌫</Text>
+          <MaterialIcons name="backspace" size={20} color="#757575" />
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -96,7 +112,7 @@ export function MessageBar() {
             pressed && styles.pressed,
           ]}
         >
-          <Text style={styles.clearButtonText}>✕</Text>
+          <MaterialIcons name="close" size={20} color={UI_COLORS.clearRed} />
         </Pressable>
       </View>
 
@@ -154,17 +170,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
+  emptyHint: {
+    fontFamily: FONTS.regular,
+    fontSize: 15,
+    color: '#B0B0B0',
+  },
   tokenPill: {
+    alignItems: 'center',
     backgroundColor: UI_COLORS.barBackground,
     borderWidth: 1,
     borderColor: UI_COLORS.barBorder,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    minWidth: 52,
+  },
+  tokenSymbol: {
+    width: 34,
+    height: 34,
   },
   tokenText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontFamily: FONTS.bold,
+    fontSize: 13,
   },
   actions: {
     flexDirection: 'row',
@@ -172,40 +199,38 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   speakButton: {
-    backgroundColor: UI_COLORS.speakGreen,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minWidth: 44,
-    minHeight: 44,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: UI_COLORS.speakGreen,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    height: 60,
+    minWidth: 120,
+    gap: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
   },
   speakText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
+    fontSize: 19,
   },
   smallButton: {
     backgroundColor: UI_COLORS.barBackground,
     borderWidth: 1,
     borderColor: UI_COLORS.barBorder,
-    borderRadius: 8,
-    minWidth: 44,
-    minHeight: 44,
+    borderRadius: 10,
+    minWidth: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  smallButtonText: {
-    fontSize: 18,
-    color: UI_COLORS.backspaceGray,
-  },
   clearButton: {
     borderColor: UI_COLORS.clearRed,
-  },
-  clearButtonText: {
-    fontSize: 16,
-    color: UI_COLORS.clearRed,
   },
   pressed: {
     opacity: 0.7,
@@ -224,6 +249,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sheetMessage: {
+    fontFamily: FONTS.regular,
     fontSize: 14,
     color: '#666666',
     textAlign: 'center',
@@ -238,7 +264,7 @@ const styles = StyleSheet.create({
     borderColor: UI_COLORS.barBorder,
   },
   sheetButtonText: {
+    fontFamily: FONTS.bold,
     fontSize: 15,
-    fontWeight: '600',
   },
 })

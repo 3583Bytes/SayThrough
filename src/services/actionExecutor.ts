@@ -14,7 +14,10 @@ export function executeButtonActions(button: Button): void {
   for (const action of button.actions) {
     switch (action.type) {
       case 'append_to_message':
-        message.appendToken(action.text ?? button.label)
+        message.appendToken(action.text ?? button.label, {
+          symbolId: button.symbolId,
+          customSymbolUri: button.customSymbolUri,
+        })
         break
       case 'speak_label':
         ttsService.speak(button.label)

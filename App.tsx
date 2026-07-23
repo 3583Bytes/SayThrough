@@ -1,7 +1,13 @@
+import {
+  AtkinsonHyperlegible_400Regular,
+  AtkinsonHyperlegible_700Bold,
+  useFonts,
+} from '@expo-google-fonts/atkinson-hyperlegible'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { CommunicationScreen } from './src/screens/CommunicationScreen'
 import { SettingsScreen } from './src/screens/SettingsScreen'
 import { TrackingReportScreen } from './src/screens/TrackingReportScreen'
@@ -16,13 +22,25 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 export default function App() {
-  const [ready, setReady] = useState(false)
+  const [booted, setBooted] = useState(false)
+  const [fontsLoaded] = useFonts({
+    AtkinsonHyperlegible_400Regular,
+    AtkinsonHyperlegible_700Bold,
+  })
 
   useEffect(() => {
-    bootstrap().then(() => setReady(true))
+    bootstrap().then(() => setBooted(true))
   }, [])
 
-  if (!ready) return null
+  if (!booted || !fontsLoaded) {
+    return (
+      <View style={styles.loading}>
+        <Text style={styles.loadingTitle}>SayThrough</Text>
+        <ActivityIndicator size="large" color="#4CAF50" />
+        <Text style={styles.loadingHint}>Getting your voice ready…</Text>
+      </View>
+    )
+  }
 
   return (
     <NavigationContainer>
@@ -35,3 +53,22 @@ export default function App() {
     </NavigationContainer>
   )
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    gap: 16,
+  },
+  loadingTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+  },
+  loadingHint: {
+    fontSize: 14,
+    color: '#888888',
+  },
+})

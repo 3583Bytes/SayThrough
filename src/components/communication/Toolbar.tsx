@@ -1,6 +1,8 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
+import { FONTS } from '../../constants/typography'
 
 interface ToolbarProps {
   isKeyboardOpen: boolean
@@ -12,10 +14,12 @@ interface ToolbarProps {
 // §5.3 toolbar — Core / Quick / Keys for v1.0; Topics is covered by the
 // home page's navigation buttons, Forms arrives in v1.1
 export function Toolbar({ isKeyboardOpen, onCore, onQuick, onKeyboard }: ToolbarProps) {
-  const items: Array<[string, string, () => void, boolean]> = [
-    ['⌂', 'Core', onCore, false],
-    ['⚡', 'Quick', onQuick, false],
-    ['⌨', 'Keys', onKeyboard, isKeyboardOpen],
+  const items: Array<
+    [keyof typeof MaterialIcons.glyphMap, string, () => void, boolean]
+  > = [
+    ['apps', 'Core', onCore, false],
+    ['bolt', 'Quick', onQuick, false],
+    ['keyboard', 'Keys', onKeyboard, isKeyboardOpen],
   ]
   return (
     <View style={styles.bar}>
@@ -31,7 +35,7 @@ export function Toolbar({ isKeyboardOpen, onCore, onQuick, onKeyboard }: Toolbar
             pressed && styles.pressed,
           ]}
         >
-          <Text style={styles.icon}>{icon}</Text>
+          <MaterialIcons name={icon} size={20} color={active ? "#1976D2" : "#666666"} />
           <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
         </Pressable>
       ))}
@@ -57,10 +61,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#1976D2',
     backgroundColor: '#E3F2FD',
   },
-  icon: {
-    fontSize: 18,
-  },
   label: {
+    fontFamily: FONTS.bold,
     fontSize: 11,
     fontWeight: '600',
     color: '#666666',

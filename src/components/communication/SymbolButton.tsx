@@ -1,7 +1,9 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { useRef } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
+import { FONTS } from '../../constants/typography'
 import { getSymbolUri } from '../../services/SymbolService'
 import { useUserStore } from '../../stores/userStore'
 import type { Button } from '../../types/models'
@@ -103,6 +105,8 @@ export function SymbolButton({
           borderColor: button.borderColor,
           borderWidth: button.borderWidth,
         },
+        // AAC convention: navigation "folder" buttons look distinct
+        button.isNavigationButton && styles.navButton,
         isSelected && styles.selected,
         isFlashing && styles.flashing,
         dimmed && styles.dimmed,
@@ -139,8 +143,16 @@ export function SymbolButton({
           {button.label}
         </Text>
       )}
-      {button.isNavigationButton && <Text style={styles.navArrow}>➜</Text>}
-      {showCheck && <Text style={styles.checkBadge}>✓</Text>}
+      {button.isNavigationButton && (
+        <View style={styles.navBadge}>
+          <MaterialIcons name="arrow-forward" size={11} color="#546E7A" />
+        </View>
+      )}
+      {showCheck && (
+        <View style={styles.checkBadge}>
+          <MaterialIcons name="check" size={13} color="#FFFFFF" />
+        </View>
+      )}
     </Pressable>
   )
 }
@@ -153,6 +165,15 @@ const styles = StyleSheet.create({
     borderRadius: LAYOUT.buttonRadius,
     minHeight: LAYOUT.minButtonSize,
     padding: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  navButton: {
+    borderWidth: 2,
+    borderColor: '#B0BEC5',
   },
   selected: {
     borderWidth: 3,
@@ -167,11 +188,14 @@ const styles = StyleSheet.create({
   },
   checkBadge: {
     position: 'absolute',
-    top: 2,
-    left: 5,
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#2E7D32',
+    top: 3,
+    left: 3,
+    backgroundColor: '#2E7D32',
+    borderRadius: 9,
+    width: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pressed: {
     opacity: 0.85,
@@ -187,20 +211,24 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   symbolLabel: {
+    fontFamily: FONTS.bold,
     fontSize: 13,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   label: {
+    fontFamily: FONTS.bold,
     fontSize: 16,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
-  navArrow: {
+  navBadge: {
     position: 'absolute',
-    bottom: 4,
-    right: 6,
-    fontSize: 11,
-    color: '#888888',
+    top: 3,
+    right: 3,
+    backgroundColor: '#ECEFF1',
+    borderRadius: 7,
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

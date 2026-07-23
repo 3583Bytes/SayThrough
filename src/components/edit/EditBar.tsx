@@ -1,6 +1,8 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
+import { FONTS } from '../../constants/typography'
 
 interface EditBarProps {
   pageName: string
@@ -20,7 +22,10 @@ export function EditBar({ pageName, wordListName, onDone, onSettings }: EditBarP
         onPress={onDone}
         style={({ pressed }) => [styles.doneButton, pressed && styles.pressed]}
       >
-        <Text style={styles.doneText}>✓ Done</Text>
+        <View style={styles.buttonRow}>
+          <MaterialIcons name="check" size={18} color="#FFFFFF" />
+          <Text style={styles.doneText}>Done</Text>
+        </View>
       </Pressable>
       <Text style={styles.title}>
         {wordListName
@@ -33,7 +38,10 @@ export function EditBar({ pageName, wordListName, onDone, onSettings }: EditBarP
         onPress={onSettings}
         style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
       >
-        <Text style={styles.settingsText}>⚙ Settings</Text>
+        <View style={styles.buttonRow}>
+          <MaterialIcons name="settings" size={16} color="#7A4F01" />
+          <Text style={styles.settingsText}>Settings</Text>
+        </View>
       </Pressable>
     </View>
   )
@@ -57,13 +65,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   doneText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontFamily: FONTS.bold,
   },
   title: {
+    fontFamily: FONTS.bold,
     fontSize: 15,
-    fontWeight: '600',
     color: '#7A4F01',
   },
   settingsButton: {
@@ -76,7 +89,7 @@ const styles = StyleSheet.create({
   },
   settingsText: {
     color: '#7A4F01',
-    fontWeight: '600',
+    fontFamily: FONTS.bold,
   },
   pressed: {
     opacity: 0.7,

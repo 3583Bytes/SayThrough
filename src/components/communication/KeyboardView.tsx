@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
+import { FONTS } from '../../constants/typography'
 import { useMessageStore } from '../../stores/messageStore'
 
 // §5.5 v1.0 basic keyboard: QWERTY, typed text becomes a message-bar
@@ -111,8 +112,8 @@ const styles = StyleSheet.create({
     borderTopColor: UI_COLORS.barBorder,
   },
   buffer: {
+    fontFamily: FONTS.bold,
     fontSize: 20,
-    fontWeight: '600',
     textAlign: 'center',
     minHeight: 28,
     color: '#333333',
@@ -156,8 +157,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#BBDEFB',
   },
   keyText: {
+    fontFamily: FONTS.bold,
     fontSize: 17,
-    fontWeight: '600',
   },
   pressed: {
     opacity: 0.6,

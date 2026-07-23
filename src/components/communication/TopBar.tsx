@@ -1,6 +1,8 @@
+import { MaterialIcons } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
+import { FONTS } from '../../constants/typography'
 import { useNavigationStore } from '../../stores/navigationStore'
 
 interface TopBarProps {
@@ -34,7 +36,7 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
             pressed && styles.pressed,
           ]}
         >
-          <Text style={styles.icon}>←</Text>
+          <MaterialIcons name="arrow-back" size={22} color="#444444" />
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -42,7 +44,7 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
           onPress={navigateHome}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <Text style={styles.icon}>⌂</Text>
+          <MaterialIcons name="home" size={22} color="#444444" />
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -50,7 +52,7 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
           onPress={onSearchPress}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <Text style={styles.icon}>🔍</Text>
+          <MaterialIcons name="search" size={22} color="#444444" />
         </Pressable>
       </View>
       <Text style={styles.pageName}>{pageName}</Text>
@@ -68,7 +70,7 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.icon, filter.enabled && styles.filterActiveIcon]}>⊘</Text>
+            <MaterialIcons name="block" size={22} color={filter.enabled ? "#E65100" : "#444444"} />
           </Pressable>
         )}
         <Pressable
@@ -77,7 +79,7 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
           onPress={onEditPress}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <Text style={styles.icon}>⚙</Text>
+          <MaterialIcons name="settings" size={22} color="#444444" />
         </Pressable>
       </View>
     </View>
@@ -108,15 +110,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  icon: {
-    fontSize: 20,
-  },
   filterActive: {
     backgroundColor: '#FFF3E0',
     borderRadius: 8,
-  },
-  filterActiveIcon: {
-    color: '#E65100',
   },
   disabled: {
     opacity: 0.3,
@@ -125,6 +121,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   pageName: {
+    fontFamily: FONTS.bold,
     fontSize: 15,
     fontWeight: '600',
     color: '#555555',
