@@ -144,8 +144,8 @@ export function SymbolButton({
         </Text>
       )}
       {button.isNavigationButton && (
-        <View style={styles.navBadge}>
-          <MaterialIcons name="arrow-forward" size={11} color="#546E7A" />
+        <View style={styles.navChevron}>
+          <MaterialIcons name="chevron-right" size={18} color="#FFFFFF" />
         </View>
       )}
       {showCheck && (
@@ -171,9 +171,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  // Navigation buttons read as "doorways/folders": a teal tab bar along
+  // the bottom + a clear chevron badge, distinct from the pastel
+  // Fitzgerald word colors so they're never mistaken for words
   navButton: {
-    borderWidth: 2,
-    borderColor: '#B0BEC5',
+    borderWidth: 1.5,
+    borderColor: '#CFD8DC',
+    borderBottomWidth: 5,
+    borderBottomColor: '#00897B',
   },
   selected: {
     borderWidth: 3,
@@ -220,14 +225,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  navBadge: {
+  navChevron: {
     position: 'absolute',
-    top: 3,
-    right: 3,
-    backgroundColor: '#ECEFF1',
-    borderRadius: 7,
-    width: 16,
-    height: 16,
+    top: 4,
+    right: 4,
+    backgroundColor: '#00897B',
+    borderRadius: 11,
+    width: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

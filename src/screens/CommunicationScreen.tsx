@@ -46,6 +46,7 @@ export function CommunicationScreen() {
   const [searchVisible, setSearchVisible] = useState(false)
   const [pageMenuVisible, setPageMenuVisible] = useState(false)
   const [pageRenameText, setPageRenameText] = useState('')
+  const [coreSetId, setCoreSetId] = useState<string | null>(null)
   const [wordListIds, setWordListIds] = useState<Set<string>>(new Set())
   const [wordListName, setWordListName] = useState<string | undefined>()
 
@@ -88,6 +89,14 @@ export function CommunicationScreen() {
       cancelled = true
     }
   }, [filterListId, activeUser])
+
+  // The persistent-core framing (§19.2) applies to the Core Vocabulary
+  // set and its pages (incl. user-created ones, which share its id) —
+  // not Quick Phrases or blank sets.
+  useEffect(() => {
+    storage.getMeta('coreVocabularySeeded').then(setCoreSetId)
+  }, [])
+  const coreColumns = page && page.pageSetId === coreSetId ? 3 : 0
 
   // §12.4: clear the search-jump flash after a short pulse
   useEffect(() => {
@@ -385,6 +394,7 @@ export function CommunicationScreen() {
           rows={page.rows}
           columns={page.columns}
           buttons={buttons}
+          coreColumns={coreColumns}
           isEditMode={isEditMode}
           selectedButtonId={selectedButtonId}
           flashButtonId={flashButtonId}
