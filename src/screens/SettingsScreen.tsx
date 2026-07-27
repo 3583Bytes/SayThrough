@@ -47,6 +47,17 @@ const PITCH_PRESETS: Array<[string, number]> = [
   ['Normal', 1.0],
   ['High', 1.2],
 ]
+const DWELL_PRESETS: Array<[string, number]> = [
+  ['0.5s', 500],
+  ['1s', 1000],
+  ['1.5s', 1500],
+  ['2.5s', 2500],
+]
+const SCAN_SPEEDS: Array<[string, number]> = [
+  ['Slow (2.5s)', 2500],
+  ['Medium (1.5s)', 1500],
+  ['Fast (1s)', 1000],
+]
 const HOLD_PRESETS: Array<[string, number]> = [
   ['Off', 0],
   ['0.3s', 300],
@@ -307,44 +318,143 @@ export function SettingsScreen() {
           </View>
         </View>
 
-        {/* 3. Access Method (touch accommodations — AM-01) */}
+        {/* 3. Access Method (§4.6) */}
         <Text style={styles.sectionTitle}>Access Method</Text>
         <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Hold to activate</Text>
+          <Text style={styles.fieldLabel}>How this user selects</Text>
           <View style={styles.chipRow}>
-            {HOLD_PRESETS.map(([label, value]) => (
+            {(
+              [
+                ['touch', 'Touch'],
+                ['dwell', 'Dwell (hover)'],
+                ['scanning', 'Switch scanning'],
+              ] as const
+            ).map(([value, label]) => (
               <Chip
-                key={label}
+                key={value}
                 label={label}
-                selected={(activeUser.touchHoldDuration ?? 0) === value}
-                onPress={() => updateActiveUser({ touchHoldDuration: value })}
+                selected={(activeUser.accessMethod ?? 'touch') === value}
+                onPress={() => updateActiveUser({ accessMethod: value })}
               />
             ))}
           </View>
-          <Text style={styles.fieldLabel}>Ignore repeat taps for</Text>
-          <View style={styles.chipRow}>
-            {HOLD_PRESETS.map(([label, value]) => (
-              <Chip
-                key={label}
-                label={label}
-                selected={(activeUser.touchDebounce ?? 0) === value}
-                onPress={() => updateActiveUser({ touchDebounce: value })}
-              />
-            ))}
-          </View>
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>
-              Ignore second touch while pressing (palm guard)
-            </Text>
-            <Switch
-              value={activeUser.ignoreSecondTouch ?? false}
-              onValueChange={(value) => updateActiveUser({ ignoreSecondTouch: value })}
-              accessibilityLabel="Ignore second touch"
-            />
-          </View>
-          <Text style={styles.hint}>
-            Dwell and switch scanning arrive in a later release.
-          </Text>
+
+          {(activeUser.accessMethod ?? 'touch') === 'touch' && (
+            <>
+              <Text style={styles.fieldLabel}>Hold to activate</Text>
+              <View style={styles.chipRow}>
+                {HOLD_PRESETS.map(([label, value]) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    selected={(activeUser.touchHoldDuration ?? 0) === value}
+                    onPress={() => updateActiveUser({ touchHoldDuration: value })}
+                  />
+                ))}
+              </View>
+              <Text style={styles.fieldLabel}>Ignore repeat taps for</Text>
+              <View style={styles.chipRow}>
+                {HOLD_PRESETS.map(([label, value]) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    selected={(activeUser.touchDebounce ?? 0) === value}
+                    onPress={() => updateActiveUser({ touchDebounce: value })}
+                  />
+                ))}
+              </View>
+              <View style={styles.switchRow}>
+                <Text style={styles.switchLabel}>
+                  Ignore second touch while pressing (palm guard)
+                </Text>
+                <Switch
+                  value={activeUser.ignoreSecondTouch ?? false}
+                  onValueChange={(v) => updateActiveUser({ ignoreSecondTouch: v })}
+                  accessibilityLabel="Ignore second touch"
+                />
+              </View>
+            </>
+          )}
+
+          {activeUser.accessMethod === 'dwell' && (
+            <>
+              <Text style={styles.fieldLabel}>Hover time to select</Text>
+              <View style={styles.chipRow}>
+                {DWELL_PRESETS.map(([label, value]) => (
+                  <Chip
+                    key={label}
+                    label={label}
+                    selected={(activeUser.dwellTime ?? 1000) === value}
+                    onPress={() => updateActiveUser({ dwellTime: value })}
+                  />
+                ))}
+              </View>
+              <Text style={styles.hint}>
+                Hover the pointer over a button (mouse, head mouse, or eye
+                gaze that moves the cursor); it selects when the bar fills.
+                Move away to cancel.
+              </Text>
+            </>
+          )}
+
+          {activeUser.accessMethod === 'scanning' && (
+            <>
+              <Text style={styles.fieldLabel}>Scan style</Text>
+              <View style={styles.chipRow}>
+                <Chip
+                  label="Auto (1 switch)"
+                  selected={(activeUser.scanMode ?? 'auto') === 'auto'}
+                  onPress={() => updateActiveUser({ scanMode: 'auto' })}
+                />
+                <Chip
+                  label="Step (2 switches)"
+                  selected={activeUser.scanMode === 'step'}
+                  onPress={() => updateActiveUser({ scanMode: 'step' })}
+                />
+              </View>
+              <Text style={styles.fieldLabel}>Pattern</Text>
+              <View style={styles.chipRow}>
+                <Chip
+                  label="Row then column"
+                  selected={(activeUser.scanPattern ?? 'row-column') === 'row-column'}
+                  onPress={() => updateActiveUser({ scanPattern: 'row-column' })}
+                />
+                <Chip
+                  label="One at a time"
+                  selected={activeUser.scanPattern === 'linear'}
+                  onPress={() => updateActiveUser({ scanPattern: 'linear' })}
+                />
+              </View>
+              {(activeUser.scanMode ?? 'auto') === 'auto' && (
+                <>
+                  <Text style={styles.fieldLabel}>Scan speed</Text>
+                  <View style={styles.chipRow}>
+                    {SCAN_SPEEDS.map(([label, value]) => (
+                      <Chip
+                        key={label}
+                        label={label}
+                        selected={(activeUser.scanSpeed ?? 1500) === value}
+                        onPress={() => updateActiveUser({ scanSpeed: value })}
+                      />
+                    ))}
+                  </View>
+                </>
+              )}
+              <View style={styles.switchRow}>
+                <Text style={styles.switchLabel}>Speak each item as it highlights</Text>
+                <Switch
+                  value={activeUser.scanAuditory ?? false}
+                  onValueChange={(v) => updateActiveUser({ scanAuditory: v })}
+                  accessibilityLabel="Scan auditory cue"
+                />
+              </View>
+              <Text style={styles.hint}>
+                Switch = Space (select) and, in step mode, Enter (advance).
+                Most Bluetooth switches emulate these keys. Two-switch
+                mapping and block scanning are coming next.
+              </Text>
+            </>
+          )}
         </View>
 
         {/* 3b. Display (§6.1 layout preferences) */}

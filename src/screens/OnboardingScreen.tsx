@@ -112,6 +112,17 @@ export function OnboardingScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.form}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back to welcome"
+          onPress={() => {
+            setError(undefined)
+            setStep('welcome')
+          }}
+          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.backText}>← Back</Text>
+        </Pressable>
         <Text style={styles.heading}>Who is this voice for?</Text>
         <TextInput
           value={name}
@@ -224,6 +235,17 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     width: '100%',
     alignSelf: 'center',
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingRight: 12,
+  },
+  backText: {
+    fontFamily: FONTS.bold,
+    fontSize: 15,
+    color: '#1976D2',
   },
   heading: {
     fontFamily: FONTS.bold,

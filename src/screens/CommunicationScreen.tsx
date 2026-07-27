@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Modal,
   Pressable,
@@ -12,7 +12,12 @@ import {
 } from 'react-native'
 import type { RootStackParamList } from '../../App'
 import { KeyboardView } from '../components/communication/KeyboardView'
-import { MessageBar } from '../components/communication/MessageBar'
+import {
+  MessageBar,
+  SCAN_BACKSPACE,
+  SCAN_CLEAR,
+  SCAN_SPEAK,
+} from '../components/communication/MessageBar'
 import { SearchModal } from '../components/communication/SearchModal'
 import { SymbolGrid } from '../components/communication/SymbolGrid'
 import { Toolbar } from '../components/communication/Toolbar'
@@ -25,7 +30,9 @@ import {
 import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
 import { usePageButtons } from '../hooks/usePageButtons'
+import { useScanning, type ScanItem } from '../hooks/useScanning'
 import { executeButtonActions } from '../services/actionExecutor'
+import { useMessageStore } from '../stores/messageStore'
 import { deletePageAndCleanLinks, renamePage } from '../services/pageService'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
@@ -111,6 +118,50 @@ export function CommunicationScreen() {
         ? 'core'
         : null
 
+  // §AM-05 switch scanning: build the scannable model (message actions
+  // group + one group per grid row) and drive the highlight/selection.
+  const speakMessage = useMessageStore((s) => s.speakMessage)
+  const clearMessage = useMessageStore((s) => s.clearMessage)
+  const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
+
+  const scanGroups = useMemo<ScanItem[][]>(() => {
+    if (!page) return []
+    const groups: ScanItem[][] = []
+    if (page.showMessageBar) {
+      groups.push([
+        { id: SCAN_SPEAK, label: 'Speak', activate: () => speakMessage() },
+        { id: SCAN_BACKSPACE, label: 'Delete', activate: () => deleteLastToken() },
+        { id: SCAN_CLEAR, label: 'Clear', activate: () => clearMessage() },
+      ])
+    }
+    const visible = buttons.filter((b) => !b.isHidden)
+    for (let r = 0; r < page.rows; r++) {
+      const rowItems = visible
+        .filter((b) => b.row === r)
+        .sort((a, b) => a.column - b.column)
+        .map<ScanItem>((b) => ({
+          id: b.id,
+          label: b.label,
+          activate: () => executeButtonActions(b),
+        }))
+      if (rowItems.length) groups.push(rowItems)
+    }
+    return groups
+  }, [page, buttons, speakMessage, clearMessage, deleteLastToken])
+
+  const scanningEnabled =
+    !!page && !isEditMode && !keyboardOpen && activeUser?.accessMethod === 'scanning'
+
+  const { highlightedIds: scanHighlightIds, select: scanSelect } = useScanning({
+    enabled: scanningEnabled,
+    groups: scanGroups,
+    resetKey: currentPageId ?? '',
+    mode: activeUser?.scanMode ?? 'auto',
+    pattern: activeUser?.scanPattern ?? 'row-column',
+    speed: activeUser?.scanSpeed ?? 1500,
+    auditory: activeUser?.scanAuditory ?? false,
+  })
+
   // §12.4: clear the search-jump flash after a short pulse
   useEffect(() => {
     if (!flashButtonId) return
@@ -170,6 +221,12 @@ export function CommunicationScreen() {
   }
 
   const handleButtonPress = async (button: Button) => {
+    // §AM-05: in scanning mode a tap anywhere is the "select" switch —
+    // it activates the current scan cursor, not the tapped button
+    if (scanningEnabled) {
+      scanSelect()
+      return
+    }
     if (!isEditMode) {
       executeButtonActions(button)
       return
@@ -402,7 +459,9 @@ export function CommunicationScreen() {
           </View>
         )}
         {/* §5.6: message bar hidden in edit mode; position per profile */}
-        {!isEditMode && activeUser?.messageBarPosition !== 'bottom' && <MessageBar />}
+        {!isEditMode && activeUser?.messageBarPosition !== 'bottom' && (
+          <MessageBar scanHighlightIds={scanHighlightIds} />
+        )}
         <SymbolGrid
           rows={page.rows}
           columns={page.columns}
@@ -412,6 +471,7 @@ export function CommunicationScreen() {
           selectedButtonId={selectedButtonId}
           flashButtonId={flashButtonId}
           gap={{ compact: 2, normal: 4, wide: 8 }[activeUser?.buttonGap ?? 'normal']}
+          scanHighlightIds={scanHighlightIds}
           filterState={
             wordListEditingId
               ? { mode: 'editing', ids: wordListIds }
@@ -431,7 +491,9 @@ export function CommunicationScreen() {
             onClose={() => edit().closeEditor()}
           />
         )}
-        {!isEditMode && activeUser?.messageBarPosition === 'bottom' && <MessageBar />}
+        {!isEditMode && activeUser?.messageBarPosition === 'bottom' && (
+          <MessageBar scanHighlightIds={scanHighlightIds} />
+        )}
         {!isEditMode && keyboardOpen && <KeyboardView />}
         {!isEditMode && page.showToolbar && (
           <Toolbar

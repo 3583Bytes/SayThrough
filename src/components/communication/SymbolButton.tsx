@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
-import { useRef } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useRef, useState } from 'react'
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 import { getSymbolUri } from '../../services/SymbolService'
@@ -12,9 +12,10 @@ interface SymbolButtonProps {
   button: Button
   isSelected?: boolean // edit mode: blue selection border (§5.6)
   isFlashing?: boolean // §12.4: pulse after a search jump
+  isScanHighlighted?: boolean // §AM-05: current scan target
   dimmed?: boolean // §12.2: filtered out — visible for modeling, inert
   showCheck?: boolean // word-list editing: included badge
-  accommodate?: boolean // apply touch accommodations (use mode only)
+  accommodate?: boolean // apply access-method behavior (use mode only)
   onPress: (button: Button) => void
   onLongPress?: (button: Button) => void
 }
@@ -27,6 +28,7 @@ export function SymbolButton({
   button,
   isSelected,
   isFlashing,
+  isScanHighlighted,
   dimmed,
   showCheck,
   accommodate,
@@ -38,10 +40,17 @@ export function SymbolButton({
   const holdDuration = accommodate ? (activeUser?.touchHoldDuration ?? 0) : 0
   const debounce = accommodate ? (activeUser?.touchDebounce ?? 0) : 0
   const guardSecondTouch = accommodate ? (activeUser?.ignoreSecondTouch ?? false) : false
+  // AM-04: hover-to-select for pointer/head-mouse/eye-gaze users
+  const dwellMs =
+    accommodate && activeUser?.accessMethod === 'dwell'
+      ? (activeUser?.dwellTime ?? 1000)
+      : 0
 
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const firedByHold = useRef(false)
   const blocked = useRef(false)
+  const dwellAnim = useRef(new Animated.Value(0)).current
+  const [width, setWidth] = useState(0)
 
   const activate = () => {
     if (dimmed) return // filtered out — visible so a partner can model
@@ -60,8 +69,6 @@ export function SymbolButton({
     blocked.current = false
     firedByHold.current = false
     if (holdDuration > 0) {
-      // AM-01 hold-to-activate: fires while still touching, once the
-      // hold duration elapses; releasing earlier cancels
       holdTimer.current = setTimeout(() => {
         firedByHold.current = true
         activate()
@@ -82,6 +89,26 @@ export function SymbolButton({
     if (holdDuration > 0) return // hold path activates via the timer
     activate()
   }
+
+  // AM-04 dwell: fill sweeps over dwellTime; completing selects, moving
+  // off (onHoverOut) cancels.
+  const startDwell = () => {
+    if (dwellMs <= 0 || dimmed) return
+    dwellAnim.setValue(0)
+    Animated.timing(dwellAnim, {
+      toValue: 1,
+      duration: dwellMs,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) activate()
+    })
+  }
+  const cancelDwell = () => {
+    if (dwellMs <= 0) return
+    dwellAnim.stopAnimation()
+    dwellAnim.setValue(0)
+  }
+
   const symbolUri = button.customSymbolUri
     ? button.customSymbolUri
     : button.symbolId
@@ -97,7 +124,10 @@ export function SymbolButton({
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      onHoverIn={dwellMs > 0 ? startDwell : undefined}
+      onHoverOut={dwellMs > 0 ? cancelDwell : undefined}
       onLongPress={onLongPress ? () => onLongPress(button) : undefined}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
       style={({ pressed }) => [
         styles.button,
         {
@@ -109,6 +139,7 @@ export function SymbolButton({
         button.isNavigationButton && styles.navButton,
         isSelected && styles.selected,
         isFlashing && styles.flashing,
+        isScanHighlighted && styles.scanHighlight,
         dimmed && styles.dimmed,
         pressed && !dimmed && styles.pressed,
       ]}
@@ -134,10 +165,7 @@ export function SymbolButton({
         </View>
       ) : (
         <Text
-          style={[
-            styles.label,
-            { color: button.labelColor, fontSize: 16 * textScale },
-          ]}
+          style={[styles.label, { color: button.labelColor, fontSize: 16 * textScale }]}
           numberOfLines={2}
         >
           {button.label}
@@ -153,6 +181,15 @@ export function SymbolButton({
           <MaterialIcons name="check" size={13} color="#FFFFFF" />
         </View>
       )}
+      {dwellMs > 0 && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.dwellFill,
+            { width: dwellAnim.interpolate({ inputRange: [0, 1], outputRange: [0, width] }) },
+          ]}
+        />
+      )}
     </Pressable>
   )
 }
@@ -165,6 +202,7 @@ const styles = StyleSheet.create({
     borderRadius: LAYOUT.buttonRadius,
     minHeight: LAYOUT.minButtonSize,
     padding: 4,
+    overflow: 'hidden', // clip the dwell fill to the rounded corners
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
@@ -188,6 +226,11 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#FF9800',
   },
+  // §AM-05: high-visibility scan cursor
+  scanHighlight: {
+    borderWidth: 4,
+    borderColor: '#1565C0',
+  },
   dimmed: {
     opacity: 0.3,
   },
@@ -201,6 +244,13 @@ const styles = StyleSheet.create({
     height: 18,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dwellFill: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    height: 8,
+    backgroundColor: 'rgba(21,101,192,0.55)',
   },
   pressed: {
     opacity: 0.85,

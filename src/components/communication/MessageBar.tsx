@@ -17,13 +17,19 @@ import { FONTS } from '../../constants/typography'
 import { getSymbolUri } from '../../services/SymbolService'
 import { useMessageStore } from '../../stores/messageStore'
 
-export function MessageBar() {
+// §AM-05: stable ids so the scan engine can target the message actions
+export const SCAN_SPEAK = 'scan-speak'
+export const SCAN_BACKSPACE = 'scan-backspace'
+export const SCAN_CLEAR = 'scan-clear'
+
+export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string> }) {
   const tokens = useMessageStore((s) => s.tokens)
   const speakMessage = useMessageStore((s) => s.speakMessage)
   const clearMessage = useMessageStore((s) => s.clearMessage)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
   const [actionsVisible, setActionsVisible] = useState(false)
   const [actionFeedback, setActionFeedback] = useState('')
+  const scanned = (id: string) => scanHighlightIds?.has(id)
 
   const messageText = tokens.map((t) => t.text).join(' ')
 
@@ -89,7 +95,11 @@ export function MessageBar() {
           accessibilityRole="button"
           accessibilityLabel="Speak message"
           onPress={speakMessage}
-          style={({ pressed }) => [styles.speakButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.speakButton,
+            scanned(SCAN_SPEAK) && styles.scanHighlight,
+            pressed && styles.pressed,
+          ]}
         >
           <MaterialIcons name="play-arrow" size={26} color="#FFFFFF" />
           <Text style={styles.speakText}>Speak</Text>
@@ -98,7 +108,11 @@ export function MessageBar() {
           accessibilityRole="button"
           accessibilityLabel="Delete last word"
           onPress={deleteLastToken}
-          style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.smallButton,
+            scanned(SCAN_BACKSPACE) && styles.scanHighlight,
+            pressed && styles.pressed,
+          ]}
         >
           <MaterialIcons name="backspace" size={20} color="#757575" />
         </Pressable>
@@ -109,6 +123,7 @@ export function MessageBar() {
           style={({ pressed }) => [
             styles.smallButton,
             styles.clearButton,
+            scanned(SCAN_CLEAR) && styles.scanHighlight,
             pressed && styles.pressed,
           ]}
         >
@@ -231,6 +246,10 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     borderColor: UI_COLORS.clearRed,
+  },
+  scanHighlight: {
+    borderWidth: 4,
+    borderColor: '#1565C0',
   },
   pressed: {
     opacity: 0.7,

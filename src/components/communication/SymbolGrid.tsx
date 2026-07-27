@@ -20,6 +20,7 @@ interface SymbolGridProps {
   selectedButtonId?: string | null
   flashButtonId?: string | null
   gap?: number // profile buttonGap preference (§6.1) — wide reduces mis-hits
+  scanHighlightIds?: Set<string> // §AM-05: buttons the scan cursor is on
   // §4.8: 'filtering' dims buttons NOT in ids; 'editing' badges those in ids
   filterState?: { mode: 'filtering' | 'editing'; ids: Set<string> }
   onButtonPress: (button: Button) => void
@@ -37,6 +38,7 @@ export function SymbolGrid({
   selectedButtonId,
   flashButtonId,
   gap = LAYOUT.gridGap,
+  scanHighlightIds,
   filterState,
   onButtonPress,
   onButtonLongPress,
@@ -75,6 +77,7 @@ export function SymbolGrid({
           button={button}
           isSelected={isEditMode && button.id === selectedButtonId}
           isFlashing={button.id === flashButtonId}
+          isScanHighlighted={scanHighlightIds?.has(button.id)}
           dimmed={filterState?.mode === 'filtering' && !filterState.ids.has(button.id)}
           showCheck={filterState?.mode === 'editing' && filterState.ids.has(button.id)}
           accommodate={!isEditMode}

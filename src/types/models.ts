@@ -4,6 +4,8 @@
 
 // §4.1 — the fields implemented so far; access-method, layout-preference,
 // and tracking fields arrive with their features
+export type AccessMethod = 'touch' | 'dwell' | 'scanning'
+
 export interface UserProfile {
   id: string
   name: string
@@ -14,6 +16,14 @@ export interface UserProfile {
   ttsPitch: number // 0.5–2.0 (default 1.0)
   ttsVolume: number // 0.0–1.0 (default 1.0)
   speakOnSelect: boolean
+  // Access method (§4.6) — how the user physically selects. Defaults to
+  // touch; 'dwell' and 'scanning' widen who can use the app.
+  accessMethod?: AccessMethod
+  dwellTime?: number // ms to hover before selecting (AM-04, default 1000)
+  scanSpeed?: number // ms between auto-scan advances (AM-05, default 1500)
+  scanPattern?: 'row-column' | 'linear'
+  scanMode?: 'auto' | 'step' // auto = 1-switch timed; step = 2-switch
+  scanAuditory?: boolean // speak each item as it is highlighted
   // Touch accommodations (AM-01) — optional so profiles created before
   // these fields existed read as "off"
   touchHoldDuration?: number // ms a button must be held before activating
