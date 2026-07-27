@@ -30,6 +30,21 @@ jobs:
 
       - run: npm ci
 
+      # Full symbol library ships as a release asset (never in git).
+      # continue-on-error: deploys still work with the committed seed
+      # subset until the symbols-v1 release exists.
+      - name: Fetch full symbol library
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download symbols-v1 --pattern 'saythrough-symbols.tar.gz' --output /tmp/symbols.tar.gz
+          mkdir -p public/symbols
+          tar -xzf /tmp/symbols.tar.gz -C public/symbols
+          # the tar carries the full search index — promote it to the app root
+          mv public/symbols/symbolIndex.json public/symbolIndex.json
+          echo "symbols in build: $(ls public/symbols/arasaac | wc -l)"
+
       - name: Build web (export + PWA postbuild)
         run: npm run build
         env:

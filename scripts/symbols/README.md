@@ -1,17 +1,35 @@
-# Symbol pipeline (spec §9.1)
+# Symbol pipeline (spec §9.1 / §9.4)
 
 Build-time scripts — never run on user devices.
 
+## Seed subset (committed, keeps every clone working)
+
 ```
-node scripts/symbols/download-index.mjs        # 1. full ARASAAC index → data/ (gitignored)
-node scripts/symbols/build-seed-symbols.mjs    # 2. seed-word subset → public/symbols/arasaac/ + seedSymbolMap.json
+node scripts/symbols/download-index.mjs        # full ARASAAC index → data/ (gitignored)
+node scripts/symbols/build-seed-symbols.mjs    # seed words → public/symbols/ + seedSymbolMap.json
+node scripts/symbols/build-symbol-index.mjs    # search index from hosted symbols
 ```
 
-The seed subset (~70 WebP files, <500 KB) IS committed — it makes the
-deployed demo work offline. The **full-library run** (~13,500 files,
-~165 MB) must NOT be committed; when it lands, output goes to a release
-artifact / CDN bucket instead, and `public/symbols/` gets gitignored.
-Sizes and delivery strategy: docs/technical-specification.md §9.4.
+`symbol-overrides.json` holds hand-curated label→id picks that beat
+keyword matching (visually verified; e.g. "stop" keyword-matched a bus
+stop). Edit it, re-run build-seed-symbols, done.
+
+## Full library (release asset, never in git — ~165 MB)
+
+```
+node scripts/symbols/download-all-symbols.mjs  # all ~13,800 pictograms → data/library/ (1–3 h, resumable)
+node scripts/symbols/pack-library.mjs          # tarball incl. full symbolIndex.json
+gh release create symbols-v1 \
+  --title "Symbol library v1" \
+  --notes "ARASAAC (CC BY-NC-SA 4.0) WebP library for deploys" \
+  scripts/symbols/data/saythrough-symbols.tar.gz
+```
+
+The deploy workflow downloads the `symbols-v1` release asset and unpacks
+it into the site at build time (`continue-on-error`: deploys fall back to
+the seed subset until the release exists). For local full-catalog
+testing: `node scripts/symbols/sync-library.mjs` (public/symbols/ is
+gitignored beyond the committed seed subset).
 
 Attribution: ARASAAC pictograms © Government of Aragón, author Sergio
 Palao, CC BY-NC-SA 4.0. Mulberry (CC BY-SA 4.0) joins the pipeline with
