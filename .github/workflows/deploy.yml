@@ -51,7 +51,12 @@ jobs:
           EXPO_BASE_URL: /saythrough
           EXPO_PUBLIC_BASE_URL: /saythrough
 
+      # enablement:true turns on Pages via the API if it isn't already,
+      # so the workflow is self-sufficient (also enable it once under
+      # Settings → Pages → Source: GitHub Actions).
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
