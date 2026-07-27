@@ -43,11 +43,17 @@ See `docs/aac-requirements.txt` for the full feature requirements document deriv
 npm install        # install dependencies
 npm run web        # Expo dev server, web target
 npm start          # Expo dev server (choose platform)
-npm run build      # production web export → dist/
-npm run typecheck  # tsc --noEmit
+npm run build      # production web export → dist/ (+ PWA postbuild)
+npm run typecheck  # tsc --noEmit (app only; tests excluded)
+npm test           # jest unit tests (pure logic; tests/unit)
+npm run e2e        # build + Playwright E2E against the web build (tests/e2e)
 ```
 
-_(Not yet wired up: `npm test` — Jest/jest-expo; `npm run e2e` — Playwright, installed as devDependency; `npm run lint` — ESLint. Add scripts when the test suites land.)_
+Tests: unit via jest + ts-jest (`tests/unit`); end-to-end via Playwright
+against the exported build served by `scripts/serve-dist.mjs`
+(`tests/e2e`). CI (`.github/workflows/ci.yml`) runs typecheck → unit →
+build → E2E on every push and PR. Component tests via jest-expo + RNTL
+are a planned follow-up.
 
 ## Deploy
 
