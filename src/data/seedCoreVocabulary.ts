@@ -1,7 +1,17 @@
 import { POS_COLORS, PartOfSpeech, UI_COLORS } from '../constants/colors'
 import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
-import { uuid } from '../utils/uuid'
+
+// Built-in content uses STABLE, deterministic ids (not random uuids) so
+// content updates can rebuild the bundled pages/buttons IN PLACE while
+// leaving user profiles, word lists, tracking, and user-created pages
+// untouched. Profile.activePageSetId and word-list button references stay
+// valid across versions because the ids never change.
+const CORE_SET_ID = 'builtin-core-vocabulary'
+const QUICK_SET_ID = 'builtin-quick-phrases'
+const CORE_HOME_ID = 'builtin-core-home'
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+const topicPageId = (topic: string) => `builtin-core-${slug(topic)}`
 
 // Seeds the bundled Core Vocabulary page set per §19: a 5×6 grid where
 // columns 0–2 are the persistent core region — identical words at
@@ -40,7 +50,7 @@ function makeButton(
   now = 0,
 ): Button {
   return {
-    id: uuid(),
+    id: `${pageId}-r${row}-c${column}`, // stable: one button per cell
     pageId,
     row,
     column,
@@ -110,55 +120,66 @@ const QUICK_PHRASES: Array<[string, PartOfSpeech]> = [
 
 const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
-// Bump when seed content changes — pre-release only, wipes local data.
-// Post-release this becomes a proper migration.
-const SEED_VERSION = '5'
+// Bump when bundled content changes. From v6 on, a bump runs a
+// data-preserving migration (rebuildBuiltInContent) — NOT a wipe.
+const SEED_VERSION = '6'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
   const version = await storage.getMeta(SEED_VERSION_KEY)
-  if (existing && version === SEED_VERSION) return existing // value = pageSetId
-  if (existing) await storage.clearAll()
+  if (existing === CORE_SET_ID && version === SEED_VERSION) return CORE_SET_ID
 
-  const pageSetId = await createBuiltInSets(storage)
+  if (existing && existing !== CORE_SET_ID) {
+    // Pre-stable-id install (random uuids from ≤ v5) → one final clean
+    // reset to adopt stable ids. This is the last wipe; there are no
+    // real users yet, and every future update is gentle.
+    await storage.clearAll()
+    await createBuiltInSets(storage)
+  } else if (existing) {
+    // Stable-id install, content changed → migrate in place, keeping
+    // profiles, word lists, tracking, and user-created pages.
+    await rebuildBuiltInContent(storage)
+  } else {
+    await createBuiltInSets(storage) // first run
+  }
+
   await storage.setMeta(SEED_VERSION_KEY, SEED_VERSION)
-  return pageSetId
+  return CORE_SET_ID
 }
 
-// Safety net ("my kid's board is ruined"): rebuilds the built-in page
-// sets from the seed WITHOUT touching user-created page sets, pages, or
-// profiles. Users whose active set was a rebuilt one are repointed at
-// the fresh Core Vocabulary.
-export async function restoreBuiltInPageSets(storage: Storage): Promise<string> {
-  const sets = await storage.getPageSets()
-  for (const set of sets.filter((s) => s.isBuiltIn)) {
+// Migration + "restore defaults" safety net. Rebuilds ONLY the built-in
+// pages/buttons (isBuiltIn) from the current seed, leaving user-created
+// pages (isBuiltIn=false), profiles, word lists, and tracking intact.
+// Because built-in ids are stable, links and references survive.
+export async function rebuildBuiltInContent(storage: Storage): Promise<string> {
+  for (const set of (await storage.getPageSets()).filter((s) => s.isBuiltIn)) {
     for (const page of await storage.getPagesForPageSet(set.id)) {
-      await storage.deletePage(page.id)
+      if (page.isBuiltIn) await storage.deletePage(page.id) // keep user pages
     }
-    await storage.deletePageSet(set.id)
   }
 
-  const coreId = await createBuiltInSets(storage)
+  await createBuiltInSets(storage) // upserts set rows + built-in pages/buttons
 
-  const remaining = new Set((await storage.getPageSets()).map((s) => s.id))
+  // Defensive: if a profile pointed at a set that no longer exists,
+  // send it to Core (shouldn't happen with stable ids).
+  const ids = new Set((await storage.getPageSets()).map((s) => s.id))
   for (const user of await storage.getUsers()) {
-    if (!remaining.has(user.activePageSetId)) {
-      await storage.updateUser({
-        ...user,
-        activePageSetId: coreId,
-        updatedAt: Date.now(),
-      })
+    if (!ids.has(user.activePageSetId)) {
+      await storage.updateUser({ ...user, activePageSetId: CORE_SET_ID, updatedAt: Date.now() })
     }
   }
 
-  return coreId
+  return CORE_SET_ID
 }
+
+// Back-compat alias — Settings still calls this name for "restore".
+export const restoreBuiltInPageSets = rebuildBuiltInContent
 
 async function createBuiltInSets(storage: Storage): Promise<string> {
   const now = Date.now()
-  const pageSetId = uuid()
-  const homePageId = uuid()
-  const topicPageIds = new Map(Object.keys(TOPICS).map((t) => [t, uuid()]))
+  const pageSetId = CORE_SET_ID
+  const homePageId = CORE_HOME_ID
+  const topicPageIds = new Map(Object.keys(TOPICS).map((t) => [t, topicPageId(t)]))
 
   const pageSet: PageSet = {
     id: pageSetId,
@@ -228,7 +249,7 @@ async function createBuiltInSets(storage: Storage): Promise<string> {
 
   await seedQuickPhrases(storage, now)
 
-  await storage.setMeta(SEED_META_KEY, pageSetId)
+  await storage.setMeta(SEED_META_KEY, CORE_SET_ID)
 
   return pageSetId
 }
@@ -236,8 +257,8 @@ async function createBuiltInSets(storage: Storage): Promise<string> {
 // §19.4: each button speaks its full sentence in one tap, bypassing the
 // message bar
 async function seedQuickPhrases(storage: Storage, now: number): Promise<void> {
-  const pageSetId = uuid()
-  const pageId = uuid()
+  const pageSetId = QUICK_SET_ID
+  const pageId = `${QUICK_SET_ID}-page`
   await storage.setMeta('quickPhrasesPageSetId', pageSetId) // toolbar jump
 
   await storage.createPageSet({

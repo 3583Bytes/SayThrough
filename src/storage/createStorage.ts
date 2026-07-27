@@ -433,7 +433,7 @@ class SqliteStorage implements Storage {
 
   async createPageSet(ps: PageSet): Promise<void> {
     await this.db.runAsync(
-      `INSERT INTO page_sets
+      `INSERT OR REPLACE INTO page_sets
        (id, name, description, language, root_page_id, is_built_in,
         schema_version, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -472,7 +472,7 @@ class SqliteStorage implements Storage {
 
   async createPage(p: Page): Promise<void> {
     await this.db.runAsync(
-      `INSERT INTO pages
+      `INSERT OR REPLACE INTO pages
        (id, page_set_id, name, symbol_id, rows, columns, background_color,
         show_message_bar, show_toolbar, is_built_in, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -524,7 +524,7 @@ class SqliteStorage implements Storage {
 
   async createButton(b: Button): Promise<void> {
     await this.db.runAsync(
-      `INSERT INTO buttons
+      `INSERT OR REPLACE INTO buttons
        (id, page_id, row_index, col_index, row_span, col_span, label,
         symbol_id, custom_symbol_uri, audio_uri, audio_cue_uri,
         background_color, border_color, border_width, label_color,
