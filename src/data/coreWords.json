@@ -88,6 +88,87 @@
       ["car", "noun"],
       ["doctor", "noun"],
       ["library", "noun"]
+    ],
+    "Actions": [
+      ["open", "verb"],
+      ["close", "verb"],
+      ["give", "verb"],
+      ["get", "verb"],
+      ["put", "verb"],
+      ["wash", "verb"],
+      ["read", "verb"],
+      ["write", "verb"],
+      ["sing", "verb"],
+      ["dance", "verb"],
+      ["run", "verb"],
+      ["jump", "verb"],
+      ["sit", "verb"],
+      ["turn on", "verb"],
+      ["turn off", "verb"]
+    ],
+    "School": [
+      ["book", "noun"],
+      ["pencil", "noun"],
+      ["paper", "noun"],
+      ["backpack", "noun"],
+      ["computer", "noun"],
+      ["music", "noun"],
+      ["art", "noun"],
+      ["math", "noun"],
+      ["recess", "noun"],
+      ["lunch", "noun"],
+      ["homework", "noun"],
+      ["scissors", "noun"]
+    ],
+    "Body": [
+      ["head", "noun"],
+      ["eyes", "noun"],
+      ["ears", "noun"],
+      ["nose", "noun"],
+      ["mouth", "noun"],
+      ["hands", "noun"],
+      ["feet", "noun"],
+      ["tummy", "noun"],
+      ["teeth", "noun"],
+      ["hair", "noun"],
+      ["arm", "noun"],
+      ["leg", "noun"]
+    ],
+    "Clothes": [
+      ["shirt", "noun"],
+      ["pants", "noun"],
+      ["shoes", "noun"],
+      ["socks", "noun"],
+      ["coat", "noun"],
+      ["hat", "noun"],
+      ["dress", "noun"],
+      ["pajamas", "noun"],
+      ["boots", "noun"]
+    ],
+    "Animals": [
+      ["dog", "noun"],
+      ["cat", "noun"],
+      ["bird", "noun"],
+      ["fish", "noun"],
+      ["horse", "noun"],
+      ["cow", "noun"],
+      ["pig", "noun"],
+      ["chicken", "noun"],
+      ["rabbit", "noun"],
+      ["bear", "noun"],
+      ["lion", "noun"],
+      ["elephant", "noun"]
+    ],
+    "Weather": [
+      ["sunny", "descriptor"],
+      ["rainy", "descriptor"],
+      ["cloudy", "descriptor"],
+      ["snowy", "descriptor"],
+      ["windy", "descriptor"],
+      ["hot", "descriptor"],
+      ["cold", "descriptor"],
+      ["storm", "noun"],
+      ["rainbow", "noun"]
     ]
   }
 }

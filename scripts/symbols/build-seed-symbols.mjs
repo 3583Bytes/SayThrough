@@ -25,6 +25,11 @@ const coreWords = JSON.parse(
 )
 const index = JSON.parse(await readFile(indexPath, 'utf8'))
 
+// Hand-curated picks beat keyword matching (see symbol-overrides.json)
+const overrides = JSON.parse(
+  await readFile(join(here, 'symbol-overrides.json'), 'utf8'),
+)
+
 // Labels to map: core + every topic word + the topic names themselves
 // (used on the home page's navigation buttons)
 const labels = new Set()
@@ -54,7 +59,11 @@ await mkdir(outDir, { recursive: true })
 const map = {}
 const missing = []
 for (const label of [...labels].sort()) {
-  const hit = byKeyword.get(label.toLowerCase())
+  const overrideId = overrides[label.toLowerCase()]
+  const hit =
+    typeof overrideId === 'number'
+      ? { id: overrideId, rank: -1 }
+      : byKeyword.get(label.toLowerCase())
   if (!hit) {
     missing.push(label)
     continue

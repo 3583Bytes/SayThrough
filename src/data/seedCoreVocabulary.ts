@@ -112,7 +112,7 @@ const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when seed content changes — pre-release only, wipes local data.
 // Post-release this becomes a proper migration.
-const SEED_VERSION = '4'
+const SEED_VERSION = '5'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
