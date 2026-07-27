@@ -29,6 +29,7 @@ export interface Storage {
   getPageSets(): Promise<PageSet[]>
   getPageSet(id: string): Promise<PageSet | null>
   createPageSet(pageSet: PageSet): Promise<void>
+  deletePageSet(id: string): Promise<void>
 
   getPage(id: string): Promise<Page | null>
   getPagesForPageSet(pageSetId: string): Promise<Page[]>

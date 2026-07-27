@@ -120,6 +120,41 @@ export async function seedIfNeeded(storage: Storage): Promise<string> {
   if (existing && version === SEED_VERSION) return existing // value = pageSetId
   if (existing) await storage.clearAll()
 
+  const pageSetId = await createBuiltInSets(storage)
+  await storage.setMeta(SEED_VERSION_KEY, SEED_VERSION)
+  return pageSetId
+}
+
+// Safety net ("my kid's board is ruined"): rebuilds the built-in page
+// sets from the seed WITHOUT touching user-created page sets, pages, or
+// profiles. Users whose active set was a rebuilt one are repointed at
+// the fresh Core Vocabulary.
+export async function restoreBuiltInPageSets(storage: Storage): Promise<string> {
+  const sets = await storage.getPageSets()
+  for (const set of sets.filter((s) => s.isBuiltIn)) {
+    for (const page of await storage.getPagesForPageSet(set.id)) {
+      await storage.deletePage(page.id)
+    }
+    await storage.deletePageSet(set.id)
+  }
+
+  const coreId = await createBuiltInSets(storage)
+
+  const remaining = new Set((await storage.getPageSets()).map((s) => s.id))
+  for (const user of await storage.getUsers()) {
+    if (!remaining.has(user.activePageSetId)) {
+      await storage.updateUser({
+        ...user,
+        activePageSetId: coreId,
+        updatedAt: Date.now(),
+      })
+    }
+  }
+
+  return coreId
+}
+
+async function createBuiltInSets(storage: Storage): Promise<string> {
   const now = Date.now()
   const pageSetId = uuid()
   const homePageId = uuid()
@@ -194,7 +229,6 @@ export async function seedIfNeeded(storage: Storage): Promise<string> {
   await seedQuickPhrases(storage, now)
 
   await storage.setMeta(SEED_META_KEY, pageSetId)
-  await storage.setMeta(SEED_VERSION_KEY, SEED_VERSION)
 
   return pageSetId
 }

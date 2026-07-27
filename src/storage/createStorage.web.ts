@@ -187,6 +187,11 @@ class WebStorage implements Storage {
     await promisify(this.store('pageSets', 'readwrite').put(pageSet))
   }
 
+  async deletePageSet(id: string): Promise<void> {
+    // callers delete the set's pages first (deletePage cascades buttons)
+    await promisify(this.store('pageSets', 'readwrite').delete(id))
+  }
+
   async getPage(id: string): Promise<Page | null> {
     const row = await promisify(this.store('pages').get(id))
     return (row as Page) ?? null

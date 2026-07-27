@@ -10,6 +10,10 @@ interface EditBarProps {
   onDone: () => void
   onPageMenu: () => void // rename/delete the current page
   onSettings: () => void // §5.8: settings are reachable via edit mode only
+  canUndo?: boolean
+  canRedo?: boolean
+  onUndo?: () => void
+  onRedo?: () => void
 }
 
 // §5.6 — replaces the top bar while editing; changes save immediately,
@@ -20,6 +24,10 @@ export function EditBar({
   onDone,
   onPageMenu,
   onSettings,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
 }: EditBarProps) {
   return (
     <View style={styles.bar}>
@@ -40,6 +48,32 @@ export function EditBar({
           : `Editing: ${pageName}`}
       </Text>
       <View style={styles.rightGroup}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Undo"
+          disabled={!canUndo}
+          onPress={onUndo}
+          style={({ pressed }) => [
+            styles.iconButton,
+            !canUndo && styles.disabled,
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialIcons name="undo" size={20} color="#7A4F01" />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Redo"
+          disabled={!canRedo}
+          onPress={onRedo}
+          style={({ pressed }) => [
+            styles.iconButton,
+            !canRedo && styles.disabled,
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialIcons name="redo" size={20} color="#7A4F01" />
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Page options"
@@ -101,7 +135,17 @@ const styles = StyleSheet.create({
   },
   rightGroup: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
+  },
+  iconButton: {
+    minWidth: 40,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabled: {
+    opacity: 0.3,
   },
   settingsButton: {
     minHeight: 36,

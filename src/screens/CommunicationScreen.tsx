@@ -57,6 +57,8 @@ export function CommunicationScreen() {
   const selectedButtonId = useEditStore((s) => s.selectedButtonId)
   const isEditorOpen = useEditStore((s) => s.isEditorOpen)
   const wordListEditingId = useEditStore((s) => s.wordListEditingId)
+  const canUndo = useEditStore((s) => s.undoStack.length > 0)
+  const canRedo = useEditStore((s) => s.redoStack.length > 0)
   const edit = useEditStore.getState
 
   const activeUser = useUserStore((s) => s.activeUser)
@@ -198,10 +200,36 @@ export function CommunicationScreen() {
       updatedAt: now,
     }
     await storage.createButton(newButton)
+    edit().pushEdit({ type: 'ADD_BUTTON', button: newButton })
     markVocabularyChanged()
     refresh()
     edit().selectButton(newButton.id)
     edit().openEditor()
+  }
+
+  const handleButtonMove = async (button: Button, toRow: number, toColumn: number) => {
+    const target = buttons.find(
+      (b) => b.row === toRow && b.column === toColumn && b.id !== button.id,
+    )
+    const now = Date.now()
+    await storage.updateButton({ ...button, row: toRow, column: toColumn, updatedAt: now })
+    if (target) {
+      // §12.3: dropping on an occupied cell swaps the two buttons
+      await storage.updateButton({
+        ...target,
+        row: button.row,
+        column: button.column,
+        updatedAt: now,
+      })
+    }
+    edit().pushEdit({
+      type: 'MOVE_BUTTON',
+      moved: button,
+      to: { row: toRow, column: toColumn },
+      swapped: target,
+    })
+    markVocabularyChanged()
+    refresh()
   }
 
   // Toolbar section jumps (session-level; the profile default is
@@ -238,11 +266,9 @@ export function CommunicationScreen() {
 
   const handleEditorSave = async (changes: ButtonEditorChanges) => {
     if (!selectedButton) return
-    await storage.updateButton({
-      ...selectedButton,
-      ...changes,
-      updatedAt: Date.now(),
-    })
+    const after = { ...selectedButton, ...changes, updatedAt: Date.now() }
+    await storage.updateButton(after)
+    edit().pushEdit({ type: 'UPDATE_BUTTON', before: selectedButton, after })
     markVocabularyChanged()
     refresh()
   }
@@ -250,9 +276,20 @@ export function CommunicationScreen() {
   const handleEditorDelete = async () => {
     if (!selectedButton) return
     await storage.deleteButton(selectedButton.id)
+    edit().pushEdit({ type: 'DELETE_BUTTON', button: selectedButton })
     markVocabularyChanged()
     edit().closeEditor()
     edit().selectButton(null)
+    refresh()
+  }
+
+  const handleUndo = async () => {
+    await edit().undo()
+    refresh()
+  }
+
+  const handleRedo = async () => {
+    await edit().redo()
     refresh()
   }
 
@@ -278,6 +315,10 @@ export function CommunicationScreen() {
               setPageMenuVisible(true)
             }}
             onSettings={() => navigation.navigate('Settings')}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
           />
         ) : (
           <TopBar
@@ -340,6 +381,7 @@ export function CommunicationScreen() {
                 : undefined
           }
           onButtonPress={handleButtonPress}
+          onButtonMove={handleButtonMove}
           onEmptyCellPress={wordListEditingId ? undefined : handleEmptyCellPress}
         />
         {isEditMode && isEditorOpen && selectedButton && (

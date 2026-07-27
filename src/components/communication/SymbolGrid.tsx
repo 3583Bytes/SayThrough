@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
 import type { Button } from '../../types/models'
+import { DraggableCell } from '../edit/DraggableCell'
 import { SymbolButton } from './SymbolButton'
 
 interface SymbolGridProps {
@@ -15,6 +17,7 @@ interface SymbolGridProps {
   filterState?: { mode: 'filtering' | 'editing'; ids: Set<string> }
   onButtonPress: (button: Button) => void
   onButtonLongPress?: (button: Button) => void
+  onButtonMove?: (button: Button, toRow: number, toColumn: number) => void
   onEmptyCellPress?: (row: number, column: number) => void // edit mode only
 }
 
@@ -29,22 +32,42 @@ export function SymbolGrid({
   filterState,
   onButtonPress,
   onButtonLongPress,
+  onButtonMove,
   onEmptyCellPress,
 }: SymbolGridProps) {
+  const [gridSize, setGridSize] = useState({ width: 0, height: 0 })
+  const cellWidth =
+    (gridSize.width - LAYOUT.gridPadding * 2 - gap * (columns - 1)) / columns
+  const cellHeight =
+    (gridSize.height - LAYOUT.gridPadding * 2 - gap * (rows - 1)) / rows
+
   const byPosition = new Map(
     buttons
       .filter((b) => isEditMode || !b.isHidden)
       .map((b) => [`${b.row}:${b.column}`, b]),
   )
 
+  // Drag is available in plain edit mode, not while selecting filter words
+  const dragEnabled = !!isEditMode && !!onButtonMove && filterState?.mode !== 'editing'
+
+  const handleDrop = (button: Button, dxCells: number, dyCells: number) => {
+    const toRow = Math.max(0, Math.min(rows - 1, button.row + dyCells))
+    const toColumn = Math.max(0, Math.min(columns - 1, button.column + dxCells))
+    if (toRow === button.row && toColumn === button.column) return
+    onButtonMove?.(button, toRow, toColumn)
+  }
+
   return (
-    <View style={[styles.grid, { gap }]}>
+    <View
+      style={[styles.grid, { gap }]}
+      onLayout={(e) => setGridSize(e.nativeEvent.layout)}
+    >
       {Array.from({ length: rows }, (_, row) => (
         <View key={row} style={[styles.row, { gap }]}>
           {Array.from({ length: columns }, (_, column) => {
             const button = byPosition.get(`${row}:${column}`)
             if (button) {
-              return (
+              const symbolButton = (
                 <SymbolButton
                   key={button.id}
                   button={button}
@@ -60,6 +83,20 @@ export function SymbolGrid({
                   onPress={onButtonPress}
                   onLongPress={onButtonLongPress}
                 />
+              )
+              return dragEnabled ? (
+                <DraggableCell
+                  key={button.id}
+                  enabled
+                  cellWidth={cellWidth}
+                  cellHeight={cellHeight}
+                  gap={gap}
+                  onDrop={(dx, dy) => handleDrop(button, dx, dy)}
+                >
+                  {symbolButton}
+                </DraggableCell>
+              ) : (
+                symbolButton
               )
             }
             if (isEditMode && onEmptyCellPress) {
@@ -89,12 +126,10 @@ const styles = StyleSheet.create({
   grid: {
     flex: 1,
     padding: LAYOUT.gridPadding,
-    gap: LAYOUT.gridGap,
   },
   row: {
     flex: 1,
     flexDirection: 'row',
-    gap: LAYOUT.gridGap,
   },
   emptyCell: {
     flex: 1,

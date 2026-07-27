@@ -17,6 +17,7 @@ import {
 import type * as Speech from 'expo-speech'
 import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
+import { restoreBuiltInPageSets } from '../data/seedCoreVocabulary'
 import { exportPageSet, importPageSet } from '../services/OBFService'
 import {
   getInstallState,
@@ -136,6 +137,31 @@ export function SettingsScreen() {
     anchor.click()
     URL.revokeObjectURL(url)
     setBackupStatus('Exported.')
+  }
+
+  const [restoreArmed, setRestoreArmed] = useState(false)
+
+  // Safety net: rebuild built-in sets from seed, keep user content
+  const restoreBuiltIns = async () => {
+    if (!restoreArmed) {
+      setRestoreArmed(true)
+      setBackupStatus(
+        'This rebuilds Core Vocabulary and Quick Phrases from scratch — ' +
+          'your own pages and profiles are kept. Tap again to confirm.',
+      )
+      return
+    }
+    setRestoreArmed(false)
+    setBackupStatus('Restoring…')
+    const coreId = await restoreBuiltInPageSets(storage)
+    await useUserStore.getState().load()
+    const user = useUserStore.getState().activeUser
+    const pageSet = await storage.getPageSet(user?.activePageSetId ?? coreId)
+    if (pageSet) {
+      useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
+    }
+    setPageSets(await storage.getPageSets())
+    setBackupStatus('Built-in page sets restored.')
   }
 
   const importObz = async () => {
@@ -529,6 +555,11 @@ export function SettingsScreen() {
               onPress={exportActive}
             />
             <Chip label="Import .obz" selected={false} onPress={importObz} />
+            <Chip
+              label={restoreArmed ? 'Tap again to restore' : 'Restore built-in page sets'}
+              selected={false}
+              onPress={restoreBuiltIns}
+            />
           </View>
           {backupStatus ? <Text style={styles.hint}>{backupStatus}</Text> : null}
         </View>

@@ -449,6 +449,11 @@ class SqliteStorage implements Storage {
     )
   }
 
+  async deletePageSet(id: string): Promise<void> {
+    // pages and buttons cascade via FK
+    await this.db.runAsync('DELETE FROM page_sets WHERE id = ?', id)
+  }
+
   async getPage(id: string): Promise<Page | null> {
     const row = await this.db.getFirstAsync<PageRow>(
       'SELECT * FROM pages WHERE id = ?',
