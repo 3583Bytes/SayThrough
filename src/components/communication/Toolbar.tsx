@@ -4,8 +4,10 @@ import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 
+export type ToolbarSection = 'core' | 'quick' | 'keyboard' | null
+
 interface ToolbarProps {
-  isKeyboardOpen: boolean
+  activeSection: ToolbarSection // which section you're currently in ("you are here")
   onCore: () => void
   onQuick: () => void
   onKeyboard: () => void
@@ -13,21 +15,23 @@ interface ToolbarProps {
 
 // §5.3 toolbar — Core / Quick / Keys for v1.0; Topics is covered by the
 // home page's navigation buttons, Forms arrives in v1.1
-export function Toolbar({ isKeyboardOpen, onCore, onQuick, onKeyboard }: ToolbarProps) {
+export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarProps) {
   const items: Array<
-    [keyof typeof MaterialIcons.glyphMap, string, () => void, boolean]
+    [keyof typeof MaterialIcons.glyphMap, string, () => void, ToolbarSection]
   > = [
-    ['apps', 'Core', onCore, false],
-    ['bolt', 'Quick', onQuick, false],
-    ['keyboard', 'Keys', onKeyboard, isKeyboardOpen],
+    ['apps', 'Core', onCore, 'core'],
+    ['bolt', 'Quick', onQuick, 'quick'],
+    ['keyboard', 'Keys', onKeyboard, 'keyboard'],
   ]
   return (
     <View style={styles.bar}>
-      {items.map(([icon, label, onPress, active]) => (
+      {items.map(([icon, label, onPress, section]) => {
+        const active = section === activeSection
+        return (
         <Pressable
           key={label}
           accessibilityRole="button"
-          accessibilityLabel={`${label} section`}
+          accessibilityLabel={`${label} section${active ? ', current' : ''}`}
           onPress={onPress}
           style={({ pressed }) => [
             styles.item,
@@ -35,10 +39,11 @@ export function Toolbar({ isKeyboardOpen, onCore, onQuick, onKeyboard }: Toolbar
             pressed && styles.pressed,
           ]}
         >
-          <MaterialIcons name={icon} size={20} color={active ? "#1976D2" : "#666666"} />
+          <MaterialIcons name={icon} size={20} color={active ? '#1976D2' : '#666666'} />
           <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
         </Pressable>
-      ))}
+        )
+      })}
     </View>
   )
 }

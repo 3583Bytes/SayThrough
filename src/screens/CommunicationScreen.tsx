@@ -47,6 +47,7 @@ export function CommunicationScreen() {
   const [pageMenuVisible, setPageMenuVisible] = useState(false)
   const [pageRenameText, setPageRenameText] = useState('')
   const [coreSetId, setCoreSetId] = useState<string | null>(null)
+  const [quickSetId, setQuickSetId] = useState<string | null>(null)
   const [wordListIds, setWordListIds] = useState<Set<string>>(new Set())
   const [wordListName, setWordListName] = useState<string | undefined>()
 
@@ -95,8 +96,20 @@ export function CommunicationScreen() {
   // not Quick Phrases or blank sets.
   useEffect(() => {
     storage.getMeta('coreVocabularySeeded').then(setCoreSetId)
+    storage.getMeta('quickPhrasesPageSetId').then(setQuickSetId)
   }, [])
   const coreColumns = page && page.pageSetId === coreSetId ? 3 : 0
+
+  // Toolbar "you are here": highlight the section for the active page set
+  // (keyboard wins when open). User-created pages share the Core set id,
+  // so they correctly read as Core.
+  const activeSection = keyboardOpen
+    ? 'keyboard'
+    : page?.pageSetId === quickSetId
+      ? 'quick'
+      : page?.pageSetId === coreSetId
+        ? 'core'
+        : null
 
   // §12.4: clear the search-jump flash after a short pulse
   useEffect(() => {
@@ -422,7 +435,7 @@ export function CommunicationScreen() {
         {!isEditMode && keyboardOpen && <KeyboardView />}
         {!isEditMode && page.showToolbar && (
           <Toolbar
-            isKeyboardOpen={keyboardOpen}
+            activeSection={activeSection}
             onCore={() => jumpToPageSet('coreVocabularySeeded')}
             onQuick={() => jumpToPageSet('quickPhrasesPageSetId')}
             onKeyboard={() => setKeyboardOpen((open) => !open)}
