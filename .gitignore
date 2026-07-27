@@ -44,3 +44,7 @@ scripts/symbols/data/
 # full symbol library is synced locally / fetched in CI — only the
 # committed seed subset is tracked (gitignore doesn't untrack it)
 public/symbols/
+
+# playwright
+test-results/
+playwright-report/

@@ -78,7 +78,7 @@ export function TrackingReportScreen() {
             </View>
 
             <Text style={styles.sectionTitle}>Most used words (7 days)</Text>
-            <View style={styles.card}>
+            <View style={styles.card} testID="report-words">
               {report.topWords.length === 0 && (
                 <Text style={styles.hint}>
                   No data yet — communication will appear here once tracking
