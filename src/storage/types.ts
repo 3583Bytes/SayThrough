@@ -33,6 +33,8 @@ export interface Storage {
   getPage(id: string): Promise<Page | null>
   getPagesForPageSet(pageSetId: string): Promise<Page[]>
   createPage(page: Page): Promise<void>
+  updatePage(page: Page): Promise<void>
+  deletePage(id: string): Promise<void> // cascades to its buttons
 
   getButtonsForPage(pageId: string): Promise<Button[]>
   createButton(button: Button): Promise<void>

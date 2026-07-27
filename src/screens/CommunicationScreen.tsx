@@ -1,7 +1,15 @@
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import {
+  Modal,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
 import type { RootStackParamList } from '../../App'
 import { KeyboardView } from '../components/communication/KeyboardView'
 import { MessageBar } from '../components/communication/MessageBar'
@@ -18,6 +26,7 @@ import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
 import { usePageButtons } from '../hooks/usePageButtons'
 import { executeButtonActions } from '../services/actionExecutor'
+import { deletePageAndCleanLinks, renamePage } from '../services/pageService'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
@@ -35,6 +44,8 @@ export function CommunicationScreen() {
   const [keyboardOpen, setKeyboardOpen] = useState(false)
   const [showBackupNudge, setShowBackupNudge] = useState(false)
   const [searchVisible, setSearchVisible] = useState(false)
+  const [pageMenuVisible, setPageMenuVisible] = useState(false)
+  const [pageRenameText, setPageRenameText] = useState('')
   const [wordListIds, setWordListIds] = useState<Set<string>>(new Set())
   const [wordListName, setWordListName] = useState<string | undefined>()
 
@@ -204,6 +215,25 @@ export function CommunicationScreen() {
     setKeyboardOpen(false)
   }
 
+  const isRootPage = useNavigationStore.getState().rootPageId === currentPageId
+
+  const handlePageRename = async () => {
+    if (!page || !pageRenameText.trim()) return
+    await renamePage(page, pageRenameText.trim())
+    markVocabularyChanged()
+    setPageMenuVisible(false)
+    refresh()
+  }
+
+  const handlePageDelete = async () => {
+    if (!page || isRootPage) return
+    setPageMenuVisible(false)
+    useNavigationStore.getState().navigateHome()
+    await deletePageAndCleanLinks(page)
+    markVocabularyChanged()
+    refresh()
+  }
+
   const selectedButton = buttons.find((b) => b.id === selectedButtonId)
 
   const handleEditorSave = async (changes: ButtonEditorChanges) => {
@@ -243,6 +273,10 @@ export function CommunicationScreen() {
                 ? edit().setWordListEditing(null) // back to normal edit mode
                 : edit().exitEditMode()
             }
+            onPageMenu={() => {
+              setPageRenameText(page.name)
+              setPageMenuVisible(true)
+            }}
             onSettings={() => navigation.navigate('Settings')}
           />
         ) : (
@@ -334,6 +368,52 @@ export function CommunicationScreen() {
         error={pinError}
       />
       <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
+      <Modal
+        visible={pageMenuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPageMenuVisible(false)}
+      >
+        <Pressable style={styles.menuBackdrop} onPress={() => setPageMenuVisible(false)}>
+          <Pressable style={styles.menuCard} onPress={() => {}}>
+            <Text style={styles.menuTitle}>Page: {page.name}</Text>
+            <TextInput
+              value={pageRenameText}
+              onChangeText={setPageRenameText}
+              style={styles.menuInput}
+              accessibilityLabel="Page name"
+              onSubmitEditing={handlePageRename}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Rename page"
+              onPress={handlePageRename}
+              style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
+            >
+              <Text style={styles.menuButtonText}>Rename</Text>
+            </Pressable>
+            {!isRootPage && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Delete page"
+                onPress={handlePageDelete}
+                style={({ pressed }) => [
+                  styles.menuButton,
+                  styles.menuDelete,
+                  pressed && styles.menuPressed,
+                ]}
+              >
+                <Text style={styles.menuDeleteText}>
+                  Delete page (buttons that open it become plain words)
+                </Text>
+              </Pressable>
+            )}
+            {isRootPage && (
+              <Text style={styles.menuHint}>The home page cannot be deleted.</Text>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -371,5 +451,60 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2E7D32',
     padding: 4,
+  },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuCard: {
+    width: 320,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    gap: 10,
+  },
+  menuTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  menuInput: {
+    borderWidth: 1,
+    borderColor: UI_COLORS.buttonBorder,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+  },
+  menuButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: UI_COLORS.barBorder,
+    paddingHorizontal: 8,
+  },
+  menuDelete: {
+    borderColor: UI_COLORS.clearRed,
+  },
+  menuButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  menuDeleteText: {
+    fontSize: 13,
+    color: UI_COLORS.clearRed,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  menuHint: {
+    fontSize: 12,
+    color: '#999999',
+    textAlign: 'center',
+  },
+  menuPressed: {
+    opacity: 0.7,
   },
 })

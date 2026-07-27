@@ -486,6 +486,29 @@ class SqliteStorage implements Storage {
     )
   }
 
+  async updatePage(p: Page): Promise<void> {
+    await this.db.runAsync(
+      `UPDATE pages SET name = ?, symbol_id = ?, rows = ?, columns = ?,
+        background_color = ?, show_message_bar = ?, show_toolbar = ?,
+        updated_at = ?
+       WHERE id = ?`,
+      p.name,
+      p.symbolId ?? null,
+      p.rows,
+      p.columns,
+      p.backgroundColor,
+      p.showMessageBar ? 1 : 0,
+      p.showToolbar ? 1 : 0,
+      p.updatedAt,
+      p.id,
+    )
+  }
+
+  async deletePage(id: string): Promise<void> {
+    // buttons cascade via FK (PRAGMA foreign_keys = ON)
+    await this.db.runAsync('DELETE FROM pages WHERE id = ?', id)
+  }
+
   async getButtonsForPage(pageId: string): Promise<Button[]> {
     const rows = await this.db.getAllAsync<ButtonRow>(
       'SELECT * FROM buttons WHERE page_id = ?',

@@ -8,12 +8,19 @@ interface EditBarProps {
   pageName: string
   wordListName?: string // §12.2: selecting words for this list
   onDone: () => void
+  onPageMenu: () => void // rename/delete the current page
   onSettings: () => void // §5.8: settings are reachable via edit mode only
 }
 
 // §5.6 — replaces the top bar while editing; changes save immediately,
 // Done just exits
-export function EditBar({ pageName, wordListName, onDone, onSettings }: EditBarProps) {
+export function EditBar({
+  pageName,
+  wordListName,
+  onDone,
+  onPageMenu,
+  onSettings,
+}: EditBarProps) {
   return (
     <View style={styles.bar}>
       <Pressable
@@ -32,17 +39,30 @@ export function EditBar({ pageName, wordListName, onDone, onSettings }: EditBarP
           ? `Tap words for list: ${wordListName}`
           : `Editing: ${pageName}`}
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Open settings"
-        onPress={onSettings}
-        style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
-      >
-        <View style={styles.buttonRow}>
-          <MaterialIcons name="settings" size={16} color="#7A4F01" />
-          <Text style={styles.settingsText}>Settings</Text>
-        </View>
-      </Pressable>
+      <View style={styles.rightGroup}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Page options"
+          onPress={onPageMenu}
+          style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
+        >
+          <View style={styles.buttonRow}>
+            <MaterialIcons name="description" size={16} color="#7A4F01" />
+            <Text style={styles.settingsText}>Page…</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open settings"
+          onPress={onSettings}
+          style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
+        >
+          <View style={styles.buttonRow}>
+            <MaterialIcons name="settings" size={16} color="#7A4F01" />
+            <Text style={styles.settingsText}>Settings</Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   )
 }
@@ -78,6 +98,10 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     fontSize: 15,
     color: '#7A4F01',
+  },
+  rightGroup: {
+    flexDirection: 'row',
+    gap: 6,
   },
   settingsButton: {
     minHeight: 36,

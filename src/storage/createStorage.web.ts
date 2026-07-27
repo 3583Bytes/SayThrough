@@ -202,6 +202,19 @@ class WebStorage implements Storage {
     await promisify(this.store('pages', 'readwrite').put(page))
   }
 
+  async updatePage(page: Page): Promise<void> {
+    await promisify(this.store('pages', 'readwrite').put(page))
+  }
+
+  async deletePage(id: string): Promise<void> {
+    await promisify(this.store('pages', 'readwrite').delete(id))
+    const buttons = this.db
+      .transaction('buttons', 'readwrite')
+      .objectStore('buttons')
+    const keys = await promisify(buttons.index('pageId').getAllKeys(id))
+    for (const key of keys) await promisify(buttons.delete(key))
+  }
+
   async getButtonsForPage(pageId: string): Promise<Button[]> {
     return promisify(
       this.store('buttons').index('pageId').getAll(pageId),

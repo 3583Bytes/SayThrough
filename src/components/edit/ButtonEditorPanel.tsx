@@ -11,12 +11,20 @@ import {
 } from 'react-native'
 import { POS_COLORS, UI_COLORS } from '../../constants/colors'
 import { getSymbolUri } from '../../services/SymbolService'
+import { storage } from '../../storage'
+import { useNavigationStore } from '../../stores/navigationStore'
 import type { Button } from '../../types/models'
+import { PageLinkModal } from './PageLinkModal'
 import { SymbolPickerModal } from './SymbolPickerModal'
 
 export type ButtonEditorChanges = Pick<
   Button,
-  'label' | 'backgroundColor' | 'symbolId' | 'customSymbolUri'
+  | 'label'
+  | 'backgroundColor'
+  | 'symbolId'
+  | 'customSymbolUri'
+  | 'actions'
+  | 'isNavigationButton'
 >
 
 interface ButtonEditorPanelProps {
@@ -40,13 +48,26 @@ export function ButtonEditorPanel({
   const [symbolId, setSymbolId] = useState(button.symbolId)
   const [customSymbolUri, setCustomSymbolUri] = useState(button.customSymbolUri)
   const [pickerVisible, setPickerVisible] = useState(false)
+  const [linkModalVisible, setLinkModalVisible] = useState(false)
+  const [linkedPageId, setLinkedPageId] = useState<string | undefined>()
+  const [linkedPageName, setLinkedPageName] = useState<string | undefined>()
 
   useEffect(() => {
     setLabel(button.label)
     setBackgroundColor(button.backgroundColor)
     setSymbolId(button.symbolId)
     setCustomSymbolUri(button.customSymbolUri)
+    const navigate = button.actions.find((a) => a.type === 'navigate')
+    setLinkedPageId(navigate?.type === 'navigate' ? navigate.pageId : undefined)
   }, [button])
+
+  useEffect(() => {
+    if (!linkedPageId) {
+      setLinkedPageName(undefined)
+      return
+    }
+    storage.getPage(linkedPageId).then((page) => setLinkedPageName(page?.name))
+  }, [linkedPageId])
 
   const previewUri = customSymbolUri ?? (symbolId ? getSymbolUri(symbolId) : null)
 
@@ -72,8 +93,33 @@ export function ButtonEditorPanel({
   }
 
   const save = () => {
-    onSave({ label: label.trim(), backgroundColor, symbolId, customSymbolUri })
+    // Link changes rewrite the action list; otherwise the button keeps
+    // its original actions (e.g. Quick Phrases' speak-only buttons)
+    const originallyLinked = button.actions.some((a) => a.type === 'navigate')
+    let actions = button.actions
+    let isNavigationButton = button.isNavigationButton
+    if (linkedPageId) {
+      actions = [{ type: 'navigate', pageId: linkedPageId }]
+      isNavigationButton = true
+    } else if (originallyLinked) {
+      actions = [{ type: 'append_to_message' }]
+      isNavigationButton = false
+    }
+    onSave({
+      label: label.trim(),
+      backgroundColor,
+      symbolId,
+      customSymbolUri,
+      actions,
+      isNavigationButton,
+    })
     onClose()
+  }
+
+  const openLinkedPage = () => {
+    if (!linkedPageId) return
+    save() // persist first so the link exists before navigating
+    useNavigationStore.getState().navigateTo(linkedPageId)
   }
 
   return (
@@ -129,6 +175,25 @@ export function ButtonEditorPanel({
         </View>
       </View>
 
+      <Text style={styles.heading}>This button opens</Text>
+      <View style={styles.linkRow}>
+        <Text style={styles.linkValue}>
+          {linkedPageId ? (linkedPageName ?? '…') : 'nothing — it speaks its word'}
+        </Text>
+        <SmallAction
+          label={linkedPageId ? 'Change…' : 'Link to a page…'}
+          accessibilityLabel="Link button to a page"
+          onPress={() => setLinkModalVisible(true)}
+        />
+        {linkedPageId && (
+          <SmallAction
+            label="Go to page"
+            accessibilityLabel="Go to linked page"
+            onPress={openLinkedPage}
+          />
+        )}
+      </View>
+
       <Text style={styles.heading}>Color</Text>
       <View style={styles.swatches}>
         {COLOR_CHOICES.map((color) => (
@@ -165,6 +230,20 @@ export function ButtonEditorPanel({
         </Pressable>
       </View>
 
+      <PageLinkModal
+        visible={linkModalVisible}
+        currentPageId={button.pageId}
+        hasLink={!!linkedPageId}
+        onSelect={(pageId) => {
+          setLinkedPageId(pageId)
+          setLinkModalVisible(false)
+        }}
+        onRemoveLink={() => {
+          setLinkedPageId(undefined)
+          setLinkModalVisible(false)
+        }}
+        onClose={() => setLinkModalVisible(false)}
+      />
       <SymbolPickerModal
         visible={pickerVisible}
         initialQuery={label.trim()}
@@ -269,6 +348,17 @@ const styles = StyleSheet.create({
   smallActionText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  linkValue: {
+    fontSize: 14,
+    color: '#555555',
+    flexShrink: 1,
   },
   swatches: {
     flexDirection: 'row',
