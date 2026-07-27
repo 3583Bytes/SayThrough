@@ -1431,14 +1431,21 @@ export class TTSService {
 // iOS voices: e.g. 'com.apple.ttsbundle.Samantha-compact'
 // Android voices: e.g. 'en-us-x-sfg-local'
 
-// Default voice selection algorithm:
+// Default voice selection algorithm (implemented in voiceSelection.ts —
+// the app must ALWAYS pick explicitly; with no voice specified the
+// browser chooses, and on macOS that can be a novelty voice):
 // 1. Find voices matching the user's language setting
-// 2. Prefer local voices (localService: true on web) — some Chrome
-//    voices are network-backed: they add latency and FAIL OFFLINE,
-//    silently breaking the app's offline promise
-// 3. Prefer 'enhanced' or 'premium' quality voices
-// 4. Filter by gender preference if set
-// 5. Default to first available matching voice
+// 2. EXCLUDE OS novelty/legacy voices ("Albert", "Fred", "Zarvox",
+//    "Bubbles", … — macOS ships ~25 joke voices that must never be an
+//    AAC user's voice; they also pollute the Settings picker)
+// 3. Prefer neural/natural voices (Edge exposes "… Online (Natural)"),
+//    then known high-quality names (Samantha, Ava, Google US English…),
+//    then 'enhanced' quality
+// 4. Prefer local voices (localService: true) as a tiebreak — network
+//    voices add latency and FAIL OFFLINE
+// 5. Filter by gender preference if set (future)
+// 6. Persist the pick to the profile on first run so Settings shows
+//    what is actually being used
 ```
 
 ### 10.3 Speak-on-Select Behavior

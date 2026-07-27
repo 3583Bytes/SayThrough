@@ -25,6 +25,7 @@ import {
   type InstallState,
 } from '../services/pwa'
 import { ttsService } from '../services/TTSService'
+import { rankVoices } from '../services/voiceSelection'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
@@ -85,17 +86,10 @@ export function SettingsScreen() {
 
   useEffect(() => {
     ttsService.init().then(() => {
-      const language = (activeUser?.language ?? 'en').slice(0, 2)
-      const matching = ttsService
-        .getVoices()
-        .filter((v) => v.language?.toLowerCase().startsWith(language))
-      // §10.2: local voices first — network voices lag and fail offline
-      matching.sort((a, b) => {
-        const aLocal = (a as { localService?: boolean }).localService ? 0 : 1
-        const bLocal = (b as { localService?: boolean }).localService ? 0 : 1
-        return aLocal - bLocal || a.name.localeCompare(b.name)
-      })
-      setVoices(matching.slice(0, 12))
+      // §10.2 ranking: novelty voices excluded, quality + local first
+      setVoices(
+        rankVoices(ttsService.getVoices(), activeUser?.language ?? 'en').slice(0, 12),
+      )
     })
     storage.getPageSets().then(setPageSets)
   }, [activeUser?.language])

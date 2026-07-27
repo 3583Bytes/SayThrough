@@ -5,6 +5,7 @@ import { useUserStore } from '../stores/userStore'
 import { initPwa, warmupSymbolCache } from './pwa'
 import { getSymbolUri } from './SymbolService'
 import { ttsService } from './TTSService'
+import { pickDefaultVoice } from './voiceSelection'
 
 // App startup: storage → seed → profile → navigation → TTS.
 // Runs once from App before the navigator renders.
@@ -28,7 +29,21 @@ export async function bootstrap(): Promise<void> {
   }
 
   initPwa()
-  ttsService.init()
+  void pickAndPersistDefaultVoice() // non-blocking — voices load async
+}
+
+// §10.2: without this, the browser picks its own default voice for the
+// language — on macOS that can be a novelty voice ("Albert", "Zarvox")
+// that sounds like a broken robot. Pick the best available voice once
+// and persist it so Settings shows what's actually being used.
+async function pickAndPersistDefaultVoice(): Promise<void> {
+  await ttsService.init()
+  const user = useUserStore.getState().activeUser
+  if (!user || user.ttsVoiceId) return
+  const best = pickDefaultVoice(ttsService.getVoices(), user.language)
+  if (best) {
+    await useUserStore.getState().updateActiveUser({ ttsVoiceId: best.identifier })
+  }
 }
 
 // Pre-caches every symbol the active page set references, so the user's

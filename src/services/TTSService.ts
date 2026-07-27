@@ -24,12 +24,18 @@ class TTSService {
   }
 
   // §10.4: force the voice list to load at startup — on web it arrives
-  // asynchronously and the first speak() would otherwise use a fallback
+  // asynchronously (voiceschanged) and the first call often returns [],
+  // so retry briefly before giving up
   async init(): Promise<void> {
-    try {
-      this.voices = await Speech.getAvailableVoicesAsync()
-    } catch {
-      this.voices = []
+    for (let attempt = 0; attempt < 10 && this.voices.length === 0; attempt++) {
+      try {
+        this.voices = await Speech.getAvailableVoicesAsync()
+      } catch {
+        this.voices = []
+      }
+      if (this.voices.length === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 250))
+      }
     }
   }
 
