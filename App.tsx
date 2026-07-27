@@ -9,11 +9,14 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { CommunicationScreen } from './src/screens/CommunicationScreen'
+import { OnboardingScreen } from './src/screens/OnboardingScreen'
 import { SettingsScreen } from './src/screens/SettingsScreen'
 import { TrackingReportScreen } from './src/screens/TrackingReportScreen'
 import { bootstrap } from './src/services/bootstrap'
+import { useUserStore } from './src/stores/userStore'
 
 export type RootStackParamList = {
+  Onboarding: undefined
   Communication: undefined
   Settings: undefined
   TrackingReport: undefined
@@ -23,6 +26,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>()
 
 export default function App() {
   const [booted, setBooted] = useState(false)
+  const hasProfile = useUserStore((s) => s.activeUser !== null)
   const [fontsLoaded] = useFonts({
     AtkinsonHyperlegible_400Regular,
     AtkinsonHyperlegible_700Bold,
@@ -45,9 +49,16 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Communication" component={CommunicationScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="TrackingReport" component={TrackingReportScreen} />
+        {hasProfile ? (
+          <>
+            <Stack.Screen name="Communication" component={CommunicationScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="TrackingReport" component={TrackingReportScreen} />
+          </>
+        ) : (
+          // §5.2: no profile yet → onboarding (or a guest session)
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        )}
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>

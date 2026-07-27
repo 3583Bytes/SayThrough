@@ -7,6 +7,7 @@ import { useNavigationStore } from '../../stores/navigationStore'
 
 interface TopBarProps {
   pageName: string
+  editHidden?: boolean // guest sessions: nothing may be saved
   onEditPress: () => void // PIN-gated by the caller (§13.1)
   onSearchPress: () => void // §12.4
   filter?: {
@@ -17,7 +18,13 @@ interface TopBarProps {
 }
 
 // §5.3 top bar — back/home/search left, filter/edit right
-export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarProps) {
+export function TopBar({
+  pageName,
+  editHidden,
+  onEditPress,
+  onSearchPress,
+  filter,
+}: TopBarProps) {
   const canGoBack = useNavigationStore((s) => s.pageHistory.length > 0)
   const navigateBack = useNavigationStore((s) => s.navigateBack)
   const navigateHome = useNavigationStore((s) => s.navigateHome)
@@ -73,14 +80,16 @@ export function TopBar({ pageName, onEditPress, onSearchPress, filter }: TopBarP
             <MaterialIcons name="block" size={22} color={filter.enabled ? "#E65100" : "#444444"} />
           </Pressable>
         )}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Edit mode"
-          onPress={onEditPress}
-          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-        >
-          <MaterialIcons name="settings" size={22} color="#444444" />
-        </Pressable>
+        {!editHidden && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Edit mode"
+            onPress={onEditPress}
+            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+          >
+            <MaterialIcons name="settings" size={22} color="#444444" />
+          </Pressable>
+        )}
       </View>
     </View>
   )

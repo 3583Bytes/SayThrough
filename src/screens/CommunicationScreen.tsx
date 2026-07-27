@@ -31,7 +31,7 @@ import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
-import { useUserStore } from '../stores/userStore'
+import { GUEST_USER_ID, useUserStore } from '../stores/userStore'
 import type { Button } from '../types/models'
 import { verifyPin } from '../utils/pin'
 import { uuid } from '../utils/uuid'
@@ -62,6 +62,7 @@ export function CommunicationScreen() {
   const edit = useEditStore.getState
 
   const activeUser = useUserStore((s) => s.activeUser)
+  const isGuest = activeUser?.id === GUEST_USER_ID
   const filterListId =
     wordListEditingId ??
     (activeUser?.filterEnabled ? activeUser.activeWordListId : undefined)
@@ -323,6 +324,7 @@ export function CommunicationScreen() {
         ) : (
           <TopBar
             pageName={page.name}
+            editHidden={isGuest}
             onEditPress={requestEditAccess}
             onSearchPress={() => setSearchVisible(true)}
             filter={
@@ -338,6 +340,20 @@ export function CommunicationScreen() {
                 : undefined
             }
           />
+        )}
+        {isGuest && (
+          <View style={styles.guestBanner}>
+            <Text style={styles.guestText}>
+              Demo mode — nothing is saved.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Set up SayThrough"
+              onPress={() => useUserStore.getState().endGuest()}
+            >
+              <Text style={styles.guestAction}>Set up SayThrough</Text>
+            </Pressable>
+          </View>
         )}
         {isEditMode && showBackupNudge && (
           <View style={styles.nudge}>
@@ -548,5 +564,26 @@ const styles = StyleSheet.create({
   },
   menuPressed: {
     opacity: 0.7,
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: '#E3F2FD',
+    borderBottomWidth: 1,
+    borderBottomColor: '#90CAF9',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  guestText: {
+    fontSize: 13,
+    color: '#1565C0',
+  },
+  guestAction: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#1565C0',
+    textDecorationLine: 'underline',
   },
 })

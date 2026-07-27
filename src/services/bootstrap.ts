@@ -13,16 +13,15 @@ export async function bootstrap(): Promise<void> {
   await storage.init()
   const coreSetId = await seedIfNeeded(storage)
 
-  const userStore = useUserStore.getState()
-  await userStore.load()
-  if (!useUserStore.getState().activeUser) {
-    await userStore.createUser('My voice', coreSetId)
-  }
+  // No auto-created profile: with no users, App routes to onboarding
+  // (§5.2), which creates the first profile or starts a guest session
+  await useUserStore.getState().load()
 
-  const activeUser = useUserStore.getState().activeUser!
-  const pageSet =
-    (await storage.getPageSet(activeUser.activePageSetId)) ??
-    (await storage.getPageSet(coreSetId))
+  const activeUser = useUserStore.getState().activeUser
+  const pageSet = activeUser
+    ? ((await storage.getPageSet(activeUser.activePageSetId)) ??
+      (await storage.getPageSet(coreSetId)))
+    : await storage.getPageSet(coreSetId)
   if (pageSet) {
     useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
     void warmupActiveSetSymbols(pageSet.id) // fire-and-forget

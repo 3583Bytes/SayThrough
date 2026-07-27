@@ -5,6 +5,8 @@ import type { UserProfile } from '../types/models'
 import { uuid } from '../utils/uuid'
 
 // §7.3 — active profile drives TTS settings, speak-on-select, PIN gate
+export const GUEST_USER_ID = 'guest'
+
 interface UserState {
   activeUser: UserProfile | null
   users: UserProfile[]
@@ -12,6 +14,8 @@ interface UserState {
   setActiveUser: (userId: string) => Promise<void>
   updateActiveUser: (changes: Partial<UserProfile>) => Promise<void>
   createUser: (name: string, activePageSetId: string) => Promise<UserProfile>
+  startGuest: (activePageSetId: string) => void // §4.14: nothing saved
+  endGuest: () => void
 }
 
 function applyTtsSettings(user: UserProfile) {
@@ -48,7 +52,9 @@ export const useUserStore = create<UserState>((set, get) => ({
     const current = get().activeUser
     if (!current) return
     const updated = { ...current, ...changes, updatedAt: Date.now() }
-    await storage.updateUser(updated)
+    if (current.id !== GUEST_USER_ID) {
+      await storage.updateUser(updated) // guest sessions persist nothing
+    }
     applyTtsSettings(updated)
     set({
       activeUser: updated,
@@ -75,5 +81,29 @@ export const useUserStore = create<UserState>((set, get) => ({
     applyTtsSettings(user)
     set({ users: [...get().users, user], activeUser: user })
     return user
+  },
+
+  // "Try SayThrough" — a transient in-memory profile so an SLP or parent
+  // can evaluate from a link in 30 seconds; never written to storage
+  startGuest: (activePageSetId) => {
+    const now = Date.now()
+    const guest: UserProfile = {
+      id: GUEST_USER_ID,
+      name: 'Guest',
+      activePageSetId,
+      language: 'en-US',
+      ttsRate: 0.9,
+      ttsPitch: 1.0,
+      ttsVolume: 1.0,
+      speakOnSelect: false,
+      createdAt: now,
+      updatedAt: now,
+    }
+    applyTtsSettings(guest)
+    set({ activeUser: guest })
+  },
+
+  endGuest: () => {
+    if (get().activeUser?.id === GUEST_USER_ID) set({ activeUser: null })
   },
 }))
