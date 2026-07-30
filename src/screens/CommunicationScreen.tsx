@@ -21,6 +21,7 @@ import { SearchModal } from '../components/communication/SearchModal'
 import { SymbolGrid } from '../components/communication/SymbolGrid'
 import { Toolbar } from '../components/communication/Toolbar'
 import { TopBar } from '../components/communication/TopBar'
+import { WordFormsModal } from '../components/communication/WordFormsModal'
 import { PinEntryModal } from '../components/common/PinEntryModal'
 import {
   ButtonEditorPanel,
@@ -33,6 +34,7 @@ import { useScanning, type ScanItem } from '../hooks/useScanning'
 import { useTheme } from '../hooks/useTheme'
 import { executeButtonActions } from '../services/actionExecutor'
 import { useMessageStore } from '../stores/messageStore'
+import { wordForms } from '../services/morphology'
 import { deletePageAndCleanLinks, renamePage } from '../services/pageService'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
@@ -216,6 +218,21 @@ export function CommunicationScreen() {
       enterEdit()
     } else {
       setPinError('Wrong PIN — try again')
+    }
+  }
+
+  // §Tier-1 word forms: long-press a word button (use mode) → pick an
+  // inflection. Disabled when hold-to-activate is on (that gesture already
+  // means "select"), and only for word buttons that have alternate forms.
+  const [formsButton, setFormsButton] = useState<Button | null>(null)
+  const holdToActivate = (activeUser?.touchHoldDuration ?? 0) > 0
+
+  const handleButtonLongPress = (button: Button) => {
+    if (scanningEnabled) return
+    const isWord = button.actions.some((a) => a.type === 'append_to_message')
+    if (!isWord) return
+    if (wordForms(button.label, button.partOfSpeech).length > 1) {
+      setFormsButton(button)
     }
   }
 
@@ -482,6 +499,9 @@ export function CommunicationScreen() {
                 : undefined
           }
           onButtonPress={handleButtonPress}
+          onButtonLongPress={
+            !isEditMode && !holdToActivate ? handleButtonLongPress : undefined
+          }
           onButtonMove={handleButtonMove}
           onEmptyCellPress={wordListEditingId ? undefined : handleEmptyCellPress}
         />
@@ -513,6 +533,21 @@ export function CommunicationScreen() {
         error={pinError}
       />
       <SearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
+      <WordFormsModal
+        visible={!!formsButton}
+        word={formsButton?.label ?? ''}
+        pos={formsButton?.partOfSpeech}
+        onPick={(value) => {
+          if (formsButton) {
+            useMessageStore.getState().appendToken(value, {
+              symbolId: formsButton.symbolId,
+              customSymbolUri: formsButton.customSymbolUri,
+            })
+          }
+          setFormsButton(null)
+        }}
+        onClose={() => setFormsButton(null)}
+      />
       <Modal
         visible={pageMenuVisible}
         transparent

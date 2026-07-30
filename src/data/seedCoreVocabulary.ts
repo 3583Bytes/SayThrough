@@ -57,6 +57,7 @@ function makeButton(
     rowSpan: 1,
     columnSpan: 1,
     label,
+    partOfSpeech: pos,
     symbolId: SYMBOL_MAP[label],
     backgroundColor: POS_COLORS[pos],
     borderColor: UI_COLORS.buttonBorder,
@@ -139,7 +140,7 @@ const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when bundled content changes. From v6 on, a bump runs a
 // data-preserving migration (rebuildBuiltInContent) — NOT a wipe.
-const SEED_VERSION = '7'
+const SEED_VERSION = '8'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)

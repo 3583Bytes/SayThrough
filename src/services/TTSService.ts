@@ -13,7 +13,11 @@ export interface SpeakOptions {
   volume?: number
   onStart?: () => void
   onDone?: () => void
+  onStopped?: () => void
   onError?: (error: Error) => void
+  // Fired as each word is reached (word-by-word highlight). charIndex is
+  // the offset into `text`; available on web + native via expo-speech.
+  onBoundary?: (charIndex: number) => void
 }
 
 // technical-specification.md §10.1 / §10.4
@@ -81,7 +85,11 @@ class TTSService {
       volume: o.volume ?? 1.0,
       onStart: o.onStart,
       onDone: o.onDone,
+      onStopped: o.onStopped,
       onError: o.onError,
+      onBoundary: o.onBoundary
+        ? (ev: { charIndex: number }) => o.onBoundary?.(ev.charIndex)
+        : undefined,
     })
   }
 

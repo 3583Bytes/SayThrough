@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { recordSpoken } from '../services/messageHistory'
 import { logMessageSpoken } from '../services/TrackingService'
 import { ttsService } from '../services/TTSService'
+import { tokenIdAtChar } from '../utils/tokenRanges'
 import { useNavigationStore } from './navigationStore'
 import { useUserStore } from './userStore'
 
@@ -14,6 +15,8 @@ export interface MessageToken {
 
 interface MessageState {
   tokens: MessageToken[]
+  // The token currently being spoken (word-by-word highlight), or null.
+  speakingTokenId: string | null
   appendToken: (
     text: string,
     symbol?: Pick<MessageToken, 'symbolId' | 'customSymbolUri'>,
@@ -33,6 +36,7 @@ let nextTokenId = 0
 // immediate feedback without giving up sentence building
 export const useMessageStore = create<MessageState>((set, get) => ({
   tokens: [],
+  speakingTokenId: null,
 
   appendToken: (text, symbol) => {
     set((state) => ({
@@ -60,18 +64,25 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     }),
 
   speakMessage: () => {
-    const message = get()
-      .tokens.map((t) => t.text)
-      .join(' ')
+    const tokens = get().tokens
+    const message = tokens.map((t) => t.text).join(' ')
     if (!message) return
-    ttsService.speak(message)
+    // Word-by-word highlight: map each boundary's charIndex back to a token.
+    // Cleared when speech finishes, is interrupted, or errors.
+    set({ speakingTokenId: null })
+    ttsService.speak(message, {
+      onBoundary: (charIndex) => set({ speakingTokenId: tokenIdAtChar(tokens, charIndex) }),
+      onDone: () => set({ speakingTokenId: null }),
+      onStopped: () => set({ speakingTokenId: null }),
+      onError: () => set({ speakingTokenId: null }),
+    })
     const user = useUserStore.getState().activeUser
     logMessageSpoken(message) // no-op unless caregiver opted in (tracking)
     void recordSpoken(user?.id, message) // history — always on, per profile
     // §UX post-speak options (both default off): clear the bar and/or jump
     // home so the next utterance starts from core. Text is already captured
     // above, so mutating tokens here is safe.
-    if (user?.clearAfterSpeak) set({ tokens: [] })
+    if (user?.clearAfterSpeak) set({ tokens: [], speakingTokenId: null })
     if (user?.returnHomeAfterSpeak) useNavigationStore.getState().navigateHome()
   },
 }))

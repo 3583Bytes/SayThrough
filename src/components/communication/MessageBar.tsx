@@ -32,6 +32,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
   const clearMessage = useMessageStore((s) => s.clearMessage)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
   const removeToken = useMessageStore((s) => s.removeToken)
+  const speakingTokenId = useMessageStore((s) => s.speakingTokenId)
   const [actionsVisible, setActionsVisible] = useState(false)
   const [historyVisible, setHistoryVisible] = useState(false)
   const [actionFeedback, setActionFeedback] = useState('')
@@ -91,6 +92,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
             const uri =
               token.customSymbolUri ??
               (token.symbolId ? getSymbolUri(token.symbolId) : null)
+            const speaking = token.id === speakingTokenId
             return (
               <Pressable
                 key={token.id}
@@ -102,14 +104,20 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
                 delayLongPress={500}
                 style={({ pressed }) => [
                   styles.tokenPill,
-                  { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+                  speaking
+                    ? { backgroundColor: theme.accent, borderColor: theme.accent }
+                    : { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
                   pressed && styles.pressed,
                 ]}
               >
                 {uri && (
                   <Image source={{ uri }} style={styles.tokenSymbol} contentFit="contain" />
                 )}
-                <Text style={[styles.tokenText, { color: theme.text }]}>{token.text}</Text>
+                <Text
+                  style={[styles.tokenText, { color: speaking ? '#FFFFFF' : theme.text }]}
+                >
+                  {token.text}
+                </Text>
               </Pressable>
             )
           })}

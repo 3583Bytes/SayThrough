@@ -1,3 +1,5 @@
+import type { PartOfSpeech } from '../constants/colors'
+
 // Data models — technical-specification.md §4. Fields not yet used by the
 // app (styling overrides, audio, spans) are included so rows written now
 // stay forward-compatible.
@@ -116,6 +118,7 @@ export interface Button {
   columnSpan: number
 
   label: string
+  partOfSpeech?: PartOfSpeech // drives word-forms (§Tier-1) and color coding
   symbolId?: string // namespaced ref, e.g. 'arasaac:2788'
   customSymbolUri?: string
   audioUri?: string

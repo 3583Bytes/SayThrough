@@ -190,3 +190,19 @@ test.describe('quick-fire buttons & message history', () => {
     await expect(messageBar(page).getByText('want', { exact: true })).toBeVisible()
   })
 })
+
+test.describe('word forms (§Tier-1)', () => {
+  test('long-press a verb offers inflections and inserts the chosen one', async ({
+    page,
+  }) => {
+    await setupProfile(page)
+    // 'go' is a verb in the core set → press-and-hold opens its forms
+    await page.getByLabel('go', { exact: true }).click({ delay: 700 })
+    await expect(page.getByText('Forms of “go”')).toBeVisible()
+
+    await page.getByLabel('Insert going').click()
+    await expect(messageBar(page).getByText('going', { exact: true })).toBeVisible()
+    // the long-press picked a form; it did NOT also append the base word
+    await expect(messageBar(page).getByText('go', { exact: true })).toHaveCount(0)
+  })
+})
