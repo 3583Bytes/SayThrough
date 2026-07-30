@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **SayThrough** — a free, open-source alternative to TD Snap and other expensive AAC (Augmentative and Alternative Communication) software. Targets teachers, parents, and SLPs who cannot afford $9.99/month commercial solutions.
 
-See `docs/aac-requirements.txt` for the full feature requirements document derived from deep research into TD Snap, Proloquo2Go, and the broader AAC landscape, and `docs/technical-specification.md` for the technical spec (data models, screens, §19 core page set design). Update the spec before implementing any major feature change.
+See `docs/aac-requirements.txt` for the full feature requirements document derived from deep research into TD Snap, Proloquo2Go, and the broader AAC landscape, and `docs/technical-specification.md` for the technical spec (data models, screens, §19 core page set design). Update the spec before implementing any major feature change. `docs/competitive-backlog.md` is the prioritized, status-tracked UX & feature backlog vs. competitors — keep its checkboxes current as items ship.
 
 ## Architecture (Planned)
 

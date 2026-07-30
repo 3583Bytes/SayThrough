@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { recordSpoken } from '../services/messageHistory'
 import { logMessageSpoken } from '../services/TrackingService'
 import { ttsService } from '../services/TTSService'
 import { useNavigationStore } from './navigationStore'
@@ -21,6 +22,9 @@ interface MessageState {
   removeToken: (id: string) => void
   clearMessage: () => void
   speakMessage: () => void
+  // Replace the bar with a saved/recent phrase (text only — re-speakable,
+  // symbols aren't restored)
+  loadMessage: (text: string) => void
 }
 
 let nextTokenId = 0
@@ -47,17 +51,26 @@ export const useMessageStore = create<MessageState>((set, get) => ({
 
   clearMessage: () => set({ tokens: [] }),
 
+  loadMessage: (text) =>
+    set({
+      tokens: text
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => ({ id: String(nextTokenId++), text: w })),
+    }),
+
   speakMessage: () => {
     const message = get()
       .tokens.map((t) => t.text)
       .join(' ')
     if (!message) return
     ttsService.speak(message)
-    logMessageSpoken(message) // no-op unless caregiver opted in
+    const user = useUserStore.getState().activeUser
+    logMessageSpoken(message) // no-op unless caregiver opted in (tracking)
+    void recordSpoken(user?.id, message) // history — always on, per profile
     // §UX post-speak options (both default off): clear the bar and/or jump
     // home so the next utterance starts from core. Text is already captured
     // above, so mutating tokens here is safe.
-    const user = useUserStore.getState().activeUser
     if (user?.clearAfterSpeak) set({ tokens: [] })
     if (user?.returnHomeAfterSpeak) useNavigationStore.getState().navigateHome()
   },

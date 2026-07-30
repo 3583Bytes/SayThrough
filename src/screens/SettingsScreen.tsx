@@ -350,6 +350,29 @@ export function SettingsScreen() {
           </View>
         </View>
 
+        {/* Quick-fire message-bar buttons */}
+        <Text style={[styles.sectionTitle, mutedT]}>Quick Buttons</Text>
+        <View style={[styles.card, cardT]}>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Attention bell</Text>
+            <Switch
+              value={activeUser.attentionButton ?? true}
+              onValueChange={(value) => updateActiveUser({ attentionButton: value })}
+              accessibilityLabel="Attention bell"
+            />
+          </View>
+          <Text style={[styles.fieldLabel, mutedT]}>
+            Emergency phrase (spoken with one tap; leave blank to hide the button)
+          </Text>
+          <TextInput
+            value={activeUser.emergencyPhrase ?? 'I need help.'}
+            onChangeText={(text) => updateActiveUser({ emergencyPhrase: text })}
+            style={[styles.input, inputT]}
+            accessibilityLabel="Emergency phrase"
+            placeholder="I need help."
+          />
+        </View>
+
         {/* 3. Access Method (§4.6) */}
         <Text style={[styles.sectionTitle, mutedT]}>Access Method</Text>
         <View style={[styles.card, cardT]}>

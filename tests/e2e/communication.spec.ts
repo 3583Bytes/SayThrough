@@ -140,3 +140,53 @@ test.describe('sentence-bar interactions & post-speak options', () => {
     await expect(messageBar(page).getByText('I', { exact: true })).toHaveCount(0)
   })
 })
+
+test.describe('quick-fire buttons & message history', () => {
+  test('attention + emergency buttons are present and non-destructive', async ({
+    page,
+  }) => {
+    await setupProfile(page)
+    await expect(page.getByLabel('Get attention')).toBeVisible()
+    await expect(page.getByLabel('Speak emergency phrase')).toBeVisible()
+
+    // tapping them must not break message building
+    await page.getByLabel('Speak emergency phrase').click()
+    await page.getByLabel('Get attention').click()
+    await page.getByLabel('I', { exact: true }).click()
+    await expect(messageBar(page).getByText('I', { exact: true })).toBeVisible()
+  })
+
+  test('settings can hide the emergency and attention buttons', async ({ page }) => {
+    await setupProfile(page)
+    await enterEditMode(page)
+    await page.getByLabel('Open settings').click()
+    await page.getByLabel('Emergency phrase').fill('')
+    await page.getByLabel('Attention bell').click() // toggle off
+    await page.getByLabel('Back to communication').click()
+    await page.getByLabel('Done editing').click()
+
+    await expect(page.getByLabel('Speak emergency phrase')).toHaveCount(0)
+    await expect(page.getByLabel('Get attention')).toHaveCount(0)
+  })
+
+  test('a spoken message can be recalled from history into the bar', async ({
+    page,
+  }) => {
+    await setupProfile(page)
+    await page.getByLabel('I', { exact: true }).click()
+    await page.getByLabel('want', { exact: true }).click()
+    await page.getByLabel('Speak message').click()
+
+    // clear the bar so recall is observable
+    await page.getByLabel('Message actions').click()
+    await page.getByLabel('Clear message').click()
+    await expect(messageBar(page).getByText('want', { exact: true })).toHaveCount(0)
+
+    // reopen actions → Recent messages → tap the phrase to reload it
+    await page.getByLabel('Message actions').click()
+    await page.getByLabel('Recent messages').click()
+    await page.getByLabel('Use phrase: I want').click()
+    await expect(messageBar(page).getByText('I', { exact: true })).toBeVisible()
+    await expect(messageBar(page).getByText('want', { exact: true })).toBeVisible()
+  })
+})

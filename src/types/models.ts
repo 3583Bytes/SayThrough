@@ -21,6 +21,11 @@ export interface UserProfile {
   // Both default off (undefined) to preserve the build-and-keep behavior.
   returnHomeAfterSpeak?: boolean
   clearAfterSpeak?: boolean
+  // Message-bar quick-fire buttons. Attention bell defaults on (undefined =
+  // shown); the emergency button speaks `emergencyPhrase` and hides when the
+  // phrase is set to an empty string.
+  attentionButton?: boolean
+  emergencyPhrase?: string
   // Access method (§4.6) — how the user physically selects. Defaults to
   // touch; 'dwell' and 'scanning' widen who can use the app.
   accessMethod?: AccessMethod

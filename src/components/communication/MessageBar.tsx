@@ -15,8 +15,12 @@ import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { playAttentionChime } from '../../services/attentionSound'
 import { getSymbolUri } from '../../services/SymbolService'
+import { ttsService } from '../../services/TTSService'
 import { useMessageStore } from '../../stores/messageStore'
+import { useUserStore } from '../../stores/userStore'
+import { MessageHistoryModal } from './MessageHistoryModal'
 
 // §AM-05: stable ids so the scan engine can target the message actions
 export const SCAN_SPEAK = 'scan-speak'
@@ -29,9 +33,14 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
   const removeToken = useMessageStore((s) => s.removeToken)
   const [actionsVisible, setActionsVisible] = useState(false)
+  const [historyVisible, setHistoryVisible] = useState(false)
   const [actionFeedback, setActionFeedback] = useState('')
   const scanned = (id: string) => scanHighlightIds?.has(id)
   const theme = useTheme()
+
+  const activeUser = useUserStore((s) => s.activeUser)
+  const showAttention = activeUser?.attentionButton !== false // default on
+  const emergencyPhrase = (activeUser?.emergencyPhrase ?? 'I need help.').trim()
 
   const messageText = tokens.map((t) => t.text).join(' ')
 
@@ -108,23 +117,53 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
       </Pressable>
 
       <View style={styles.actions}>
-        {tokens.length > 0 && (
+        {/* Quick-fire buttons — always available, independent of the
+            composed message: a bell to get attention and a one-tap
+            emergency phrase. */}
+        {showAttention && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Message actions"
-            onPress={() => {
-              setActionFeedback('')
-              setActionsVisible(true)
-            }}
+            accessibilityLabel="Get attention"
+            onPress={playAttentionChime}
             style={({ pressed }) => [
               styles.smallButton,
               { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
               pressed && styles.pressed,
             ]}
           >
-            <MaterialIcons name="more-horiz" size={22} color={theme.icon} />
+            <MaterialIcons name="notifications-active" size={22} color={theme.icon} />
           </Pressable>
         )}
+        {emergencyPhrase !== '' && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Speak emergency phrase"
+            onPress={() => ttsService.speak(emergencyPhrase)}
+            style={({ pressed }) => [
+              styles.smallButton,
+              styles.emergencyButton,
+              { backgroundColor: theme.surfaceAlt },
+              pressed && styles.pressed,
+            ]}
+          >
+            <MaterialIcons name="warning" size={20} color={UI_COLORS.clearRed} />
+          </Pressable>
+        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Message actions"
+          onPress={() => {
+            setActionFeedback('')
+            setActionsVisible(true)
+          }}
+          style={({ pressed }) => [
+            styles.smallButton,
+            { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+            pressed && styles.pressed,
+          ]}
+        >
+          <MaterialIcons name="more-horiz" size={22} color={theme.icon} />
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Speak message"
@@ -164,59 +203,88 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
           onPress={() => setActionsVisible(false)}
         >
           <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.sheetMessage, { color: theme.textMuted }]} numberOfLines={2}>
-              “{messageText}”
-            </Text>
+            {messageText !== '' && (
+              <>
+                <Text
+                  style={[styles.sheetMessage, { color: theme.textMuted }]}
+                  numberOfLines={2}
+                >
+                  “{messageText}”
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Copy message"
+                  onPress={copyMessage}
+                  style={({ pressed }) => [
+                    styles.sheetButton,
+                    { borderColor: theme.border },
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={[styles.sheetButtonText, { color: theme.text }]}>
+                    {actionFeedback || 'Copy message'}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Share message"
+                  onPress={shareMessage}
+                  style={({ pressed }) => [
+                    styles.sheetButton,
+                    { borderColor: theme.border },
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={[styles.sheetButtonText, { color: theme.text }]}>
+                    Share message
+                  </Text>
+                </Pressable>
+                {/* Clear-all lives here (not on the bar) so it isn't confused
+                    with the ⌫ backspace, which deletes only the last word */}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear message"
+                  onPress={() => {
+                    clearMessage()
+                    setActionsVisible(false)
+                  }}
+                  style={({ pressed }) => [
+                    styles.sheetButton,
+                    { borderColor: UI_COLORS.clearRed },
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={[styles.sheetButtonText, { color: UI_COLORS.clearRed }]}>
+                    Clear message
+                  </Text>
+                </Pressable>
+              </>
+            )}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Copy message"
-              onPress={copyMessage}
-              style={({ pressed }) => [
-                styles.sheetButton,
-                { borderColor: theme.border },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[styles.sheetButtonText, { color: theme.text }]}>
-                {actionFeedback || 'Copy message'}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Share message"
-              onPress={shareMessage}
-              style={({ pressed }) => [
-                styles.sheetButton,
-                { borderColor: theme.border },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[styles.sheetButtonText, { color: theme.text }]}>
-                Share message
-              </Text>
-            </Pressable>
-            {/* Clear-all lives here (not on the bar) so it isn't confused
-                with the ⌫ backspace, which deletes only the last word */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Clear message"
+              accessibilityLabel="Recent messages"
               onPress={() => {
-                clearMessage()
                 setActionsVisible(false)
+                setHistoryVisible(true)
               }}
               style={({ pressed }) => [
                 styles.sheetButton,
-                { borderColor: UI_COLORS.clearRed },
+                { borderColor: theme.border },
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.sheetButtonText, { color: UI_COLORS.clearRed }]}>
-                Clear message
+              <Text style={[styles.sheetButtonText, { color: theme.text }]}>
+                Recent messages
               </Text>
             </Pressable>
           </View>
         </Pressable>
       </Modal>
+
+      <MessageHistoryModal
+        visible={historyVisible}
+        onClose={() => setHistoryVisible(false)}
+      />
     </View>
   )
 }
@@ -297,6 +365,9 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emergencyButton: {
+    borderColor: UI_COLORS.clearRed,
   },
   scanHighlight: {
     borderWidth: 4,
