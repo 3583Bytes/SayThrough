@@ -16,6 +16,11 @@ export interface UserProfile {
   ttsPitch: number // 0.5–2.0 (default 1.0)
   ttsVolume: number // 0.0–1.0 (default 1.0)
   speakOnSelect: boolean
+  // After speaking the full message: optionally jump back to the home page
+  // (motor planning — next utterance starts from core) and/or clear the bar.
+  // Both default off (undefined) to preserve the build-and-keep behavior.
+  returnHomeAfterSpeak?: boolean
+  clearAfterSpeak?: boolean
   // Access method (§4.6) — how the user physically selects. Defaults to
   // touch; 'dwell' and 'scanning' widen who can use the app.
   accessMethod?: AccessMethod
@@ -41,6 +46,7 @@ export interface UserProfile {
   messageBarPosition?: 'top' | 'bottom' // bottom = easier reach when mounted
   buttonGap?: 'compact' | 'normal' | 'wide' // wide reduces mis-hits
   labelTextScale?: number // 0.85–1.4 button-label multiplier
+  theme?: 'light' | 'dark' | 'system' // §6.1 appearance (default system)
   createdAt: number
   updatedAt: number
 }

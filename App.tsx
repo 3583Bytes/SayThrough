@@ -12,6 +12,7 @@ import { CommunicationScreen } from './src/screens/CommunicationScreen'
 import { OnboardingScreen } from './src/screens/OnboardingScreen'
 import { SettingsScreen } from './src/screens/SettingsScreen'
 import { TrackingReportScreen } from './src/screens/TrackingReportScreen'
+import { useTheme } from './src/hooks/useTheme'
 import { bootstrap } from './src/services/bootstrap'
 import { useUserStore } from './src/stores/userStore'
 
@@ -27,6 +28,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>()
 export default function App() {
   const [booted, setBooted] = useState(false)
   const hasProfile = useUserStore((s) => s.activeUser !== null)
+  const theme = useTheme()
   const [fontsLoaded] = useFonts({
     AtkinsonHyperlegible_400Regular,
     AtkinsonHyperlegible_700Bold,
@@ -38,10 +40,12 @@ export default function App() {
 
   if (!booted || !fontsLoaded) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: theme.screen }]}>
         <Text style={styles.loadingTitle}>SayThrough</Text>
         <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingHint}>Getting your voice ready…</Text>
+        <Text style={[styles.loadingHint, { color: theme.textMuted }]}>
+          Getting your voice ready…
+        </Text>
       </View>
     )
   }

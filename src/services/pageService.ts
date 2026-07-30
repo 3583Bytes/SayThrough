@@ -1,3 +1,4 @@
+import { UI_COLORS } from '../constants/colors'
 import { storage } from '../storage'
 import type { Button, Page } from '../types/models'
 import { uuid } from '../utils/uuid'
@@ -48,6 +49,32 @@ export async function createLinkedPage(
       await storage.createButton(copy)
     }
   }
+
+  // Every sub-page is reachable only by linking, so it always has a page to
+  // return to — give it an in-grid Back button at the first content cell,
+  // matching built-in topic pages (§19.5: fixed position, never shifts).
+  await storage.createButton({
+    id: uuid(),
+    pageId: page.id,
+    row: 0,
+    column: includeCoreRegion ? 3 : 0,
+    rowSpan: 1,
+    columnSpan: 1,
+    label: 'Back',
+    backgroundColor: '#ECEFF1',
+    borderColor: UI_COLORS.buttonBorder,
+    borderWidth: 1,
+    labelColor: UI_COLORS.label,
+    labelFontSize: 14,
+    labelFontWeight: 'bold',
+    symbolScale: 0.65,
+    isHidden: false,
+    isNavigationButton: false,
+    actions: [{ type: 'navigate_back' }],
+    isBuiltIn: false,
+    createdAt: now,
+    updatedAt: now,
+  })
 
   return page
 }

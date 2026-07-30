@@ -1,7 +1,9 @@
 import {
   isNoveltyVoice,
+  isValidVoiceId,
   pickDefaultVoice,
   rankVoices,
+  resolveVoiceId,
   type RankableVoice,
 } from '../../src/services/voiceSelection'
 
@@ -53,5 +55,38 @@ describe('voiceSelection (§10.2)', () => {
   test('empty voice list is handled safely', () => {
     expect(pickDefaultVoice([], 'en-US')).toBeUndefined()
     expect(rankVoices([], 'en-US')).toEqual([])
+  })
+})
+
+// The crux of the "robot voice kept coming back" bug: expo-speech-web
+// silently uses voices[0] when the requested id matches nothing, so the
+// id we hand it must always be present and non-novelty.
+describe('resolveVoiceId — never feed expo-speech a bad id', () => {
+  test('keeps a valid requested voice', () => {
+    expect(resolveVoiceId(MAC, 'samantha', 'en-US')).toBe('samantha')
+  })
+
+  test('substitutes best voice when the requested id is a NOVELTY voice', () => {
+    // e.g. a profile that had "Zarvox" stored from before the fix
+    expect(resolveVoiceId(MAC, 'zarvox', 'en-US')).toBe('samantha')
+  })
+
+  test('substitutes best voice when the requested id is STALE (not in list)', () => {
+    expect(resolveVoiceId(MAC, 'com.some.removed.voice', 'en-US')).toBe('samantha')
+  })
+
+  test('substitutes best voice when no voice is requested', () => {
+    expect(resolveVoiceId(MAC, undefined, 'en-US')).toBe('samantha')
+  })
+
+  test('returns undefined (→ OS default, NOT voices[0]) when nothing loaded', () => {
+    expect(resolveVoiceId([], 'zarvox', 'en-US')).toBeUndefined()
+  })
+
+  test('isValidVoiceId rejects novelty, stale, and empty ids', () => {
+    expect(isValidVoiceId(MAC, 'samantha')).toBe(true)
+    expect(isValidVoiceId(MAC, 'zarvox')).toBe(false) // novelty
+    expect(isValidVoiceId(MAC, 'gone')).toBe(false) // stale
+    expect(isValidVoiceId(MAC, undefined)).toBe(false)
   })
 })

@@ -5,7 +5,6 @@ import { useUserStore } from '../stores/userStore'
 import { initPwa, warmupSymbolCache } from './pwa'
 import { getSymbolUri } from './SymbolService'
 import { ttsService } from './TTSService'
-import { pickDefaultVoice } from './voiceSelection'
 
 // App startup: storage → seed → profile → navigation → TTS.
 // Runs once from App before the navigator renders.
@@ -38,10 +37,15 @@ export async function bootstrap(): Promise<void> {
 async function pickAndPersistDefaultVoice(): Promise<void> {
   await ttsService.init()
   const user = useUserStore.getState().activeUser
-  if (!user || user.ttsVoiceId) return
-  const best = pickDefaultVoice(ttsService.getVoices(), user.language)
+  if (!user) return
+  // Self-heal: re-pick if the stored voice is missing, stale (not in the
+  // current list), or a novelty voice — NOT only when it's empty. An
+  // earlier bad/first-run value would otherwise stick forever and the
+  // user keeps hearing the wrong voice.
+  if (ttsService.isValidVoiceId(user.ttsVoiceId)) return
+  const best = ttsService.bestVoiceId(user.language)
   if (best) {
-    await useUserStore.getState().updateActiveUser({ ttsVoiceId: best.identifier })
+    await useUserStore.getState().updateActiveUser({ ttsVoiceId: best })
   }
 }
 

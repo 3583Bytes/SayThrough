@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { messageBar, setupProfile } from './helpers'
+import { enterEditMode, messageBar, setupProfile } from './helpers'
 
 test.describe('core communication', () => {
   test('onboarding lands on Core with symbols', async ({ page }) => {
@@ -32,6 +32,8 @@ test.describe('core communication', () => {
     await page.getByLabel('Delete last word').click()
     await expect(messageBar(page).getByText('want')).toHaveCount(0)
     await expect(messageBar(page).getByText('I', { exact: true })).toBeVisible()
+    // clear-all now lives in the ⋯ message-actions sheet, not on the bar
+    await page.getByLabel('Message actions').click()
     await page.getByLabel('Clear message').click()
     await expect(messageBar(page).getByText('I', { exact: true })).toHaveCount(0)
   })
@@ -60,6 +62,8 @@ test.describe('navigation & persistent core', () => {
   test('topic pages keep the core region in the same place', async ({ page }) => {
     await setupProfile(page)
     const wantHome = await page.getByLabel('want', { exact: true }).boundingBox()
+    // no Back on the home page — there's nowhere to go back to
+    await expect(page.getByLabel('Back')).toHaveCount(0)
 
     await page.getByLabel('Food, opens page').click()
     await page.getByLabel('cookie', { exact: true }).waitFor()
@@ -69,8 +73,11 @@ test.describe('navigation & persistent core', () => {
     expect(Math.abs(wantHome!.x - wantFood!.x)).toBeLessThan(2)
     expect(Math.abs(wantHome!.y - wantFood!.y)).toBeLessThan(2)
 
+    // a clear, labeled Back appears inside a category to return to it
+    await expect(page.getByLabel('Back')).toBeVisible()
     await page.getByLabel('Back').click()
     await expect(page.getByLabel('Food, opens page')).toBeVisible()
+    await expect(page.getByLabel('Back')).toHaveCount(0)
   })
 
   test('search jumps to a word on its page', async ({ page }) => {
@@ -79,5 +86,57 @@ test.describe('navigation & persistent core', () => {
     await page.getByRole('textbox', { name: 'Search vocabulary' }).fill('cook')
     await page.getByLabel('Go to cookie on Food').click()
     await expect(page.getByLabel('cookie', { exact: true })).toBeVisible()
+  })
+})
+
+test.describe('sentence-bar interactions & post-speak options', () => {
+  test('long-press a word removes just that word', async ({ page }) => {
+    await setupProfile(page)
+    await page.getByLabel('I', { exact: true }).click()
+    await page.getByLabel('want', { exact: true }).click()
+    await page.getByLabel('more', { exact: true }).click()
+    const bar = messageBar(page)
+    await expect(bar.getByText('want', { exact: true })).toBeVisible()
+
+    // press-and-hold the middle word → removes only it (tap would speak)
+    await bar.getByText('want', { exact: true }).click({ delay: 700 })
+    await expect(bar.getByText('want', { exact: true })).toHaveCount(0)
+    await expect(bar.getByText('I', { exact: true })).toBeVisible()
+    await expect(bar.getByText('more', { exact: true })).toBeVisible()
+  })
+
+  test('return-home-after-speaking jumps back to the categories', async ({
+    page,
+  }) => {
+    await setupProfile(page)
+    await enterEditMode(page)
+    await page.getByLabel('Open settings').click()
+    await page.getByLabel('Return to home after speaking').click()
+    await page.getByLabel('Back to communication').click()
+    await page.getByLabel('Done editing').click()
+
+    await page.getByLabel('Food, opens page').click()
+    await page.getByLabel('cookie', { exact: true }).click()
+    await page.getByLabel('Speak message').click()
+
+    // back on the home page — category buttons are visible again
+    await expect(page.getByLabel('Food, opens page')).toBeVisible()
+  })
+
+  test('clear-after-speaking empties the sentence bar', async ({ page }) => {
+    await setupProfile(page)
+    await enterEditMode(page)
+    await page.getByLabel('Open settings').click()
+    await page.getByLabel('Clear message after speaking').click()
+    await page.getByLabel('Back to communication').click()
+    await page.getByLabel('Done editing').click()
+
+    await page.getByLabel('I', { exact: true }).click()
+    await page.getByLabel('want', { exact: true }).click()
+    await expect(messageBar(page).getByText('want', { exact: true })).toBeVisible()
+
+    await page.getByLabel('Speak message').click()
+    await expect(messageBar(page).getByText('want', { exact: true })).toHaveCount(0)
+    await expect(messageBar(page).getByText('I', { exact: true })).toHaveCount(0)
   })
 })

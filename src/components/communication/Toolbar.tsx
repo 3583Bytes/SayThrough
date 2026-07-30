@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
+import { useTheme } from '../../hooks/useTheme'
 
 export type ToolbarSection = 'core' | 'quick' | 'keyboard' | null
 
@@ -16,6 +17,7 @@ interface ToolbarProps {
 // §5.3 toolbar — Core / Quick / Keys for v1.0; Topics is covered by the
 // home page's navigation buttons, Forms arrives in v1.1
 export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarProps) {
+  const theme = useTheme()
   const items: Array<
     [keyof typeof MaterialIcons.glyphMap, string, () => void, ToolbarSection]
   > = [
@@ -24,7 +26,12 @@ export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarP
     ['keyboard', 'Keys', onKeyboard, 'keyboard'],
   ]
   return (
-    <View style={styles.bar}>
+    <View
+      style={[
+        styles.bar,
+        { backgroundColor: theme.chrome, borderTopColor: theme.chromeBorder },
+      ]}
+    >
       {items.map(([icon, label, onPress, section]) => {
         const active = section === activeSection
         return (
@@ -39,8 +46,12 @@ export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarP
             pressed && styles.pressed,
           ]}
         >
-          <MaterialIcons name={icon} size={20} color={active ? '#1976D2' : '#666666'} />
-          <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
+          <MaterialIcons name={icon} size={20} color={active ? theme.accent : theme.icon} />
+          <Text
+            style={[styles.label, { color: active ? theme.accent : theme.textMuted }]}
+          >
+            {label}
+          </Text>
         </Pressable>
         )
       })}

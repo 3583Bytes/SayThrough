@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
+import { useTheme } from '../../hooks/useTheme'
 import { ttsService } from '../../services/TTSService'
 import { storage } from '../../storage'
 import { useNavigationStore } from '../../stores/navigationStore'
@@ -23,6 +24,7 @@ interface SearchModalProps {
 // set; tap a result to jump to its page (button flashes), or speak it
 // directly from the results. Path highlighting is v1.2.
 export function SearchModal({ visible, onClose }: SearchModalProps) {
+  const theme = useTheme()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Array<{ button: Button; pageName: string }>>([])
 
@@ -52,15 +54,19 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <View style={styles.searchRow}>
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Find a word…"
+              placeholderTextColor={theme.textMuted}
               autoFocus
-              style={styles.input}
+              style={[
+                styles.input,
+                { backgroundColor: theme.surfaceAlt, borderColor: theme.border, color: theme.text },
+              ]}
               accessibilityLabel="Search vocabulary"
             />
             <Pressable
@@ -84,8 +90,12 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
                   onPress={() => jumpTo(result)}
                   style={styles.resultMain}
                 >
-                  <Text style={styles.resultLabel}>{result.button.label}</Text>
-                  <Text style={styles.resultPage}>on {result.pageName}</Text>
+                  <Text style={[styles.resultLabel, { color: theme.text }]}>
+                    {result.button.label}
+                  </Text>
+                  <Text style={[styles.resultPage, { color: theme.textMuted }]}>
+                    on {result.pageName}
+                  </Text>
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"

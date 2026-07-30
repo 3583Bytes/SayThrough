@@ -67,3 +67,29 @@ export function pickDefaultVoice<T extends RankableVoice>(
 ): T | undefined {
   return rankVoices(voices, language)[0]
 }
+
+// The voice id to actually SPEAK with. expo-speech-web falls back to
+// voices[0] (often a robotic voice) when the requested id matches no
+// voiceURI, so we must only ever hand it an id we know is present and
+// non-novelty. If the requested id is missing/stale/novelty we
+// substitute the best available voice; if nothing is loaded we return
+// undefined so the OS default is used instead of voices[0].
+export function resolveVoiceId(
+  voices: RankableVoice[],
+  requested: string | undefined,
+  language: string,
+): string | undefined {
+  if (voices.length === 0) return undefined
+  const match = requested ? voices.find((v) => v.identifier === requested) : undefined
+  if (match && !isNoveltyVoice(match)) return match.identifier
+  return pickDefaultVoice(voices, language)?.identifier
+}
+
+export function isValidVoiceId(
+  voices: RankableVoice[],
+  id: string | undefined,
+): boolean {
+  if (!id || voices.length === 0) return false
+  const v = voices.find((x) => x.identifier === id)
+  return !!v && !isNoveltyVoice(v)
+}

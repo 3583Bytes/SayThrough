@@ -20,7 +20,6 @@ test.describe('vocabulary filter (§4.8)', () => {
 
     await page.getByLabel('Enable vocabulary filter').click()
     await page.waitForTimeout(300)
-    await page.getByLabel('Clear message').click()
     await page.getByLabel('want', { exact: true }).click() // in list → appends
     await page.getByLabel('go', { exact: true }).click() // not in list → inert
     await expect(messageBar(page).getByText('want')).toHaveCount(1)

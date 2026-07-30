@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../constants/colors'
 import { FONTS } from '../constants/typography'
+import { useTheme } from '../hooks/useTheme'
 import { storage } from '../storage'
 import { useNavigationStore } from '../stores/navigationStore'
 import { useUserStore } from '../stores/userStore'
@@ -20,6 +21,14 @@ import { generatePinSalt, hashPin } from '../utils/pin'
 // profile (name → starting vocabulary → skippable caregiver PIN) or
 // starts a nothing-saved guest session ("Try SayThrough").
 export function OnboardingScreen() {
+  const theme = useTheme()
+  const textT = { color: theme.text }
+  const mutedT = { color: theme.textMuted }
+  const inputT = {
+    backgroundColor: theme.surfaceAlt,
+    borderColor: theme.border,
+    color: theme.text,
+  }
   const [step, setStep] = useState<'welcome' | 'setup'>('welcome')
   const [name, setName] = useState('')
   const [pageSets, setPageSets] = useState<PageSet[]>([])
@@ -81,10 +90,10 @@ export function OnboardingScreen() {
 
   if (step === 'welcome') {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
         <View style={styles.welcome}>
           <Text style={styles.title}>SayThrough</Text>
-          <Text style={styles.tagline}>
+          <Text style={[styles.tagline, mutedT]}>
             A free voice for everyone. No account, no subscription — your
             words stay on this device.
           </Text>
@@ -110,7 +119,7 @@ export function OnboardingScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
       <ScrollView contentContainerStyle={styles.form}>
         <Pressable
           accessibilityRole="button"
@@ -123,17 +132,17 @@ export function OnboardingScreen() {
         >
           <Text style={styles.backText}>← Back</Text>
         </Pressable>
-        <Text style={styles.heading}>Who is this voice for?</Text>
+        <Text style={[styles.heading, textT]}>Who is this voice for?</Text>
         <TextInput
           value={name}
           onChangeText={setName}
           placeholder="Name (e.g. Maya)"
-          style={styles.input}
+          style={[styles.input, inputT]}
           accessibilityLabel="User name"
           autoFocus
         />
 
-        <Text style={styles.heading}>Starting vocabulary</Text>
+        <Text style={[styles.heading, textT]}>Starting vocabulary</Text>
         <View style={styles.chipRow}>
           {pageSets.map((set) => (
             <Pressable
@@ -143,25 +152,30 @@ export function OnboardingScreen() {
               onPress={() => setChosenSetId(set.id)}
               style={({ pressed }) => [
                 styles.chip,
+                { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
                 set.id === chosenSetId && styles.chipSelected,
                 pressed && styles.pressed,
               ]}
             >
               <Text
-                style={[styles.chipText, set.id === chosenSetId && styles.chipTextSelected]}
+                style={[
+                  styles.chipText,
+                  textT,
+                  set.id === chosenSetId && styles.chipTextSelected,
+                ]}
               >
                 {set.name}
               </Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.hint}>
+        <Text style={[styles.hint, mutedT]}>
           Core Vocabulary is recommended for most users — it's built around
           the words that make up most of daily speech.
         </Text>
 
-        <Text style={styles.heading}>Caregiver PIN (recommended)</Text>
-        <Text style={styles.hint}>
+        <Text style={[styles.heading, textT]}>Caregiver PIN (recommended)</Text>
+        <Text style={[styles.hint, mutedT]}>
           Protects edit mode and settings. Without a PIN, a long-press on
           any button opens editing. You can set one later in Settings.
         </Text>
@@ -172,7 +186,7 @@ export function OnboardingScreen() {
           secureTextEntry
           maxLength={8}
           placeholder="PIN (4–8 digits, optional)"
-          style={styles.input}
+          style={[styles.input, inputT]}
           accessibilityLabel="Caregiver PIN"
         />
         {pin !== '' && (
@@ -183,7 +197,7 @@ export function OnboardingScreen() {
             secureTextEntry
             maxLength={8}
             placeholder="Confirm PIN"
-            style={styles.input}
+            style={[styles.input, inputT]}
             accessibilityLabel="Confirm caregiver PIN"
           />
         )}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
+import { useTheme } from '../../hooks/useTheme'
 import type { Button } from '../../types/models'
 import { DraggableCell } from '../edit/DraggableCell'
 import { SymbolButton } from './SymbolButton'
@@ -45,6 +46,7 @@ export function SymbolGrid({
   onButtonMove,
   onEmptyCellPress,
 }: SymbolGridProps) {
+  const theme = useTheme()
   const [gridSize, setGridSize] = useState({ width: 0, height: 0 })
 
   const split = coreColumns > 0 && coreColumns < columns
@@ -132,7 +134,17 @@ export function SymbolGrid({
       >
         {/* Persistent core region — same framed panel on every page in the
             set, so the "these words are always here" idea is visible (§19.2) */}
-        <View style={[styles.coreFrame, { flex: coreColumns, gap }]}>
+        <View
+          style={[
+            styles.coreFrame,
+            {
+              flex: coreColumns,
+              gap,
+              backgroundColor: theme.coreFrame,
+              borderColor: theme.coreFrameBorder,
+            },
+          ]}
+        >
           {renderRows(0, coreColumns)}
         </View>
         <View style={{ width: SEAM }} />

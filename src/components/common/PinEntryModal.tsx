@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
+import { useTheme } from '../../hooks/useTheme'
 
 interface PinEntryModalProps {
   visible: boolean
@@ -22,6 +23,7 @@ export function PinEntryModal({
   onCancel,
   error,
 }: PinEntryModalProps) {
+  const theme = useTheme()
   const [pin, setPin] = useState('')
 
   const submit = () => {
@@ -31,9 +33,9 @@ export function PinEntryModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Enter caregiver PIN</Text>
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.text }]}>Enter caregiver PIN</Text>
           <TextInput
             value={pin}
             onChangeText={setPin}
@@ -41,7 +43,10 @@ export function PinEntryModal({
             secureTextEntry
             maxLength={8}
             autoFocus
-            style={styles.input}
+            style={[
+              styles.input,
+              { backgroundColor: theme.surfaceAlt, borderColor: theme.border, color: theme.text },
+            ]}
             accessibilityLabel="PIN input"
             onSubmitEditing={submit}
           />
@@ -51,9 +56,13 @@ export function PinEntryModal({
               accessibilityRole="button"
               accessibilityLabel="Cancel PIN entry"
               onPress={onCancel}
-              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.button,
+                { borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.buttonText}>Cancel</Text>
+              <Text style={[styles.buttonText, { color: theme.text }]}>Cancel</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"

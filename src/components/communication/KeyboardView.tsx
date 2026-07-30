@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { FONTS } from '../../constants/typography'
+import { useTheme } from '../../hooks/useTheme'
 import { useMessageStore } from '../../stores/messageStore'
 
 // §5.5 v1.0 basic keyboard: QWERTY, typed text becomes a message-bar
@@ -11,6 +12,7 @@ import { useMessageStore } from '../../stores/messageStore'
 const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
 
 export function KeyboardView() {
+  const theme = useTheme()
   const [buffer, setBuffer] = useState('')
   const [shift, setShift] = useState(false)
   const appendToken = useMessageStore((s) => s.appendToken)
@@ -34,8 +36,16 @@ export function KeyboardView() {
   }
 
   return (
-    <View style={styles.keyboard}>
-      <Text style={styles.buffer} accessibilityLiveRegion="polite">
+    <View
+      style={[
+        styles.keyboard,
+        { backgroundColor: theme.chrome, borderTopColor: theme.chromeBorder },
+      ]}
+    >
+      <Text
+        style={[styles.buffer, { color: theme.text }]}
+        accessibilityLiveRegion="polite"
+      >
         {buffer || ' '}
       </Text>
       {ROWS.map((row, index) => (
@@ -84,6 +94,7 @@ function Key({
   speak?: boolean
   active?: boolean
 }) {
+  const theme = useTheme()
   return (
     <Pressable
       accessibilityRole="button"
@@ -91,14 +102,23 @@ function Key({
       onPress={onPress}
       style={({ pressed }) => [
         styles.key,
+        { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
         wide && styles.keyWide,
         space && styles.keySpace,
-        speak && styles.keySpeak,
+        speak && styles.keySpeak, // green stays
         active && styles.keyActive,
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.keyText, speak && styles.keySpeakText]}>{label}</Text>
+      <Text
+        style={[
+          styles.keyText,
+          { color: theme.text },
+          speak && styles.keySpeakText,
+        ]}
+      >
+        {label}
+      </Text>
     </Pressable>
   )
 }

@@ -74,26 +74,43 @@ function makeButton(
   }
 }
 
-// Places `words` row-major into columns [columnOffset, columnOffset+2]
+// Places `words` row-major into columns [columnOffset, columnOffset+2].
+// `startIndex` shifts placement forward (used to reserve the first content
+// cell for a Back button); words that overflow past the grid flow off.
 function placeWords(
   pageId: string,
   words: Word[],
   columnOffset: number,
   actionsFor: (label: string) => ButtonAction[],
   now: number,
+  startIndex = 0,
 ): Button[] {
-  return words.map(([label, pos], i) =>
-    makeButton(
-      pageId,
-      label,
-      pos,
-      Math.floor(i / 3),
-      columnOffset + (i % 3),
-      actionsFor(label),
-      false,
-      now,
-    ),
-  )
+  return words
+    .map(([label, pos], i) => {
+      const idx = i + startIndex
+      return makeButton(
+        pageId,
+        label,
+        pos,
+        Math.floor(idx / 3),
+        columnOffset + (idx % 3),
+        actionsFor(label),
+        false,
+        now,
+      )
+    })
+    .filter((b) => b.row < ROWS)
+}
+
+// A real Back button occupying the first content cell (§19.5 motor plan:
+// its position is fixed in the data, so it never moves between edit and
+// use mode). SymbolButton draws a ← arrow for navigate_back buttons.
+function makeBackButton(pageId: string, now: number): Button {
+  return {
+    ...makeButton(pageId, 'Back', 'category', 0, 3, [{ type: 'navigate_back' }], false, now),
+    backgroundColor: '#ECEFF1',
+    symbolId: undefined,
+  }
 }
 
 // §19.4 Quick Phrases — 18 one-tap complete utterances, 3×6 single page
@@ -122,7 +139,7 @@ const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when bundled content changes. From v6 on, a bump runs a
 // data-preserving migration (rebuildBuiltInContent) — NOT a wipe.
-const SEED_VERSION = '6'
+const SEED_VERSION = '7'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
@@ -236,11 +253,13 @@ async function createBuiltInSets(storage: Storage): Promise<string> {
     navIndex++
   }
 
-  // Topic pages: right side holds the topic words
+  // Topic pages: Back button in the first content cell, then topic words
+  // flow in after it — a fixed layout identical in edit and use mode.
   for (const [topic, words] of Object.entries(TOPICS)) {
     const pageId = topicPageIds.get(topic)!
     pages.push(makePage(pageId, topic))
-    buttons.push(...placeWords(pageId, words, 3, appendAction, now))
+    buttons.push(makeBackButton(pageId, now))
+    buttons.push(...placeWords(pageId, words, 3, appendAction, now, 1))
   }
 
   await storage.createPageSet(pageSet)

@@ -14,22 +14,24 @@ import {
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
+import { useTheme } from '../../hooks/useTheme'
 import { getSymbolUri } from '../../services/SymbolService'
 import { useMessageStore } from '../../stores/messageStore'
 
 // §AM-05: stable ids so the scan engine can target the message actions
 export const SCAN_SPEAK = 'scan-speak'
 export const SCAN_BACKSPACE = 'scan-backspace'
-export const SCAN_CLEAR = 'scan-clear'
 
 export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string> }) {
   const tokens = useMessageStore((s) => s.tokens)
   const speakMessage = useMessageStore((s) => s.speakMessage)
   const clearMessage = useMessageStore((s) => s.clearMessage)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
+  const removeToken = useMessageStore((s) => s.removeToken)
   const [actionsVisible, setActionsVisible] = useState(false)
   const [actionFeedback, setActionFeedback] = useState('')
   const scanned = (id: string) => scanHighlightIds?.has(id)
+  const theme = useTheme()
 
   const messageText = tokens.map((t) => t.text).join(' ')
 
@@ -51,31 +53,59 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
   }
 
   return (
-    <View style={styles.bar}>
-      <ScrollView
-        horizontal
+    <View
+      style={[
+        styles.bar,
+        { backgroundColor: theme.surface, borderBottomColor: theme.border },
+      ]}
+    >
+      {/* Tap anywhere on the strip (or a word) to speak — the big, forgiving
+          target competitors use. Empty gaps speak via this wrapper; words
+          speak on tap and delete on long-press. */}
+      <Pressable
         style={styles.tokens}
-        contentContainerStyle={styles.tokensContent}
-        // §17.1: announce added words without moving screen-reader focus
-        accessibilityLiveRegion="polite"
+        onPress={tokens.length ? speakMessage : undefined}
       >
-        {tokens.length === 0 && (
-          <Text style={styles.emptyHint}>Tap buttons to build a message…</Text>
-        )}
-        {tokens.map((token) => {
-          const uri =
-            token.customSymbolUri ??
-            (token.symbolId ? getSymbolUri(token.symbolId) : null)
-          return (
-            <View key={token.id} style={styles.tokenPill}>
-              {uri && (
-                <Image source={{ uri }} style={styles.tokenSymbol} contentFit="contain" />
-              )}
-              <Text style={styles.tokenText}>{token.text}</Text>
-            </View>
-          )
-        })}
-      </ScrollView>
+        <ScrollView
+          horizontal
+          style={styles.tokens}
+          contentContainerStyle={styles.tokensContent}
+          // §17.1: announce added words without moving screen-reader focus
+          accessibilityLiveRegion="polite"
+        >
+          {tokens.length === 0 && (
+            <Text style={[styles.emptyHint, { color: theme.textMuted }]}>
+              Tap buttons to build a message…
+            </Text>
+          )}
+          {tokens.map((token) => {
+            const uri =
+              token.customSymbolUri ??
+              (token.symbolId ? getSymbolUri(token.symbolId) : null)
+            return (
+              <Pressable
+                key={token.id}
+                accessibilityRole="button"
+                accessibilityLabel={token.text}
+                accessibilityHint="Speaks the message. Press and hold to remove this word."
+                onPress={speakMessage}
+                onLongPress={() => removeToken(token.id)}
+                delayLongPress={500}
+                style={({ pressed }) => [
+                  styles.tokenPill,
+                  { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+                  pressed && styles.pressed,
+                ]}
+              >
+                {uri && (
+                  <Image source={{ uri }} style={styles.tokenSymbol} contentFit="contain" />
+                )}
+                <Text style={[styles.tokenText, { color: theme.text }]}>{token.text}</Text>
+              </Pressable>
+            )
+          })}
+        </ScrollView>
+      </Pressable>
 
       <View style={styles.actions}>
         {tokens.length > 0 && (
@@ -86,9 +116,13 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
               setActionFeedback('')
               setActionsVisible(true)
             }}
-            style={({ pressed }) => [styles.smallButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.smallButton,
+              { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+              pressed && styles.pressed,
+            ]}
           >
-            <MaterialIcons name="more-horiz" size={22} color="#666666" />
+            <MaterialIcons name="more-horiz" size={22} color={theme.icon} />
           </Pressable>
         )}
         <Pressable
@@ -110,24 +144,12 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
           onPress={deleteLastToken}
           style={({ pressed }) => [
             styles.smallButton,
+            { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
             scanned(SCAN_BACKSPACE) && styles.scanHighlight,
             pressed && styles.pressed,
           ]}
         >
-          <MaterialIcons name="backspace" size={20} color="#757575" />
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Clear message"
-          onPress={clearMessage}
-          style={({ pressed }) => [
-            styles.smallButton,
-            styles.clearButton,
-            scanned(SCAN_CLEAR) && styles.scanHighlight,
-            pressed && styles.pressed,
-          ]}
-        >
-          <MaterialIcons name="close" size={20} color={UI_COLORS.clearRed} />
+          <MaterialIcons name="backspace" size={20} color={theme.icon} />
         </Pressable>
       </View>
 
@@ -137,18 +159,25 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         animationType="fade"
         onRequestClose={() => setActionsVisible(false)}
       >
-        <Pressable style={styles.backdrop} onPress={() => setActionsVisible(false)}>
-          <View style={styles.sheet}>
-            <Text style={styles.sheetMessage} numberOfLines={2}>
+        <Pressable
+          style={[styles.backdrop, { backgroundColor: theme.backdrop }]}
+          onPress={() => setActionsVisible(false)}
+        >
+          <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.sheetMessage, { color: theme.textMuted }]} numberOfLines={2}>
               “{messageText}”
             </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Copy message"
               onPress={copyMessage}
-              style={({ pressed }) => [styles.sheetButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.sheetButton,
+                { borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.sheetButtonText}>
+              <Text style={[styles.sheetButtonText, { color: theme.text }]}>
                 {actionFeedback || 'Copy message'}
               </Text>
             </Pressable>
@@ -156,9 +185,34 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
               accessibilityRole="button"
               accessibilityLabel="Share message"
               onPress={shareMessage}
-              style={({ pressed }) => [styles.sheetButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.sheetButton,
+                { borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.sheetButtonText}>Share message</Text>
+              <Text style={[styles.sheetButtonText, { color: theme.text }]}>
+                Share message
+              </Text>
+            </Pressable>
+            {/* Clear-all lives here (not on the bar) so it isn't confused
+                with the ⌫ backspace, which deletes only the last word */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear message"
+              onPress={() => {
+                clearMessage()
+                setActionsVisible(false)
+              }}
+              style={({ pressed }) => [
+                styles.sheetButton,
+                { borderColor: UI_COLORS.clearRed },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[styles.sheetButtonText, { color: UI_COLORS.clearRed }]}>
+                Clear message
+              </Text>
             </Pressable>
           </View>
         </Pressable>
@@ -243,9 +297,6 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  clearButton: {
-    borderColor: UI_COLORS.clearRed,
   },
   scanHighlight: {
     borderWidth: 4,

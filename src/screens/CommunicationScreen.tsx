@@ -15,7 +15,6 @@ import { KeyboardView } from '../components/communication/KeyboardView'
 import {
   MessageBar,
   SCAN_BACKSPACE,
-  SCAN_CLEAR,
   SCAN_SPEAK,
 } from '../components/communication/MessageBar'
 import { SearchModal } from '../components/communication/SearchModal'
@@ -31,6 +30,7 @@ import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
 import { usePageButtons } from '../hooks/usePageButtons'
 import { useScanning, type ScanItem } from '../hooks/useScanning'
+import { useTheme } from '../hooks/useTheme'
 import { executeButtonActions } from '../services/actionExecutor'
 import { useMessageStore } from '../stores/messageStore'
 import { deletePageAndCleanLinks, renamePage } from '../services/pageService'
@@ -72,6 +72,7 @@ export function CommunicationScreen() {
 
   const activeUser = useUserStore((s) => s.activeUser)
   const isGuest = activeUser?.id === GUEST_USER_ID
+  const theme = useTheme()
   const filterListId =
     wordListEditingId ??
     (activeUser?.filterEnabled ? activeUser.activeWordListId : undefined)
@@ -121,7 +122,6 @@ export function CommunicationScreen() {
   // §AM-05 switch scanning: build the scannable model (message actions
   // group + one group per grid row) and drive the highlight/selection.
   const speakMessage = useMessageStore((s) => s.speakMessage)
-  const clearMessage = useMessageStore((s) => s.clearMessage)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
 
   const scanGroups = useMemo<ScanItem[][]>(() => {
@@ -131,7 +131,6 @@ export function CommunicationScreen() {
       groups.push([
         { id: SCAN_SPEAK, label: 'Speak', activate: () => speakMessage() },
         { id: SCAN_BACKSPACE, label: 'Delete', activate: () => deleteLastToken() },
-        { id: SCAN_CLEAR, label: 'Clear', activate: () => clearMessage() },
       ])
     }
     const visible = buttons.filter((b) => !b.isHidden)
@@ -147,7 +146,7 @@ export function CommunicationScreen() {
       if (rowItems.length) groups.push(rowItems)
     }
     return groups
-  }, [page, buttons, speakMessage, clearMessage, deleteLastToken])
+  }, [page, buttons, speakMessage, deleteLastToken])
 
   const scanningEnabled =
     !!page && !isEditMode && !keyboardOpen && activeUser?.accessMethod === 'scanning'
@@ -374,11 +373,14 @@ export function CommunicationScreen() {
   }
 
   if (!page) {
-    return <SafeAreaView style={styles.screen} />
+    return <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]} />
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView
+      testID="app-screen"
+      style={[styles.screen, { backgroundColor: theme.screen }]}
+    >
       {/* §10.4: first touch anywhere warms the TTS engine */}
       <View style={styles.content} onTouchStart={() => ttsService.warmUp()}>
         {isEditMode ? (
@@ -517,9 +519,15 @@ export function CommunicationScreen() {
         animationType="fade"
         onRequestClose={() => setPageMenuVisible(false)}
       >
-        <Pressable style={styles.menuBackdrop} onPress={() => setPageMenuVisible(false)}>
-          <Pressable style={styles.menuCard} onPress={() => {}}>
-            <Text style={styles.menuTitle}>Page: {page.name}</Text>
+        <Pressable
+          style={[styles.menuBackdrop, { backgroundColor: theme.backdrop }]}
+          onPress={() => setPageMenuVisible(false)}
+        >
+          <Pressable
+            style={[styles.menuCard, { backgroundColor: theme.surface }]}
+            onPress={() => {}}
+          >
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Page: {page.name}</Text>
             <TextInput
               value={pageRenameText}
               onChangeText={setPageRenameText}

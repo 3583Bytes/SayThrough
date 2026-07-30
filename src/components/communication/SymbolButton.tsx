@@ -115,6 +115,14 @@ export function SymbolButton({
       ? getSymbolUri(button.symbolId)
       : null
 
+  // Back/Home nav buttons render an icon instead of a symbol so the seeded
+  // grid Back reads at a glance (and isn't a forward "opens page" folder).
+  const navGlyph = button.actions.some((a) => a.type === 'navigate_back')
+    ? 'arrow-back'
+    : button.actions.some((a) => a.type === 'navigate_home')
+      ? 'home'
+      : null
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -144,7 +152,22 @@ export function SymbolButton({
         pressed && !dimmed && styles.pressed,
       ]}
     >
-      {symbolUri ? (
+      {navGlyph ? (
+        <View style={styles.withSymbol}>
+          <View style={styles.navGlyph}>
+            <MaterialIcons name={navGlyph} size={30} color={button.labelColor} />
+          </View>
+          <Text
+            style={[
+              styles.symbolLabel,
+              { color: button.labelColor, fontSize: 13 * textScale },
+            ]}
+            numberOfLines={1}
+          >
+            {button.label}
+          </Text>
+        </View>
+      ) : symbolUri ? (
         // §5.3: symbol fills the top ~65%, label the bottom
         <View style={styles.withSymbol}>
           <Image
@@ -260,6 +283,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'stretch',
     alignItems: 'center',
+  },
+  navGlyph: {
+    flex: 1,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   symbol: {
     flex: 1,

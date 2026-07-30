@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { logMessageSpoken } from '../services/TrackingService'
 import { ttsService } from '../services/TTSService'
+import { useNavigationStore } from './navigationStore'
 import { useUserStore } from './userStore'
 
 export interface MessageToken {
@@ -17,6 +18,7 @@ interface MessageState {
     symbol?: Pick<MessageToken, 'symbolId' | 'customSymbolUri'>,
   ) => void
   deleteLastToken: () => void
+  removeToken: (id: string) => void
   clearMessage: () => void
   speakMessage: () => void
 }
@@ -39,15 +41,24 @@ export const useMessageStore = create<MessageState>((set, get) => ({
 
   deleteLastToken: () => set((state) => ({ tokens: state.tokens.slice(0, -1) })),
 
+  // Remove one word anywhere in the message (long-press a word in the bar)
+  removeToken: (id) =>
+    set((state) => ({ tokens: state.tokens.filter((t) => t.id !== id) })),
+
   clearMessage: () => set({ tokens: [] }),
 
   speakMessage: () => {
     const message = get()
       .tokens.map((t) => t.text)
       .join(' ')
-    if (message) {
-      ttsService.speak(message)
-      logMessageSpoken(message) // no-op unless caregiver opted in
-    }
+    if (!message) return
+    ttsService.speak(message)
+    logMessageSpoken(message) // no-op unless caregiver opted in
+    // §UX post-speak options (both default off): clear the bar and/or jump
+    // home so the next utterance starts from core. Text is already captured
+    // above, so mutating tokens here is safe.
+    const user = useUserStore.getState().activeUser
+    if (user?.clearAfterSpeak) set({ tokens: [] })
+    if (user?.returnHomeAfterSpeak) useNavigationStore.getState().navigateHome()
   },
 }))

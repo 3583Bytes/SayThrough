@@ -27,6 +27,7 @@ import {
 } from '../services/pwa'
 import { ttsService } from '../services/TTSService'
 import { rankVoices } from '../services/voiceSelection'
+import { useTheme } from '../hooks/useTheme'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
@@ -75,6 +76,16 @@ const TEXT_SCALES: Array<[string, number]> = [
 // tracking, and backup sections arrive with their features.
 export function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+  const theme = useTheme()
+  // themed style tokens applied across the repeated cards/labels/inputs
+  const cardT = { backgroundColor: theme.surface, borderColor: theme.border }
+  const textT = { color: theme.text }
+  const mutedT = { color: theme.textMuted }
+  const inputT = {
+    backgroundColor: theme.surfaceAlt,
+    borderColor: theme.border,
+    color: theme.text,
+  }
   const activeUser = useUserStore((s) => s.activeUser)
   const users = useUserStore((s) => s.users)
   const updateActiveUser = useUserStore((s) => s.updateActiveUser)
@@ -192,34 +203,39 @@ export function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: theme.chrome, borderBottomColor: theme.chromeBorder },
+        ]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Back to communication"
           onPress={() => navigation.goBack()}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.accent }]}>← Back</Text>
         </Pressable>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* 1. Profile */}
-        <Text style={styles.sectionTitle}>Profile</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Name</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>Profile</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>Name</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             onEndEditing={() => name.trim() && updateActiveUser({ name: name.trim() })}
             onBlur={() => name.trim() && updateActiveUser({ name: name.trim() })}
-            style={styles.input}
+            style={[styles.input, inputT]}
             accessibilityLabel="Profile name"
           />
-          <Text style={styles.fieldLabel}>Switch profile</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>Switch profile</Text>
           <View style={styles.chipRow}>
             {users.map((user) => (
               <Chip
@@ -235,7 +251,7 @@ export function SettingsScreen() {
               value={newUserName}
               onChangeText={setNewUserName}
               placeholder="New profile name"
-              style={[styles.input, styles.addInput]}
+              style={[styles.input, styles.addInput, inputT]}
               accessibilityLabel="New profile name"
             />
             <Pressable
@@ -250,9 +266,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 2. Speech */}
-        <Text style={styles.sectionTitle}>Speech</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Voice</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>Speech</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>Voice</Text>
           {voices.map((voice) => (
             <View key={voice.identifier} style={styles.voiceRow}>
               <Pressable
@@ -281,10 +297,10 @@ export function SettingsScreen() {
             </View>
           ))}
           {voices.length === 0 && (
-            <Text style={styles.hint}>No voices reported by this device yet.</Text>
+            <Text style={[styles.hint, mutedT]}>No voices reported by this device yet.</Text>
           )}
 
-          <Text style={styles.fieldLabel}>Speed</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>Speed</Text>
           <View style={styles.chipRow}>
             {RATE_PRESETS.map(([label, value]) => (
               <Chip
@@ -296,7 +312,7 @@ export function SettingsScreen() {
             ))}
           </View>
 
-          <Text style={styles.fieldLabel}>Pitch</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>Pitch</Text>
           <View style={styles.chipRow}>
             {PITCH_PRESETS.map(([label, value]) => (
               <Chip
@@ -316,12 +332,28 @@ export function SettingsScreen() {
               accessibilityLabel="Speak on select"
             />
           </View>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Return to home after speaking</Text>
+            <Switch
+              value={activeUser.returnHomeAfterSpeak ?? false}
+              onValueChange={(value) => updateActiveUser({ returnHomeAfterSpeak: value })}
+              accessibilityLabel="Return to home after speaking"
+            />
+          </View>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Clear message after speaking</Text>
+            <Switch
+              value={activeUser.clearAfterSpeak ?? false}
+              onValueChange={(value) => updateActiveUser({ clearAfterSpeak: value })}
+              accessibilityLabel="Clear message after speaking"
+            />
+          </View>
         </View>
 
         {/* 3. Access Method (§4.6) */}
-        <Text style={styles.sectionTitle}>Access Method</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>How this user selects</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>Access Method</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>How this user selects</Text>
           <View style={styles.chipRow}>
             {(
               [
@@ -341,7 +373,7 @@ export function SettingsScreen() {
 
           {(activeUser.accessMethod ?? 'touch') === 'touch' && (
             <>
-              <Text style={styles.fieldLabel}>Hold to activate</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>Hold to activate</Text>
               <View style={styles.chipRow}>
                 {HOLD_PRESETS.map(([label, value]) => (
                   <Chip
@@ -352,7 +384,7 @@ export function SettingsScreen() {
                   />
                 ))}
               </View>
-              <Text style={styles.fieldLabel}>Ignore repeat taps for</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>Ignore repeat taps for</Text>
               <View style={styles.chipRow}>
                 {HOLD_PRESETS.map(([label, value]) => (
                   <Chip
@@ -364,7 +396,7 @@ export function SettingsScreen() {
                 ))}
               </View>
               <View style={styles.switchRow}>
-                <Text style={styles.switchLabel}>
+                <Text style={[styles.switchLabel, textT]}>
                   Ignore second touch while pressing (palm guard)
                 </Text>
                 <Switch
@@ -378,7 +410,7 @@ export function SettingsScreen() {
 
           {activeUser.accessMethod === 'dwell' && (
             <>
-              <Text style={styles.fieldLabel}>Hover time to select</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>Hover time to select</Text>
               <View style={styles.chipRow}>
                 {DWELL_PRESETS.map(([label, value]) => (
                   <Chip
@@ -389,7 +421,7 @@ export function SettingsScreen() {
                   />
                 ))}
               </View>
-              <Text style={styles.hint}>
+              <Text style={[styles.hint, mutedT]}>
                 Hover the pointer over a button (mouse, head mouse, or eye
                 gaze that moves the cursor); it selects when the bar fills.
                 Move away to cancel.
@@ -399,7 +431,7 @@ export function SettingsScreen() {
 
           {activeUser.accessMethod === 'scanning' && (
             <>
-              <Text style={styles.fieldLabel}>Scan style</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>Scan style</Text>
               <View style={styles.chipRow}>
                 <Chip
                   label="Auto (1 switch)"
@@ -412,7 +444,7 @@ export function SettingsScreen() {
                   onPress={() => updateActiveUser({ scanMode: 'step' })}
                 />
               </View>
-              <Text style={styles.fieldLabel}>Pattern</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>Pattern</Text>
               <View style={styles.chipRow}>
                 <Chip
                   label="Row then column"
@@ -427,7 +459,7 @@ export function SettingsScreen() {
               </View>
               {(activeUser.scanMode ?? 'auto') === 'auto' && (
                 <>
-                  <Text style={styles.fieldLabel}>Scan speed</Text>
+                  <Text style={[styles.fieldLabel, mutedT]}>Scan speed</Text>
                   <View style={styles.chipRow}>
                     {SCAN_SPEEDS.map(([label, value]) => (
                       <Chip
@@ -441,14 +473,14 @@ export function SettingsScreen() {
                 </>
               )}
               <View style={styles.switchRow}>
-                <Text style={styles.switchLabel}>Speak each item as it highlights</Text>
+                <Text style={[styles.switchLabel, textT]}>Speak each item as it highlights</Text>
                 <Switch
                   value={activeUser.scanAuditory ?? false}
                   onValueChange={(v) => updateActiveUser({ scanAuditory: v })}
                   accessibilityLabel="Scan auditory cue"
                 />
               </View>
-              <Text style={styles.hint}>
+              <Text style={[styles.hint, mutedT]}>
                 Switch = Space (select) and, in step mode, Enter (advance).
                 Most Bluetooth switches emulate these keys. Two-switch
                 mapping and block scanning are coming next.
@@ -458,9 +490,26 @@ export function SettingsScreen() {
         </View>
 
         {/* 3b. Display (§6.1 layout preferences) */}
-        <Text style={styles.sectionTitle}>Display</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Message bar position</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>Display</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>Appearance</Text>
+          <View style={styles.chipRow}>
+            {(
+              [
+                ['light', 'Light'],
+                ['dark', 'Dark'],
+                ['system', 'System'],
+              ] as const
+            ).map(([value, label]) => (
+              <Chip
+                key={value}
+                label={label}
+                selected={(activeUser.theme ?? 'system') === value}
+                onPress={() => updateActiveUser({ theme: value })}
+              />
+            ))}
+          </View>
+          <Text style={[styles.fieldLabel, mutedT]}>Message bar position</Text>
           <View style={styles.chipRow}>
             <Chip
               label="Top"
@@ -473,7 +522,7 @@ export function SettingsScreen() {
               onPress={() => updateActiveUser({ messageBarPosition: 'bottom' })}
             />
           </View>
-          <Text style={styles.fieldLabel}>Space between buttons</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>Space between buttons</Text>
           <View style={styles.chipRow}>
             {(['compact', 'normal', 'wide'] as const).map((gap) => (
               <Chip
@@ -484,7 +533,7 @@ export function SettingsScreen() {
               />
             ))}
           </View>
-          <Text style={styles.fieldLabel}>Button text size</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>Button text size</Text>
           <View style={styles.chipRow}>
             {TEXT_SCALES.map(([label, value]) => (
               <Chip
@@ -498,9 +547,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 4. Vocabulary */}
-        <Text style={styles.sectionTitle}>Vocabulary</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Active page set</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>Vocabulary</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>Active page set</Text>
           <View style={styles.chipRow}>
             {pageSets.map((pageSet) => (
               <Chip
@@ -514,9 +563,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 4b. Vocabulary Filter (§4.8) */}
-        <Text style={styles.sectionTitle}>Vocabulary Filter</Text>
-        <View style={styles.card}>
-          <Text style={styles.hint}>
+        <Text style={[styles.sectionTitle, mutedT]}>Vocabulary Filter</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
             Limit which words are active during therapy. Words not in the
             list stay visible (so a partner can model) but don't respond.
           </Text>
@@ -563,7 +612,7 @@ export function SettingsScreen() {
               value={newListName}
               onChangeText={setNewListName}
               placeholder="New list name (e.g. Week 1 Words)"
-              style={[styles.input, styles.addInput]}
+              style={[styles.input, styles.addInput, inputT]}
               accessibilityLabel="New word list name"
             />
             <Pressable
@@ -601,9 +650,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 5. Security */}
-        <Text style={styles.sectionTitle}>Security</Text>
-        <View style={styles.card}>
-          <Text style={styles.hint}>
+        <Text style={[styles.sectionTitle, mutedT]}>Security</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
             The caregiver PIN protects edit mode and settings. It is
             child-proofing, not security.
           </Text>
@@ -626,9 +675,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 5b. Data Tracking (§4.13 — consent-gated, DT-05) */}
-        <Text style={styles.sectionTitle}>Data Tracking</Text>
-        <View style={styles.card}>
-          <Text style={styles.hint}>
+        <Text style={[styles.sectionTitle, mutedT]}>Data Tracking</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
             Off by default. When a caregiver turns it on, button presses and
             spoken messages are recorded ON THIS DEVICE ONLY — nothing is
             sent anywhere. SLPs use this to document progress.
@@ -651,9 +700,9 @@ export function SettingsScreen() {
         </View>
 
         {/* 6. Backup & Restore */}
-        <Text style={styles.sectionTitle}>Backup & Restore</Text>
-        <View style={styles.card}>
-          <Text style={styles.hint}>
+        <Text style={[styles.sectionTitle, mutedT]}>Backup & Restore</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
             Open Board Format (.obz) — works with CoughDrop, TD Snap, and
             other AAC apps. Back up regularly: browser storage can be
             evicted.
@@ -677,16 +726,16 @@ export function SettingsScreen() {
         {/* 6b. Install (§12.6) */}
         {installState !== 'unavailable' && (
           <>
-            <Text style={styles.sectionTitle}>Install</Text>
-            <View style={styles.card}>
+            <Text style={[styles.sectionTitle, mutedT]}>Install</Text>
+            <View style={[styles.card, cardT]}>
               {installState === 'installed' && (
-                <Text style={styles.hint}>
+                <Text style={[styles.hint, mutedT]}>
                   Installed ✓ — SayThrough opens full-screen and works offline.
                 </Text>
               )}
               {installState === 'installable' && (
                 <>
-                  <Text style={styles.hint}>
+                  <Text style={[styles.hint, mutedT]}>
                     Install SayThrough to the home screen: it opens like a
                     regular app, works offline, and the browser protects its
                     storage better.
@@ -704,7 +753,7 @@ export function SettingsScreen() {
                 </>
               )}
               {installState === 'ios-instructions' && (
-                <Text style={styles.hint}>
+                <Text style={[styles.hint, mutedT]}>
                   To install on iPad/iPhone: in Safari, tap Share (□↑) →
                   "Add to Home Screen". SayThrough will open full-screen and
                   work offline.
@@ -715,9 +764,9 @@ export function SettingsScreen() {
         )}
 
         {/* 7. About */}
-        <Text style={styles.sectionTitle}>About</Text>
-        <View style={styles.card}>
-          <Text style={styles.hint}>
+        <Text style={[styles.sectionTitle, mutedT]}>About</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
             SayThrough — free, open-source AAC. Application code is MIT
             licensed.{'\n\n'}
             Pictographic symbols © Government of Aragón (Spain), created by
@@ -751,6 +800,7 @@ function Chip({
   selected: boolean
   onPress: () => void
 }) {
+  const theme = useTheme()
   return (
     <Pressable
       accessibilityRole="button"
@@ -758,11 +808,18 @@ function Chip({
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
+        { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
         selected && styles.chipSelected,
         pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+      <Text
+        style={[
+          styles.chipText,
+          { color: theme.text },
+          selected && styles.chipTextSelected,
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -778,6 +835,12 @@ function PinSetupModal({
   onClose: () => void
   onSave: (pin: string) => void
 }) {
+  const theme = useTheme()
+  const inputT = {
+    backgroundColor: theme.surfaceAlt,
+    borderColor: theme.border,
+    color: theme.text,
+  }
   const [pin, setPin] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | undefined>()
@@ -799,9 +862,11 @@ function PinSetupModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Set caregiver PIN</Text>
+      <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
+        <View style={[styles.modalCard, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.modalTitle, { color: theme.text }]}>
+            Set caregiver PIN
+          </Text>
           <TextInput
             value={pin}
             onChangeText={setPin}
@@ -809,7 +874,7 @@ function PinSetupModal({
             secureTextEntry
             maxLength={8}
             placeholder="New PIN"
-            style={styles.input}
+            style={[styles.input, inputT]}
             accessibilityLabel="New PIN"
           />
           <TextInput
@@ -819,7 +884,7 @@ function PinSetupModal({
             secureTextEntry
             maxLength={8}
             placeholder="Confirm PIN"
-            style={styles.input}
+            style={[styles.input, inputT]}
             accessibilityLabel="Confirm PIN"
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}

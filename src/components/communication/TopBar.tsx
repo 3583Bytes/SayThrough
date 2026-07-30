@@ -1,8 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
+import { useTheme } from '../../hooks/useTheme'
 import { useNavigationStore } from '../../stores/navigationStore'
 
 interface TopBarProps {
@@ -17,7 +17,9 @@ interface TopBarProps {
   }
 }
 
-// §5.3 top bar — back/home/search left, filter/edit right
+// §5.3 top bar — home/search left, filter/edit right. Page-to-page Back
+// lives in the grid itself now (a real button in the vocabulary), so the
+// chrome only carries Home + Search.
 export function TopBar({
   pageName,
   editHidden,
@@ -25,33 +27,24 @@ export function TopBar({
   onSearchPress,
   filter,
 }: TopBarProps) {
-  const canGoBack = useNavigationStore((s) => s.pageHistory.length > 0)
-  const navigateBack = useNavigationStore((s) => s.navigateBack)
+  const theme = useTheme()
   const navigateHome = useNavigationStore((s) => s.navigateHome)
 
   return (
-    <View style={styles.bar}>
+    <View
+      style={[
+        styles.bar,
+        { backgroundColor: theme.chrome, borderBottomColor: theme.chromeBorder },
+      ]}
+    >
       <View style={styles.side}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          disabled={!canGoBack}
-          onPress={navigateBack}
-          style={({ pressed }) => [
-            styles.iconButton,
-            !canGoBack && styles.disabled,
-            pressed && styles.pressed,
-          ]}
-        >
-          <MaterialIcons name="arrow-back" size={22} color="#444444" />
-        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Home"
           onPress={navigateHome}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <MaterialIcons name="home" size={22} color="#444444" />
+          <MaterialIcons name="home" size={22} color={theme.icon} />
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -59,10 +52,10 @@ export function TopBar({
           onPress={onSearchPress}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
-          <MaterialIcons name="search" size={22} color="#444444" />
+          <MaterialIcons name="search" size={22} color={theme.icon} />
         </Pressable>
       </View>
-      <Text style={styles.pageName}>{pageName}</Text>
+      <Text style={[styles.pageName, { color: theme.text }]}>{pageName}</Text>
       <View style={[styles.side, styles.right]}>
         {filter?.available && (
           <Pressable
@@ -77,7 +70,11 @@ export function TopBar({
               pressed && styles.pressed,
             ]}
           >
-            <MaterialIcons name="block" size={22} color={filter.enabled ? "#E65100" : "#444444"} />
+            <MaterialIcons
+              name="block"
+              size={22}
+              color={filter.enabled ? '#E65100' : theme.icon}
+            />
           </Pressable>
         )}
         {!editHidden && (
@@ -87,7 +84,7 @@ export function TopBar({
             onPress={onEditPress}
             style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
           >
-            <MaterialIcons name="settings" size={22} color="#444444" />
+            <MaterialIcons name="settings" size={22} color={theme.icon} />
           </Pressable>
         )}
       </View>
@@ -101,9 +98,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: UI_COLORS.barBackground,
     borderBottomWidth: 1,
-    borderBottomColor: UI_COLORS.barBorder,
     paddingHorizontal: 4,
   },
   side: {
@@ -122,9 +117,6 @@ const styles = StyleSheet.create({
   filterActive: {
     backgroundColor: '#FFF3E0',
     borderRadius: 8,
-  },
-  disabled: {
-    opacity: 0.3,
   },
   pressed: {
     opacity: 0.6,
