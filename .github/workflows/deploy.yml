@@ -45,11 +45,13 @@ jobs:
           mv public/symbols/symbolIndex.json public/symbolIndex.json
           echo "symbols in build: $(ls public/symbols/arasaac | wc -l)"
 
+      # Served at the saythrough.com root (custom domain), so NO base-path
+      # prefix — this makes the deployed bundle identical to the local/CI
+      # build. public/CNAME keeps the custom domain across deploys. (For a
+      # github.io project-page deploy instead, set EXPO_BASE_URL and
+      # EXPO_PUBLIC_BASE_URL to /<repo> here.)
       - name: Build web (export + PWA postbuild)
         run: npm run build
-        env:
-          EXPO_BASE_URL: /saythrough
-          EXPO_PUBLIC_BASE_URL: /saythrough
 
       # enablement:true turns on Pages via the API if it isn't already,
       # so the workflow is self-sufficient (also enable it once under
