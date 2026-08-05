@@ -56,10 +56,10 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 | Item | Why it matters (who has it) | Effort | Status |
 |---|---|---|---|
 | **Word prediction** (offline n-gram) in the keyboard | Every major app; makes the text/literacy path usable. `KeyboardView` already reserves a spot | M | [ ] |
-| **Word forms / grammar** (long-press → plural, tense, possessive) | Proloquo, Grid 3; separates "toddler board" from real language | M–L | [ ] |
+| **Word forms / grammar** (long-press → plural, tense, possessive) | Proloquo, Grid 3; separates "toddler board" from real language | M–L | [x] |
 | **Grid size + vocabulary level** at setup | All of them; model already stores per-page `rows`/`columns` — needs UI + starter templates | M | [~] |
 | **Message history / favorites** | Proloquo2Go, TD Snap | S | [x] |
-| **Word-by-word highlight while speaking** | TD Snap/Proloquo; literacy support | M | [ ] |
+| **Word-by-word highlight while speaking** | TD Snap/Proloquo; literacy support | M | [x] |
 
 ### Tier 2 — Differentiators (make us *better*, lean into free + open)
 
@@ -96,7 +96,8 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 - [x] Return-to-home after speaking (optional)
 - [x] Clear-after-speaking (optional)
 - [x] In-grid, motor-plan-safe Back button
-- [ ] Word-by-word highlight during playback
+- [x] Word-by-word highlight during playback
+- [x] Word forms (long-press a word → pick an inflection)
 - [ ] Tap-and-hold a button to preview its word without adding it (modeling)
 - [ ] Undo toast after destructive actions in use mode
 
