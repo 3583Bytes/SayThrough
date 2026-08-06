@@ -7,7 +7,7 @@ export async function setupProfile(
   page: Page,
   opts: { name?: string; pin?: string } = {},
 ) {
-  await page.goto('/', { waitUntil: 'networkidle' })
+  await page.goto('/app/', { waitUntil: 'networkidle' })
   await page.getByRole('button', { name: 'Set up SayThrough' }).click()
   await page.getByLabel('User name').fill(opts.name ?? 'Tester')
   if (opts.pin) {

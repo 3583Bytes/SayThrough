@@ -57,4 +57,8 @@ are a planned follow-up.
 
 ## Deploy
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`: web export with `EXPO_BASE_URL=/saythrough` → GitHub Pages.
+Pushing to `main` triggers `.github/workflows/deploy.yml` → GitHub Pages at the custom domain **saythrough.com**. The build (`npm run build`) produces a combined `dist/`:
+- **`/`** — the hand-authored static marketing site + guides (source in `site/`, copied by `scripts/build-site.mjs`; each page is real crawlable HTML with its own SEO/OG tags).
+- **`/app/`** — the Expo web app (exported with `EXPO_BASE_URL=/app` so it's a self-contained PWA under that path; `postbuild-web.mjs` handles its manifest/SW and marks it `noindex`).
+
+`CNAME`, `robots.txt`, `sitemap.xml`, `og-image.png` live at the `dist/` root (from `site/`, not `public/`). The OG share image is generated from `scripts/og-image.html` via `npm run og-image`.

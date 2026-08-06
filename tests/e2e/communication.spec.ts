@@ -39,7 +39,7 @@ test.describe('core communication', () => {
   })
 
   test('setup step can go back to the welcome screen', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.goto('/app/', { waitUntil: 'networkidle' })
     await page.getByRole('button', { name: 'Set up SayThrough' }).click()
     await expect(page.getByText('Who is this voice for?')).toBeVisible()
     await page.getByRole('button', { name: 'Back to welcome' }).click()
@@ -48,7 +48,7 @@ test.describe('core communication', () => {
   })
 
   test('guest mode communicates but hides editing', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.goto('/app/', { waitUntil: 'networkidle' })
     await page.getByRole('button', { name: 'Try SayThrough' }).click()
     await page.getByLabel('want', { exact: true }).waitFor({ timeout: 20_000 })
     await expect(page.getByText('Demo mode', { exact: false })).toBeVisible()

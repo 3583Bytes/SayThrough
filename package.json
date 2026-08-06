@@ -42,10 +42,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "expo export --platform web && node scripts/postbuild-web.mjs",
+    "build": "rm -rf dist && EXPO_BASE_URL=/app EXPO_PUBLIC_BASE_URL=/app expo export --platform web --output-dir dist/app && node scripts/postbuild-web.mjs && node scripts/build-site.mjs",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "e2e": "npm run build && playwright test",
+    "og-image": "node scripts/gen-og-image.mjs",
     "lint": "tsc --noEmit"
   },
   "private": true
