@@ -92,10 +92,16 @@ export function OnboardingScreen() {
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
         <View style={styles.welcome}>
-          <Text style={styles.title}>SayThrough</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            SayThrough
+          </Text>
+          <Text style={[styles.subtitle, textT]}>
+            Tap symbols and words — SayThrough speaks them out loud.
+          </Text>
           <Text style={[styles.tagline, mutedT]}>
-            A free voice for everyone. No account, no subscription — your
-            words stay on this device.
+            A free, open communication app (AAC) for people who are nonspeaking
+            or have limited speech. No account, no subscription — it works
+            offline and your words stay on this device.
           </Text>
           <Pressable
             accessibilityRole="button"
@@ -113,6 +119,10 @@ export function OnboardingScreen() {
           >
             <Text style={styles.secondaryText}>Try it first — nothing is saved</Text>
           </Pressable>
+          <Text style={[styles.audience, mutedT]}>
+            Made for AAC users and the families, teachers, and speech-language
+            pathologists who support them.
+          </Text>
         </View>
       </SafeAreaView>
     )
@@ -235,13 +245,28 @@ const styles = StyleSheet.create({
     fontSize: 34,
     color: '#2E7D32',
   },
+  subtitle: {
+    fontFamily: FONTS.bold,
+    fontSize: 19,
+    textAlign: 'center',
+    maxWidth: 460,
+    lineHeight: 26,
+  },
   tagline: {
     fontFamily: FONTS.regular,
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
-    maxWidth: 420,
+    maxWidth: 460,
     lineHeight: 24,
+  },
+  audience: {
+    fontFamily: FONTS.regular,
+    fontSize: 13,
+    textAlign: 'center',
+    maxWidth: 420,
+    lineHeight: 19,
+    marginTop: 8,
   },
   form: {
     padding: 24,
