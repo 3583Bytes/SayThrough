@@ -17,7 +17,10 @@ import {
 import type * as Speech from 'expo-speech'
 import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
-import { restoreBuiltInPageSets } from '../data/seedCoreVocabulary'
+import {
+  levelCountForPageSet,
+  restoreBuiltInPageSets,
+} from '../data/seedCoreVocabulary'
 import {
   createBackup,
   parseBackup,
@@ -71,6 +74,12 @@ const HOLD_PRESETS: Array<[string, number]> = [
   ['0.3s', 300],
   ['0.6s', 600],
   ['1s', 1000],
+]
+// §19 — 3 (Full) is the default so existing profiles keep every word.
+const VOCABULARY_LEVELS: Array<[string, 1 | 2 | 3]> = [
+  ['Basic', 1],
+  ['Intermediate', 2],
+  ['Full', 3],
 ]
 const TEXT_SCALES: Array<[string, number]> = [
   ['A−', 0.85],
@@ -776,6 +785,31 @@ export function SettingsScreen() {
             )}
           </View>
         </View>
+
+        {/* 5. Vocabulary level (§19) — only where the board defines levels */}
+        {levelCountForPageSet(activeUser.activePageSetId) > 1 && (
+          <>
+            <Text style={[styles.sectionTitle, mutedT]}>Vocabulary Level</Text>
+            <View style={[styles.card, cardT]}>
+              <Text style={[styles.hint, mutedT]}>
+                Show fewer words while someone is learning the board. Words
+                stay in the SAME place at every level — raising the level only
+                reveals more, so nothing a user has already learned to reach
+                ever moves.
+              </Text>
+              <View style={styles.chipRow}>
+                {VOCABULARY_LEVELS.map(([label, value]) => (
+                  <Chip
+                    key={value}
+                    label={label}
+                    selected={(activeUser.vocabularyLevel ?? 3) === value}
+                    onPress={() => updateActiveUser({ vocabularyLevel: value })}
+                  />
+                ))}
+              </View>
+            </View>
+          </>
+        )}
 
         {/* 5a. Word Prediction (§18) */}
         <Text style={[styles.sectionTitle, mutedT]}>Word Prediction</Text>

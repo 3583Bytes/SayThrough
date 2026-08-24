@@ -6,7 +6,7 @@ test.describe('edit mode', () => {
     await setupProfile(page)
     await enterEditMode(page)
 
-    await page.getByLabel('Add button at row 5, column 4').click()
+    await page.getByLabel('Add button at row 5, column 6').click()
     await page.getByLabel('Button label').fill('juice')
     await page.getByLabel('Save button').click()
     await page.getByLabel('Done editing').click()
@@ -25,7 +25,7 @@ test.describe('edit mode', () => {
   test('create a linked page carrying the core region', async ({ page }) => {
     await setupProfile(page)
     await enterEditMode(page)
-    await page.getByLabel('Add button at row 5, column 4').click()
+    await page.getByLabel('Add button at row 5, column 6').click()
     await page.getByLabel('Button label').fill('Games')
     await page.getByLabel('Link button to a page').click()
     await page.getByLabel('New page name').fill('Games')
@@ -42,7 +42,7 @@ test.describe('edit mode', () => {
   test('delete a page repairs buttons that linked to it', async ({ page }) => {
     await setupProfile(page)
     await enterEditMode(page)
-    await page.getByLabel('Add button at row 5, column 4').click()
+    await page.getByLabel('Add button at row 5, column 6').click()
     await page.getByLabel('Button label').fill('Temp')
     await page.getByLabel('Link button to a page').click()
     await page.getByLabel('New page name').fill('Temp')

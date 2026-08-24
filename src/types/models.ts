@@ -49,6 +49,11 @@ export interface UserProfile {
   // Data tracking (§4.13) — default OFF: caregiver must opt in
   // (COPPA/GDPR consent; requirements DT-05)
   trackingEnabled?: boolean
+  // Vocabulary level (§19) — which words are introduced yet. 1 Basic,
+  // 2 Intermediate, 3 Full. UNDEFINED MEANS 3: profiles created before
+  // levels existed must not silently lose words. Levels reveal words in
+  // place, so changing this never moves a button (§19.1).
+  vocabularyLevel?: 1 | 2 | 3
   // Word prediction (§18) — default ON (undefined = enabled). Unlike
   // tracking this is a communication convenience rather than analytics, so
   // it is disclosed and clearable rather than consent-gated, matching how

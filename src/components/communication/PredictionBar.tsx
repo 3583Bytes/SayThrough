@@ -9,7 +9,7 @@ import type { Prediction } from '../../services/prediction'
 //   1. The slot COUNT and POSITIONS are fixed. Short lists are padded with
 //      empty slots rather than letting the row shrink or re-center. A bar that
 //      changes shape between keystrokes destroys the motor plan the user is
-//      building and causes mis-hits — the same invariant as §19.5, applied to
+//      building and causes mis-hits — the same invariant as §19.6, applied to
 //      the keyboard.
 //   2. Slots keep the same touch target as the keys below them (48px), so a
 //      user who can hit a letter can hit a suggestion.

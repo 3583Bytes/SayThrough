@@ -17,6 +17,27 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [~] **Vocabulary sizes + levels — the structural spine (§19.2/§19.3).**
+  The seed generator is now size-driven: each grid size is an independently
+  authored page set (§19.2 — a motor-plan layout cannot be reflowed), with
+  5×6 keeping the exact ids it shipped with. A second size (3×4 simplified,
+  6 core words) ships. Vocabulary levels reveal words **in place**, so raising
+  a level never moves a button, and the level control hides itself on a board
+  with only one level. `buildSet()` is the single source of truth for both
+  seeding and the level map, so they cannot drift.
+- [x] **Vocabulary depth at 5×6 (§19.4)** — 144 → **203 words**, inside the
+  spec's own 200–250 target: the three topics §19.4 listed but we never shipped
+  (House, Describing, Social), every topic page filled out, and topic overflow
+  via "More" pages. Fixed a silent content bug on the way — the 15th Actions
+  word never became a button, dropped by the off-grid row filter. Every
+  core-board page now keeps a free cell, enforced in the generator, because a
+  100%-full board cannot be personalised.
+- [x] **6×10 expanded board (§19.2)** — **307 words**, and a **24-word core**,
+  which is the point: the core region is `rows × coreColumns` cells and is full
+  at every size, so 15 was a ceiling no amount of authoring could lift within
+  5×6. Three boards now ship — 26 / 203 / 307 words at 6 / 15 / 24 core words —
+  chosen once at setup, since a motor-plan layout cannot be reflowed. Weather
+  returns here, where there is navigation room for it.
 - [x] **Full device backup (§14.3)** — one JSON file carrying profiles, voice
   and access-method tuning, PIN, pages, word lists, history, learned
   prediction words and tracking. `.obz` is vocabulary-only, so until now a
@@ -43,7 +64,7 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
   to remove just it.
 - [x] **In-grid Back button** — a real seeded button at a fixed cell, so
   page-to-page navigation lives *in the vocabulary* (like TD Snap/Proloquo)
-  and never shifts between edit and use mode (§19.5 motor-plan invariant).
+  and never shifts between edit and use mode (§19.6 motor-plan invariant).
 - [x] **Post-speak options** (per-profile, default off) — "return to home
   after speaking" and "clear message after speaking".
 - [x] **Attention bell** — one-tap chime to get a partner's attention
@@ -74,7 +95,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 |---|---|---|---|
 | **Word prediction** (offline n-gram) in the keyboard | Every major app; makes the text/literacy path usable | M | [x] |
 | **Word forms / grammar** (long-press → plural, tense, possessive) | Proloquo, Grid 3; separates "toddler board" from real language | M–L | [x] |
-| **Grid size + vocabulary level** at setup | All of them; model already stores per-page `rows`/`columns` — needs UI + starter templates | M | [~] |
+| **Grid size + vocabulary level** at setup | All of them. Three authored sizes (3×4 / 5×6 / 6×10), levels that reveal in place, Settings controls, size choice in the onboarding page-set chooser. Remaining: a level picker at onboarding, and SLP review of the word lists (§19.6 release gate) | M | [~] |
 | **Message history / favorites** | Proloquo2Go, TD Snap | S | [x] |
 | **Word-by-word highlight while speaking** | TD Snap/Proloquo; literacy support | M | [x] |
 
@@ -147,7 +168,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
   strong motor planning; 100+ voices; iOS-only. Our answer: cross-platform,
   free, motor-plan parity via the persistent core region.
 - **LAMP / Speak for Yourself** ($149–299): motor-planning/automaticity —
-  "a word never moves." We honor the same invariant (§19.5).
+  "a word never moves." We honor the same invariant (§19.6).
 - **CoughDrop** ($9/mo or $295): web + cross-platform; cloud team sharing;
   strong reporting; supports OBF. Our answer: local-first + *optional* free
   sync, no subscription.

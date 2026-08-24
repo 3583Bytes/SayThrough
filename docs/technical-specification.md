@@ -2228,13 +2228,41 @@ It gets designed with the same rigor as any subsystem.
    Language Lab core lists, Cboard's CC-licensed boards — and get a
    practicing SLP's review before release.
 
-### 19.2 Page Template — Authored at 5×6
+### 19.2 Page Templates — One Authored Layout Per Size
 
-One authored grid size for v1.0: **5 rows × 6 columns (30 buttons)**.
-The onboarding grid-size choice applies only to blank/custom page sets
-(§5.2) — a motor-plan layout cannot be reflowed automatically. Additional
-authored sizes (3×4 simplified, 6×10 expanded) ship in v1.1 as separate,
-motor-plan-consistent variants.
+A motor-plan layout **cannot be reflowed**: changing the grid moves every
+word, which destroys the automaticity the persistent core region exists to
+protect. So grid size is not a resize control. Each size is authored
+separately in `src/data/coreWords.json` under `sizes`, becomes its own page
+set, and is chosen once at setup.
+
+Shipped sizes:
+
+| Key | Grid | Core region | Set id |
+|---|---|---|---|
+| `5x6` | 5 × 6 | 3 columns (15 words) | `builtin-core-vocabulary` |
+| `3x4` | 3 × 4 | 2 columns (6 words) | `builtin-core-3x4` |
+| `6x10` | 6 × 10 | 4 columns (24 words) | `builtin-core-6x10` |
+
+Word counts: 3×4 ships 26 words, 5×6 ships 203, 6×10 ships **307**. The core
+region is the reason the sizes exist — 6 / 15 / 24 core words is a ceiling no
+amount of content authoring can lift within a given grid, since the region is
+`rows × coreColumns` cells and is full at every size.
+
+`5x6` predates multi-size support and **keeps the exact ids it shipped
+with** — profiles, word lists and user-created pages all reference them.
+Only non-default sizes take a `builtin-core-{size}-…` prefix. Button ids
+derive from their page id (`{pageId}-r{row}-c{column}`), so they stay stable
+automatically.
+
+`buildSet(size, now)` in `seedCoreVocabulary.ts` is the single source of
+truth: seeding and the level map both derive from it, so the two cannot
+drift. A 6×10 expanded variant is content work, not machinery — adding it is
+a new entry in `coreWords.json`.
+
+Consequence for navigation: the toolbar's "Core" returns to the user's
+**active** page set, not a meta-recorded default, or a user of one grid size
+would be thrown onto another layout.
 
 ```
 ┌────────┬────────┬────────┬────────┬────────┬────────┐
@@ -2251,7 +2279,57 @@ motor-plan-consistent variants.
   on the home page; topic (fringe) words on topic pages, with an optional
   "more ➜" button linking to a second page of that topic
 
-### 19.3 Content Plan
+### 19.3 Vocabulary Levels
+
+Levels answer "how much of the board is introduced yet" **without** violating
+§19.1. Every word is authored at its final position and tagged with the level
+that introduces it (`[label, partOfSpeech, level]`); a lower level hides the
+rest. Raising a user's level only un-hides cells — nothing already learned
+ever moves. That is what makes a grow-with-me path compatible with "core
+words never move", and it is why levels are safe to change at any time while
+grid size is not.
+
+- **Core is level 1 at every size.** Core words are the highest-value words
+  on the board and the reason the persistent region exists; levels tier the
+  fringe around them.
+- **Back is level 1**, always — it is the way off a topic page.
+- **A word is no more reachable than its topic page**, so a word's effective
+  level is `max(word, topicPage)`.
+- `UserProfile.vocabularyLevel` is `1 | 2 | 3` and **undefined means 3**:
+  profiles created before levels existed must not silently lose words.
+- Implementation reuses the existing `isHidden` seam rather than adding a
+  filter of its own — `CommunicationScreen` marks out-of-level buttons hidden
+  at render time, so they drop out of the grid, the scan model and search
+  together, stay visible in edit mode, and nothing is written to storage.
+- The Settings control is hidden for a page set that defines only one level
+  (`levelCountForPageSet`), so the simplified board shows no dead choice.
+
+Distinct from the Vocabulary Filter (§4.8), which deliberately *dims* rather
+than hides so a partner can still model. Levels hide: 200 greyed-out buttons
+is exactly the overwhelm a Basic level exists to prevent.
+
+### 19.4 Content Plan
+
+**Shipped at 5×6 (203 words):** 15 core + 188 fringe across 14 topic pages —
+inside the ~200–250 target below. Two rules the generator enforces rather than
+trusting to whoever edits the word lists:
+
+- **Every core-board page keeps a free cell.** A board filled to 100% cannot
+  have the child's own words added to it, and personalisation — family names,
+  a favourite food — is central to AAC rather than an afterthought. Quick
+  Phrases (§19.5) is the exception: 18 phrases on 3×6, full by design.
+- **A topic that outgrows its page overflows** onto a "More" page in the final
+  content cell (a fixed position, so it does not move as a topic grows) rather
+  than losing words off the grid. Before this, the 15th Actions word ("turn
+  off") was silently dropped by the row filter and never became a button.
+
+Page ids derive from topic labels, so a topic named "Home" would collide with
+the home page itself. `buildSet` throws on duplicate page ids; the household
+topic is called "House" for this reason. Weather is not in the plan below and
+was dropped to keep the home page to one screen with headroom — it returns on
+the 6×10 board, which has far more navigation room.
+
+**Original plan:**
 
 - **Persistent core (15 words, candidate list pending SLP validation):**
   I, you, it, want, go, like, help, more, stop, not, do, feel, look,
@@ -2263,19 +2341,21 @@ motor-plan-consistent variants.
 - **Total:** ~200–250 buttons; every label must have a bundled core
   symbol — the ~200 bundled symbols (§3) are exactly this set
 
-### 19.4 Quick Phrases Page Set
+### 19.5 Quick Phrases Page Set
 
 18-button single page (3×6), each speaking a full sentence in one tap:
 greetings (3), requests (4), social (4), comments (3), conversational
 repair — "That's not what I meant", "Something else" (2), and
 attention/emergency (2).
 
-### 19.5 Acceptance Criteria (release gate for v1.0)
+### 19.6 Acceptance Criteria (release gate for v1.0)
 
 - From ANY page, a user can produce "help", "stop", "more", "I want ___",
   and "I feel ___" in ≤ 2 selections
-- The core region is identical (labels + positions) across all pages,
-  verified by an automated test over the shipped .obf files
+- The core region is identical (labels + positions) across all pages of
+  every authored size — asserted per size in `tests/unit/vocabulary.test.ts`,
+  alongside checks that no button lands off-grid or shares a cell, and that
+  raising a level never moves a button
 - A practicing SLP has reviewed the word selection and layout, and the
   sign-off is documented in the repo
 

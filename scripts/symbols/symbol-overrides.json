@@ -1,5 +1,5 @@
 {
-  "_comment": "Curated label\u2192ARASAAC-id picks that beat exact-keyword matching. Each was visually verified (\u00a719.5 review still pending). Example fixed here: 'stop' keyword-matched a bus stop.",
+  "_comment": "Curated label→ARASAAC-id picks that beat exact-keyword matching. Keys MUST be lowercase — build-seed-symbols.mjs looks up label.toLowerCase(), so a capitalised key silently does nothing. Example fixed here: 'stop' keyword-matched a bus stop.",
   "stop": 7195,
   "do": 32751,
   "more": 26913,
@@ -9,5 +9,16 @@
   "silly": 8593,
   "smoothie": 8503,
   "ears": 2871,
-  "math": 10260
+  "math": 10260,
+  "_pendingVisualCheck": "Found by searching the index for synonyms, NOT visually verified, because the label had no exact keyword match. Check the images before v1.0 (§19.6): describing, social, desk, loud, shorts, art, done, class, maybe, not",
+  "describing": 11713,
+  "social": 4740,
+  "desk": 11302,
+  "loud": 4686,
+  "shorts": 13638,
+  "art": 11238,
+  "done": 5358,
+  "class": 5913,
+  "maybe": 11696,
+  "not": 5800
 }

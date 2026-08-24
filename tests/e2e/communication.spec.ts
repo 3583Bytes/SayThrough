@@ -69,7 +69,7 @@ test.describe('navigation & persistent core', () => {
     await page.getByLabel('cookie', { exact: true }).waitFor()
     const wantFood = await page.getByLabel('want', { exact: true }).boundingBox()
 
-    // §19.5: core words are at identical positions across pages
+    // §19.6: core words are at identical positions across pages
     expect(Math.abs(wantHome!.x - wantFood!.x)).toBeLessThan(2)
     expect(Math.abs(wantHome!.y - wantFood!.y)).toBeLessThan(2)
 

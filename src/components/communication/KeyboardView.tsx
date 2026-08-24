@@ -18,7 +18,7 @@ import { PredictionBar, predictionSlotId } from './PredictionBar'
 //
 // The letter layout never moves. Digits and symbols live behind a mode toggle
 // rather than being crammed in, so the motor plan for the letters is stable
-// (§19.5, applied to the keyboard).
+// (§19.6, applied to the keyboard).
 const LETTER_ROWS = ['qwertyuiop', "asdfghjkl'", 'zxcvbnm']
 const SYMBOL_ROWS = ['1234567890', '-/:;()$&@"', ',!%+=#*']
 

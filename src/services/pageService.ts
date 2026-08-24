@@ -9,7 +9,7 @@ import { uuid } from '../utils/uuid'
 
 // Creates a page in the set; when includeCoreRegion is set, copies the
 // root page's buttons in columns 0–2 — the §19.2 persistent core region —
-// so the motor-plan invariant (§19.5) holds on user-created pages too.
+// so the motor-plan invariant (§19.6) holds on user-created pages too.
 export async function createLinkedPage(
   pageSetId: string,
   name: string,
@@ -52,7 +52,7 @@ export async function createLinkedPage(
 
   // Every sub-page is reachable only by linking, so it always has a page to
   // return to — give it an in-grid Back button at the first content cell,
-  // matching built-in topic pages (§19.5: fixed position, never shifts).
+  // matching built-in topic pages (§19.6: fixed position, never shifts).
   await storage.createButton({
     id: uuid(),
     pageId: page.id,

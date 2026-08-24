@@ -27,7 +27,10 @@ test.describe('word prediction (§18)', () => {
     await expect(page.getByLabel('Insert want', { exact: true })).toBeVisible({
       timeout: 10_000,
     })
-    await expect(page.getByLabel('Insert was', { exact: true })).toBeVisible()
+    // Every slot filled, and every suggestion actually starts with "wa".
+    const words = await page.getByLabel(/^Insert /).allInnerTexts()
+    expect(words.length).toBeGreaterThanOrEqual(3)
+    for (const word of words) expect(word.toLowerCase().startsWith('wa')).toBe(true)
   })
 
   test('tapping a suggestion inserts the whole word', async ({ page }) => {

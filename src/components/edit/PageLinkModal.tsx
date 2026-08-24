@@ -26,7 +26,7 @@ interface PageLinkModalProps {
 }
 
 // "This button opens…" — pick an existing page or create a new one.
-// New pages get the persistent core region by default (§19.2/§19.5);
+// New pages get the persistent core region by default (§19.2/§19.6);
 // pages are only ever created here, so orphans can't exist.
 export function PageLinkModal({
   visible,

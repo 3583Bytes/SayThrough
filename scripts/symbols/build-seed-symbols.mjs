@@ -30,17 +30,27 @@ const overrides = JSON.parse(
   await readFile(join(here, 'symbol-overrides.json'), 'utf8'),
 )
 
-// Labels to map: core + every topic word + the topic names themselves
-// (used on the home page's navigation buttons)
+// Labels to map: for EVERY authored grid size (§19.2 — one layout per size),
+// its core words, its topic words, and the topic names themselves (used on the
+// home page's navigation buttons). Sizes overlap heavily, and the map is keyed
+// by label, so shared words are mapped once.
 const labels = new Set()
-for (const [label] of coreWords.core) labels.add(label)
-for (const [topic, words] of Object.entries(coreWords.topics)) {
-  labels.add(topic)
-  for (const [label] of words) labels.add(label)
+for (const layout of Object.values(coreWords.sizes)) {
+  for (const [label] of layout.core) labels.add(label)
+  for (const [topic, words] of Object.entries(layout.topics)) {
+    labels.add(topic)
+    for (const [label] of words) labels.add(label)
+  }
 }
+if (labels.size === 0) {
+  throw new Error(
+    'No labels found in coreWords.json — expected { sizes: { <key>: { core, topics } } }',
+  )
+}
+console.log(`${labels.size} labels across ${Object.keys(coreWords.sizes).length} size(s)`)
 
 // keyword → pictogram ids, exact match, first-listed keyword wins ties.
-// TODO(§19.5): symbol choices need the same SLP review as the word list.
+// TODO(§19.6): symbol choices need the same SLP review as the word list.
 const byKeyword = new Map()
 for (const picto of index) {
   for (let k = 0; k < (picto.keywords?.length ?? 0); k++) {

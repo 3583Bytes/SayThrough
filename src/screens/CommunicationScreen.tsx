@@ -41,6 +41,10 @@ import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
 import { GUEST_USER_ID, useUserStore } from '../stores/userStore'
+import {
+  coreColumnsForPageSet,
+  levelOfButton,
+} from '../data/seedCoreVocabulary'
 import type { Button } from '../types/models'
 import { verifyPin } from '../utils/pin'
 import { uuid } from '../utils/uuid'
@@ -62,7 +66,7 @@ export function CommunicationScreen() {
 
   const currentPageId = useNavigationStore((s) => s.currentPageId)
   const flashButtonId = useNavigationStore((s) => s.flashButtonId)
-  const { page, buttons, refresh } = usePageButtons(currentPageId)
+  const { page, buttons: storedButtons, refresh } = usePageButtons(currentPageId)
 
   const isEditMode = useEditStore((s) => s.isEditMode)
   const selectedButtonId = useEditStore((s) => s.selectedButtonId)
@@ -101,14 +105,35 @@ export function CommunicationScreen() {
     }
   }, [filterListId, activeUser])
 
-  // The persistent-core framing (§19.2) applies to the Core Vocabulary
-  // set and its pages (incl. user-created ones, which share its id) —
-  // not Quick Phrases or blank sets.
+  // The persistent-core framing (§19.2) applies to any bundled core set and
+  // its pages (incl. user-created ones, which share the set id) — not Quick
+  // Phrases or blank sets. Width comes from the size's authored layout, since
+  // each grid size has its own core region.
   useEffect(() => {
     storage.getMeta('coreVocabularySeeded').then(setCoreSetId)
     storage.getMeta('quickPhrasesPageSetId').then(setQuickSetId)
   }, [])
-  const coreColumns = page && page.pageSetId === coreSetId ? 3 : 0
+  const coreColumns = page ? coreColumnsForPageSet(page.pageSetId) : 0
+
+  // §19 vocabulary level: hide words the user has not been introduced to yet,
+  // by marking them hidden rather than removing them — that reuses the
+  // existing isHidden semantics exactly, so they stay visible in edit mode and
+  // drop out of the grid, the scan model and search together. Positions come
+  // from the authored layout, so raising the level only un-hides cells and
+  // never moves anything (§19.1).
+  //
+  // Undefined level means "show everything": profiles created before levels
+  // existed must not silently lose words.
+  const vocabularyLevel = activeUser?.vocabularyLevel ?? 3
+  const buttons = useMemo(
+    () =>
+      storedButtons.map((button) =>
+        levelOfButton(button.id) > vocabularyLevel
+          ? { ...button, isHidden: true }
+          : button,
+      ),
+    [storedButtons, vocabularyLevel],
+  )
 
   // Toolbar "you are here": highlight the section for the active page set
   // (keyboard wins when open). User-created pages share the Core set id,
@@ -117,7 +142,7 @@ export function CommunicationScreen() {
     ? 'keyboard'
     : page?.pageSetId === quickSetId
       ? 'quick'
-      : page?.pageSetId === coreSetId
+      : page && coreColumnsForPageSet(page.pageSetId) > 0
         ? 'core'
         : null
 
@@ -333,6 +358,18 @@ export function CommunicationScreen() {
 
   // Toolbar section jumps (session-level; the profile default is
   // unchanged — that lives in Settings → Vocabulary)
+  // The user's own board. Resolving 'coreVocabularySeeded' here instead would
+  // always land on the 5×6 set and throw a user of another grid size onto a
+  // different layout — the exact thing motor planning cannot survive.
+  const jumpToActivePageSet = async () => {
+    const pageSetId = useUserStore.getState().activeUser?.activePageSetId
+    const pageSet = pageSetId ? await storage.getPageSet(pageSetId) : null
+    if (pageSet) {
+      useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
+    }
+    setKeyboardOpen(false)
+  }
+
   const jumpToPageSet = async (metaKey: string) => {
     const pageSetId = await storage.getMeta(metaKey)
     const pageSet = pageSetId ? await storage.getPageSet(pageSetId) : null
@@ -525,7 +562,7 @@ export function CommunicationScreen() {
         {!isEditMode && page.showToolbar && (
           <Toolbar
             activeSection={activeSection}
-            onCore={() => jumpToPageSet('coreVocabularySeeded')}
+            onCore={() => jumpToActivePageSet()}
             onQuick={() => jumpToPageSet('quickPhrasesPageSetId')}
             onKeyboard={() => setKeyboardOpen((open) => !open)}
           />
