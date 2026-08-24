@@ -1477,6 +1477,82 @@ first word a child speaks. Mitigations, both required:
 
 ---
 
+
+### 10.5 Enhanced Neural Voice (Piper)
+
+Platform voices sound robotic — the single most-reported quality problem. The
+answer is **on-device** neural TTS, not cloud TTS: cloud breaks the free,
+offline and privacy promises (§7.3, COPPA/GDPR) that define the product.
+
+Ships as an **optional download**; OS voices stay the default, so the app is
+never worse out of the box and never depends on the model being present.
+
+**Architecture — a backend behind `ttsService`.** Every utterance already goes
+through one service, so `TtsBackend` (`services/tts/types.ts`) is the only seam
+a different synthesiser needs. The router prefers a backend but falls back to
+the platform voice when it is unavailable, throws, or fails mid-utterance.
+That fallback is not a nicety: being left without a voice mid-conversation is
+the worst failure this app can produce.
+
+**Everything is self-hosted.** Same rule as symbols (§9.1): zero third-party
+requests, because school filters block unlisted domains.
+
+| Asset | Size | Source |
+|---|---|---|
+| ORT wasm (single-threaded + SIMD) | ~19 MB | `scripts/voice/build-runtime.mjs`, from node_modules, at build |
+| Voice model + config | ~60 MB | `scripts/voice/download-voice.mjs` → release asset → unpacked at deploy |
+| espeak-ng phonemizer wasm + data | ~18 MB | `scripts/voice/build-phonemizer.mjs`, from node_modules, at build |
+
+**`@diffusionstudio/vits-web` cannot be used**, despite working in the spike.
+It hardcodes `HF_BASE` (huggingface), `ONNX_BASE` (cdnjs) and `WASM_BASE`
+(jsdelivr) as exported consts with no runtime override, so three third-party
+hosts are unavoidable — and its `predict()` spawns a worker and calls
+`InferenceSession.create()` on the full model **every call** (~2–3 s per
+utterance, slower than realtime). We drive `onnxruntime-web` directly instead.
+
+**Single-threaded ORT only.** The threaded build needs SharedArrayBuffer,
+which needs COOP/COEP response headers, which GitHub Pages cannot set — the
+same limitation that put this app on IndexedDB rather than expo-sqlite (§8).
+
+**Two performance requirements**, the first now measured against the real
+model (`en_US-hfc_female-medium`, 22050 Hz, single-threaded wasm):
+
+1. **One persistent `InferenceSession`.** Session init is ~825 ms, paid once.
+   Synthesis then runs at **~165 ms per second of audio (RTF ≈ 0.16)** —
+   5–6× faster than realtime. The spike measured RTF 2.25 because
+   `vits-web` rebuilds the session on every call; keeping one session is
+   roughly a 13× difference and is what makes this viable at all.
+2. **Cache synthesized audio per word.** AAC speech is highly repetitive, so
+   core words replay from cache instantly and only novel text pays inference.
+
+**Phonemization contract.** `piper_phonemize` exposes no callable export — only
+a CLI `main`. It is driven through `callMain` with the input as a JSON
+**array**, which is undocumented and not in `--help`:
+
+```js
+callMain(['-l', 'en-us', '--input', JSON.stringify([{ text }]),
+          '--espeak_data', '/espeak-ng-data'])
+// stdout: {"phonemes": [...], "phoneme_ids": [...]}
+// "I want juice" -> aɪ wˈɔnt dʒˈuːs -> 32 ids
+```
+
+A single object rather than an array aborts with no error message, and the
+`Module.stdin` and fd-0 redirection routes both silently produce nothing.
+
+**Model tensor contract:** `input` (int64 phoneme ids, `[1, n]`),
+`input_lengths` (int64 `[1]`), `scales` (float32 `[noise_scale, length_scale,
+noise_w]`). Output is float32 PCM at the config's `sample_rate`.
+
+`length_scale` 1.25 (≈0.8× speed) is the enhanced-voice default — the setting
+the voice was validated at. The shipped model config defaults to 1.0.
+
+**Open items:** phonemization (text → phoneme ids needs espeak-ng wasm), the
+inference wrapper, audio playback and cache, the download/storage UI, the
+deploy pipeline for the model, word-boundary reporting for word-by-word
+highlight (§Tier-1 — neural synthesis emits no boundary events, so they must
+be derived), and real-device QA on low-end tablets and iPad Safari.
+
+
 ## 11. Navigation & Routing
 
 Using **React Navigation Native Stack** for screen-level navigation,

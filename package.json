@@ -19,6 +19,7 @@
     "expo-sqlite": "~57.0.1",
     "expo-status-bar": "~57.0.1",
     "jszip": "^3.10.1",
+    "onnxruntime-web": "^1.18.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.0",
@@ -28,6 +29,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@diffusionstudio/piper-wasm": "^1.0.0",
     "@playwright/test": "^1.62.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
@@ -42,12 +44,13 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "rm -rf dist && EXPO_BASE_URL=/app EXPO_PUBLIC_BASE_URL=/app expo export --platform web --output-dir dist/app && node scripts/postbuild-web.mjs && node scripts/build-site.mjs",
+    "build": "rm -rf dist && node scripts/voice/build-runtime.mjs && node scripts/voice/build-phonemizer.mjs && EXPO_BASE_URL=/app EXPO_PUBLIC_BASE_URL=/app expo export --platform web --output-dir dist/app && node scripts/postbuild-web.mjs && node scripts/build-site.mjs",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "e2e": "npm run build && playwright test",
     "og-image": "node scripts/gen-og-image.mjs",
     "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en",
+    "voice": "node scripts/voice/download-voice.mjs",
     "lint": "tsc --noEmit"
   },
   "private": true

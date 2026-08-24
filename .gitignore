@@ -41,6 +41,14 @@ yarn-error.*
 /android
 scripts/symbols/data/
 
+# ONNX Runtime wasm, copied out of node_modules by scripts/voice/build-runtime.mjs
+# (~19 MB, regenerated on every build — never committed)
+public/ort/
+# Piper voice model, fetched by scripts/voice/download-voice.mjs (~63 MB).
+# Published as a release asset and unpacked at deploy, like the symbol library.
+scripts/voice/data/
+public/voices/
+
 # raw frequency lists fetched by scripts/prediction/download-lexicon.mjs —
 # the built lexicon in public/prediction/ IS committed (~237 KB, so every
 # clone gets working prediction without running the pipeline)

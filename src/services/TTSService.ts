@@ -1,9 +1,8 @@
-import * as Speech from 'expo-speech'
-import {
-  isValidVoiceId,
-  pickDefaultVoice,
-  resolveVoiceId,
-} from './voiceSelection'
+import type * as Speech from 'expo-speech'
+import { platformBackend } from './tts/platformBackend'
+import type { TtsBackend, TtsBackendId } from './tts/types'
+
+export type { TtsBackendId } from './tts/types'
 
 export interface SpeakOptions {
   voiceId?: string // platform voice identifier → Speech `voice`
@@ -16,15 +15,51 @@ export interface SpeakOptions {
   onStopped?: () => void
   onError?: (error: Error) => void
   // Fired as each word is reached (word-by-word highlight). charIndex is
-  // the offset into `text`; available on web + native via expo-speech.
+  // the offset into `text`.
   onBoundary?: (charIndex: number) => void
 }
 
 // technical-specification.md §10.1 / §10.4
-class TTSService {
+//
+// Routes every utterance to a backend. The platform synthesiser is always
+// registered and is the fallback; optional engines (§10.5 enhanced neural
+// voice) register alongside it and are used only while genuinely available.
+//
+// The fallback is the important part: losing your voice mid-conversation
+// because an optional model failed to load is the worst failure this app can
+// have, so an unavailable or throwing backend silently drops back to the
+// platform voice rather than producing silence.
+export class TtsRouter {
+  private backends = new Map<TtsBackendId, TtsBackend>()
+  private preferred: TtsBackendId = 'platform'
   private warmedUp = false
-  private voices: Speech.Voice[] = []
   private defaults: SpeakOptions = {}
+  private lastFallbackReason: string | null = null
+
+  constructor(backends: TtsBackend[] = []) {
+    for (const backend of backends) this.backends.set(backend.id, backend)
+  }
+
+  register(backend: TtsBackend): void {
+    this.backends.set(backend.id, backend)
+  }
+
+  /** Which backend a request would actually use right now. */
+  activeBackendId(): TtsBackendId {
+    const preferred = this.backends.get(this.preferred)
+    if (preferred?.isAvailable()) return preferred.id
+    return 'platform'
+  }
+
+  /** Prefer a backend; falls back per-utterance if it is not available. */
+  setPreferredBackend(id: TtsBackendId): void {
+    this.preferred = id
+  }
+
+  /** Why the preferred backend was last skipped, for Settings to surface. */
+  fallbackReason(): string | null {
+    return this.lastFallbackReason
+  }
 
   // Called whenever the active profile loads/changes — speak() then uses
   // the profile's voice/rate/pitch/volume unless overridden per call
@@ -32,84 +67,67 @@ class TTSService {
     this.defaults = defaults
   }
 
-  // §10.4: force the voice list to load at startup. On web it arrives
-  // asynchronously (voiceschanged) and the first call often returns [],
-  // so retry briefly; also subscribe to voiceschanged so late-arriving
-  // voices are captured after init gives up.
   async init(): Promise<void> {
-    for (let attempt = 0; attempt < 12 && this.voices.length === 0; attempt++) {
-      try {
-        this.voices = await Speech.getAvailableVoicesAsync()
-      } catch {
-        this.voices = []
-      }
-      if (this.voices.length === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 250))
-      }
-    }
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        Speech.getAvailableVoicesAsync()
-          .then((v) => {
-            if (v.length) this.voices = v
-          })
-          .catch(() => {})
-      }
-    }
+    await platformBackend.init()
   }
 
-  // §10.4: engines have first-utterance latency of up to ~1s; a silent
-  // utterance on the first user interaction absorbs it before the first
-  // real word
   warmUp(): void {
     if (this.warmedUp) return
     this.warmedUp = true
-    Speech.speak(' ', { volume: 0 })
+    platformBackend.warmUp()
   }
 
-  // Resolve to a voice id we KNOW is present and non-novelty. This is
-  // the crux fix: expo-speech-web falls back to voices[0] (often a
-  // robotic voice) when the requested id doesn't match any voiceURI, so
-  // we must never hand it a stale/invalid id. If the requested id is bad
-  // we substitute the best available voice; if we can't, we return
-  // undefined so expo-speech uses the OS default instead of voices[0].
   speak(text: string, options: SpeakOptions = {}): void {
-    const o = { ...this.defaults, ...options }
-    const language = o.language ?? 'en-US'
-    Speech.stop()
-    Speech.speak(text, {
-      voice: resolveVoiceId(this.voices, o.voiceId, language),
-      language,
-      rate: o.rate ?? 0.9,
-      pitch: o.pitch ?? 1.0,
-      volume: o.volume ?? 1.0,
-      onStart: o.onStart,
-      onDone: o.onDone,
-      onStopped: o.onStopped,
-      onError: o.onError,
-      onBoundary: o.onBoundary
-        ? (ev: { charIndex: number }) => o.onBoundary?.(ev.charIndex)
-        : undefined,
-    })
+    const merged = { ...this.defaults, ...options }
+    const request = { ...merged, text }
+
+    const preferred = this.backends.get(this.preferred)
+    if (preferred && preferred.id !== 'platform') {
+      if (preferred.isAvailable()) {
+        try {
+          this.lastFallbackReason = null
+          preferred.speak({
+            ...request,
+            // A backend that fails mid-utterance must not end in silence.
+            onError: (error) => {
+              this.lastFallbackReason = error.message
+              this.speakOnPlatform(request)
+            },
+          })
+          return
+        } catch (error) {
+          this.lastFallbackReason =
+            error instanceof Error ? error.message : String(error)
+        }
+      } else {
+        this.lastFallbackReason = 'Enhanced voice is not ready yet.'
+      }
+    }
+
+    this.speakOnPlatform(request)
+  }
+
+  private speakOnPlatform(request: SpeakOptions & { text: string }): void {
+    platformBackend.speak(request)
   }
 
   stop(): void {
-    Speech.stop()
+    for (const backend of this.backends.values()) backend.stop()
   }
 
   getVoices(): Speech.Voice[] {
-    return this.voices
+    return platformBackend.getVoices()
   }
 
   // Best valid voice id for a language, or undefined if none loaded yet.
   bestVoiceId(language: string): string | undefined {
-    return pickDefaultVoice(this.voices, language)?.identifier
+    return platformBackend.bestVoiceId(language)
   }
 
   // Is this stored id still a good, present, non-novelty voice?
   isValidVoiceId(id: string | undefined): boolean {
-    return isValidVoiceId(this.voices, id)
+    return platformBackend.isValidVoiceId(id)
   }
 }
 
-export const ttsService = new TTSService()
+export const ttsService = new TtsRouter([platformBackend])
