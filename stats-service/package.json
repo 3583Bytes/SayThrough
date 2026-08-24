@@ -1,0 +1,15 @@
+{
+  "name": "saythrough-stats",
+  "version": "1.0.0",
+  "description": "Aggregate, identifier-free usage counters for SayThrough",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.0"
+  }
+}

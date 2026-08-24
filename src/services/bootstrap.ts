@@ -3,6 +3,7 @@ import { storage } from '../storage'
 import { useNavigationStore } from '../stores/navigationStore'
 import { useUserStore } from '../stores/userStore'
 import { warmLexicon } from './prediction'
+import { countAppInstall, countAppOpen } from './usageCounter'
 import { initPwa, warmupSymbolCache } from './pwa'
 import { getSymbolUri } from './SymbolService'
 import { ttsService } from './TTSService'
@@ -28,6 +29,16 @@ export async function bootstrap(): Promise<void> {
   }
 
   initPwa()
+
+  // Aggregate open counter (stats-service/). No identifier, opt-out honoured,
+  // failure silent — see usageCounter.ts for why it counts opens, not people.
+  countAppOpen()
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(display-mode: standalone)').matches
+  ) {
+    countAppInstall()
+  }
   void pickAndPersistDefaultVoice() // non-blocking — voices load async
 
   // Prediction (§18). Fetching the lexicon now rather than on first keyboard

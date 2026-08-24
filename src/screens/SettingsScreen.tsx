@@ -30,6 +30,10 @@ import {
 import { exportPageSet, importPageSet } from '../services/OBFService'
 import { resetLearning } from '../services/predictionModel'
 import {
+  isUsageCountingEnabled,
+  setUsageCountingEnabled,
+} from '../services/usageCounter'
+import {
   getInstallState,
   onInstallAvailable,
   promptInstall,
@@ -275,6 +279,7 @@ export function SettingsScreen() {
   // §18.4 — clears the learned prediction model for this profile only,
   // leaving tracking data, message history and vocabulary untouched.
   const [learnedCleared, setLearnedCleared] = useState(false)
+  const [countingOn, setCountingOn] = useState(isUsageCountingEnabled)
   const clearLearnedWords = async () => {
     await resetLearning(activeUser?.id)
     setLearnedCleared(true)
@@ -900,7 +905,7 @@ export function SettingsScreen() {
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             Off by default. When a caregiver turns it on, button presses and
-            spoken messages are recorded ON THIS DEVICE ONLY — nothing is
+            spoken messages are recorded ON THIS DEVICE ONLY and are never
             sent anywhere. SLPs use this to document progress.
           </Text>
           <View style={styles.switchRow}>
@@ -916,6 +921,29 @@ export function SettingsScreen() {
               label="View report"
               selected={false}
               onPress={() => navigation.navigate('TrackingReport')}
+            />
+          </View>
+        </View>
+
+        {/* 5c. Privacy — the one thing that does leave the device */}
+        <Text style={[styles.sectionTitle, mutedT]}>Privacy</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
+            SayThrough counts how many times the app is opened, so the project
+            can tell whether anyone is using it. That count is the ONLY thing
+            that ever leaves this device, and it carries no name, account or
+            identifier — it cannot be traced back to anyone. Words, messages,
+            pages and recordings never leave the device at all.
+          </Text>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Count app opens</Text>
+            <Switch
+              value={countingOn}
+              onValueChange={(value) => {
+                setUsageCountingEnabled(value)
+                setCountingOn(value)
+              }}
+              accessibilityLabel="Count app opens"
             />
           </View>
         </View>

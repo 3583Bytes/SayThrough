@@ -55,6 +55,17 @@ against the exported build served by `scripts/serve-dist.mjs`
 build → E2E on every push and PR. Component tests via jest-expo + RNTL
 are a planned follow-up.
 
+## Usage counting
+
+`stats-service/` is a small Express service (deploy at **stats.saythrough.com** —
+the subdomain matters, districts whitelist by domain) storing **aggregate
+counts with no identifiers of any kind**. No user id, session, cookie or IP
+log; daily-uniques are deliberately not offered because counting uniques means
+identifying people, and the users here are largely children with disabilities.
+Clients: `site/analytics.js` (marketing), `src/services/usageCounter.ts` (app),
+dashboard at `site/stats/`. Both honour DNT/GPC and the shared opt-out in
+Settings → Privacy. See `stats-service/README.md`.
+
 ## Deploy
 
 Pushing to `main` triggers `.github/workflows/deploy.yml` → GitHub Pages at the custom domain **saythrough.com**. The build (`npm run build`) produces a combined `dist/`:
