@@ -1,4 +1,5 @@
 import type * as Speech from 'expo-speech'
+import { enhancedBackend } from './tts/enhancedBackend'
 import { platformBackend } from './tts/platformBackend'
 import type { TtsBackend, TtsBackendId } from './tts/types'
 
@@ -130,4 +131,5 @@ export class TtsRouter {
   }
 }
 
-export const ttsService = new TtsRouter([platformBackend])
+export const ttsService = new TtsRouter([platformBackend, enhancedBackend])
+export { enhancedBackend }

@@ -21,6 +21,9 @@ interface UserState {
 }
 
 function applyTtsSettings(user: UserProfile) {
+  // The router falls back per-utterance if the enhanced voice is not ready,
+  // so preferring it before the model has loaded is safe.
+  ttsService.setPreferredBackend(user.ttsEngine ?? 'platform')
   ttsService.configure({
     voiceId: user.ttsVoiceId,
     language: user.language,

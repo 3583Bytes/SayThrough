@@ -25,8 +25,11 @@ const root = join(here, '..', '..')
 const src = join(root, 'node_modules', 'onnxruntime-web', 'dist')
 const out = join(root, 'public', 'ort')
 
-// Single-threaded wasm + its loader only. SIMD is fine (no headers needed).
-const WANTED = /^ort-wasm(-simd)?\.(wasm|js|mjs)$/
+// Single-threaded wasm, plus the wasm-only JS build. ort.wasm.min.js is
+// loaded from a <script> tag at run time rather than imported, so the main app
+// bundle stays exactly the same size for the majority of users who never turn
+// the enhanced voice on.
+const WANTED = /^(ort-wasm(-simd)?\.wasm|ort\.wasm\.min\.js)$/
 
 await mkdir(out, { recursive: true })
 const files = (await readdir(src)).filter((f) => WANTED.test(f))

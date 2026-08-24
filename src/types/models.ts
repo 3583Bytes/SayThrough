@@ -49,6 +49,9 @@ export interface UserProfile {
   // Data tracking (§4.13) — default OFF: caregiver must opt in
   // (COPPA/GDPR consent; requirements DT-05)
   trackingEnabled?: boolean
+  // Enhanced neural voice (§10.5). Undefined = the platform voice, so no
+  // existing profile changes behaviour and nobody downloads 60 MB unasked.
+  ttsEngine?: 'platform' | 'enhanced'
   // Vocabulary level (§19) — which words are introduced yet. 1 Basic,
   // 2 Intermediate, 3 Full. UNDEFINED MEANS 3: profiles created before
   // levels existed must not silently lose words. Levels reveal words in

@@ -8,7 +8,7 @@
 // Default voice is en_US-hfc_female-medium, validated in the spike as
 // sounding good at 0.8x speed (length_scale ~1.25 in the voice config).
 //
-// Output: scripts/voice/data/ (gitignored, ~63 MB)
+// Output: public/voices/ (gitignored, ~60 MB)
 // Usage:  node scripts/voice/download-voice.mjs [voiceId]
 
 import { mkdir, writeFile, stat } from 'node:fs/promises'
@@ -17,7 +17,8 @@ import { fileURLToPath } from 'node:url'
 
 const voiceId = process.argv[2] ?? 'en_US-hfc_female-medium'
 const here = dirname(fileURLToPath(import.meta.url))
-const dataDir = join(here, 'data')
+// Served same-origin from public/voices/ (gitignored — 60 MB).
+const dataDir = join(here, '..', '..', 'public', 'voices')
 
 // Official Piper voices. Path shape: {lang}/{locale}/{name}/{quality}/{file}
 const [locale, name, quality] = voiceId.split('-')

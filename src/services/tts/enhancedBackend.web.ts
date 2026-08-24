@@ -1,0 +1,334 @@
+import type { SpeakRequest, TtsBackend } from './types'
+
+// §10.5 enhanced neural voice (Piper) — web implementation.
+//
+// Everything is same-origin (§9.1): the ONNX runtime, the espeak-ng
+// phonemizer and the voice model are all served from our own build, never a
+// CDN, because school filters block unlisted domains.
+//
+// Two measured facts shape this file:
+//   1. ONE persistent InferenceSession. Session init is ~825 ms; synthesis is
+//      then ~165 ms per second of audio (RTF ~0.16). Creating a session per
+//      utterance — what @diffusionstudio/vits-web does — costs ~2-3 s and is
+//      slower than realtime.
+//   2. The phonemizer has no callable export, only a CLI main, and its
+//      --input must be a JSON ARRAY. A bare object aborts with no message.
+
+const BASE = process.env.EXPO_PUBLIC_BASE_URL ?? ''
+const VOICE_ID = 'en_US-hfc_female-medium'
+const ESPEAK_VOICE = 'en-us'
+
+// 0.8x speed — the setting this voice was validated at. The shipped model
+// config says 1.0, which is noticeably too fast for AAC listeners.
+const DEFAULT_LENGTH_SCALE = 1.25
+
+// Synthesized audio is cached per (text, speed). AAC speech is extremely
+// repetitive — core words and stock phrases repeat all day — so the common
+// path becomes a cache hit and never touches the model at all.
+const MAX_CACHED_CLIPS = 300
+
+interface PiperConfig {
+  audio: { sample_rate: number }
+  inference: { noise_scale: number; length_scale: number; noise_w: number }
+}
+
+type OrtNamespace = typeof import('onnxruntime-web')
+
+/** Load a classic script once; both vendored libraries are UMD globals. */
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`)
+    if (existing) {
+      resolve()
+      return
+    }
+    const script = document.createElement('script')
+    script.src = src
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error(`Failed to load ${src}`))
+    document.head.appendChild(script)
+  })
+}
+
+class EnhancedBackend implements TtsBackend {
+  readonly id = 'enhanced' as const
+
+  private ort: OrtNamespace | null = null
+  private session: import('onnxruntime-web').InferenceSession | null = null
+  private config: PiperConfig | null = null
+  private createPhonemizer: ((options: object) => Promise<any>) | null = null
+
+  private ready = false
+  private initPromise: Promise<boolean> | null = null
+  private progress: { loaded: number; total: number } | null = null
+
+  private audio: AudioContext | null = null
+  private playing: AudioBufferSourceNode | null = null
+  private cache = new Map<string, Float32Array>()
+
+  isAvailable(): boolean {
+    return this.ready
+  }
+
+  downloadProgress(): { loaded: number; total: number } | null {
+    return this.progress
+  }
+
+  /** Has the model already been fetched into the HTTP cache? */
+  async isDownloaded(): Promise<boolean> {
+    try {
+      const cache = await caches.open('saythrough-v1')
+      return Boolean(await cache.match(`${BASE}/voices/${VOICE_ID}.onnx`))
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Fetch the model and build the session. Safe to call repeatedly — the
+   * in-flight promise is shared, so tapping "Download" twice does not start
+   * two 60 MB downloads.
+   */
+  init(onProgress?: (loaded: number, total: number) => void): Promise<boolean> {
+    if (this.ready) return Promise.resolve(true)
+    if (this.initPromise) return this.initPromise
+    this.initPromise = this.load(onProgress).catch(() => {
+      // Leave the app on the platform voice; Settings surfaces the failure.
+      this.initPromise = null
+      return false
+    })
+    return this.initPromise
+  }
+
+  private async load(
+    onProgress?: (loaded: number, total: number) => void,
+  ): Promise<boolean> {
+    await Promise.all([
+      loadScript(`${BASE}/ort/ort.wasm.min.js`),
+      loadScript(`${BASE}/voice/piper_phonemize.js`),
+    ])
+
+    const ort = (globalThis as unknown as { ort?: OrtNamespace }).ort
+    const phonemize = (globalThis as unknown as { createPiperPhonemize?: any })
+      .createPiperPhonemize
+    if (!ort || !phonemize) throw new Error('Voice runtime failed to load.')
+
+    // Single-threaded only: the threaded build needs SharedArrayBuffer, which
+    // needs COOP/COEP headers that static hosting cannot send.
+    ort.env.wasm.numThreads = 1
+    ort.env.wasm.wasmPaths = `${BASE}/ort/`
+    this.ort = ort
+    this.createPhonemizer = phonemize
+
+    const configResponse = await fetch(`${BASE}/voices/${VOICE_ID}.onnx.json`)
+    if (!configResponse.ok) throw new Error('Voice config missing.')
+    this.config = (await configResponse.json()) as PiperConfig
+
+    const model = await this.fetchModel(onProgress)
+    this.session = await ort.InferenceSession.create(model, {
+      executionProviders: ['wasm'],
+    })
+    this.ready = true
+    this.progress = null
+    return true
+  }
+
+  /** Streamed so the 60 MB download can show real progress, not a spinner. */
+  private async fetchModel(
+    onProgress?: (loaded: number, total: number) => void,
+  ): Promise<Uint8Array> {
+    const response = await fetch(`${BASE}/voices/${VOICE_ID}.onnx`)
+    if (!response.ok || !response.body) throw new Error('Voice model missing.')
+
+    const total = Number(response.headers.get('content-length') ?? 0)
+    const reader = response.body.getReader()
+    const chunks: Uint8Array[] = []
+    let loaded = 0
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      loaded += value.length
+      this.progress = { loaded, total }
+      onProgress?.(loaded, total)
+    }
+
+    const bytes = new Uint8Array(loaded)
+    let offset = 0
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset)
+      offset += chunk.length
+    }
+    return bytes
+  }
+
+  private async phonemize(text: string): Promise<number[]> {
+    if (!this.createPhonemizer) throw new Error('Phonemizer not loaded.')
+    const lines: string[] = []
+    const module = await this.createPhonemizer({
+      print: (line: string) => lines.push(line),
+      printErr: () => {},
+      locateFile: (file: string) => `${BASE}/voice/${file}`,
+      noInitialRun: true,
+    })
+    // The input MUST be a JSON array — a bare object aborts silently.
+    module.callMain([
+      '-l',
+      ESPEAK_VOICE,
+      '--input',
+      JSON.stringify([{ text }]),
+      '--espeak_data',
+      '/espeak-ng-data',
+    ])
+    const ids: number[] = []
+    for (const line of lines) {
+      try {
+        const parsed = JSON.parse(line)
+        if (Array.isArray(parsed.phoneme_ids)) ids.push(...parsed.phoneme_ids)
+      } catch {
+        // non-JSON chatter on stdout is not fatal
+      }
+    }
+    if (ids.length === 0) throw new Error(`Could not pronounce "${text}".`)
+    return ids
+  }
+
+  private async synthesize(text: string, lengthScale: number): Promise<Float32Array> {
+    const key = `${lengthScale}|${text}`
+    const cached = this.cache.get(key)
+    if (cached) return cached
+
+    const ort = this.ort
+    const session = this.session
+    const config = this.config
+    if (!ort || !session || !config) throw new Error('Voice not ready.')
+
+    const ids = await this.phonemize(text)
+    const result = await session.run({
+      input: new ort.Tensor('int64', BigInt64Array.from(ids.map(BigInt)), [1, ids.length]),
+      input_lengths: new ort.Tensor('int64', BigInt64Array.from([BigInt(ids.length)]), [1]),
+      scales: new ort.Tensor(
+        'float32',
+        Float32Array.from([
+          config.inference.noise_scale,
+          lengthScale,
+          config.inference.noise_w,
+        ]),
+        [3],
+      ),
+    })
+    const samples = result[session.outputNames[0]].data as Float32Array
+
+    if (this.cache.size >= MAX_CACHED_CLIPS) {
+      // Oldest-first; Map preserves insertion order.
+      const oldest = this.cache.keys().next().value
+      if (oldest !== undefined) this.cache.delete(oldest)
+    }
+    this.cache.set(key, samples)
+    return samples
+  }
+
+  speak(request: SpeakRequest): void {
+    const text = request.text.trim()
+    if (!text) {
+      request.onDone?.()
+      return
+    }
+    // rate is the platform 0.1–2.0 scale; Piper's length_scale is inverse.
+    const rate = request.rate ?? 0.9
+    const lengthScale = DEFAULT_LENGTH_SCALE * (0.9 / Math.max(rate, 0.1))
+
+    void this.synthesize(text, Number(lengthScale.toFixed(3)))
+      .then((samples) => this.play(samples, text, request))
+      .catch((error) => {
+        request.onError?.(
+          error instanceof Error ? error : new Error(String(error)),
+        )
+      })
+  }
+
+  private play(samples: Float32Array, text: string, request: SpeakRequest): void {
+    const config = this.config
+    if (!config) throw new Error('Voice not ready.')
+
+    this.audio = this.audio ?? new AudioContext()
+    this.stop()
+
+    const buffer = this.audio.createBuffer(1, samples.length, config.audio.sample_rate)
+    // Copy rather than pass through: the tensor's view may be backed by
+    // wasm memory, which copyToChannel will not accept.
+    buffer.copyToChannel(new Float32Array(samples), 0)
+    const source = this.audio.createBufferSource()
+    source.buffer = buffer
+
+    const gain = this.audio.createGain()
+    gain.gain.value = request.volume ?? 1
+    source.connect(gain).connect(this.audio.destination)
+
+    this.playing = source
+    request.onStart?.()
+
+    // Neural synthesis emits no boundary events, so word-by-word highlight
+    // (§Tier-1) gets them derived: each token is given a share of the clip
+    // proportional to its length. Approximate, but it tracks closely enough
+    // to read along with, and the alternative is losing the feature.
+    const timers = request.onBoundary
+      ? scheduleBoundaries(text, buffer.duration, request.onBoundary)
+      : []
+
+    source.onended = () => {
+      for (const timer of timers) clearTimeout(timer)
+      if (this.playing === source) {
+        this.playing = null
+        request.onDone?.()
+      } else {
+        request.onStopped?.()
+      }
+    }
+    source.start()
+  }
+
+  stop(): void {
+    const source = this.playing
+    this.playing = null
+    if (source) {
+      try {
+        source.stop()
+      } catch {
+        // already ended
+      }
+    }
+  }
+}
+
+/** Character-proportional boundary estimate; exported for testing. */
+export function boundaryOffsets(text: string, duration: number): Array<[number, number]> {
+  const tokens: Array<{ index: number; length: number }> = []
+  const pattern = /\S+/g
+  let match: RegExpExecArray | null
+  let totalChars = 0
+  while ((match = pattern.exec(text))) {
+    tokens.push({ index: match.index, length: match[0].length })
+    totalChars += match[0].length
+  }
+  if (!tokens.length || totalChars === 0) return []
+
+  let elapsed = 0
+  return tokens.map((token) => {
+    const at = elapsed
+    elapsed += (token.length / totalChars) * duration
+    return [token.index, at] as [number, number]
+  })
+}
+
+function scheduleBoundaries(
+  text: string,
+  duration: number,
+  onBoundary: (charIndex: number) => void,
+): number[] {
+  return boundaryOffsets(text, duration).map(([charIndex, at]) =>
+    setTimeout(() => onBoundary(charIndex), at * 1000) as unknown as number,
+  )
+}
+
+export const enhancedBackend = new EnhancedBackend()

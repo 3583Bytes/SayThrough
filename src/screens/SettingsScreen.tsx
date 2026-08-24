@@ -35,7 +35,7 @@ import {
   promptInstall,
   type InstallState,
 } from '../services/pwa'
-import { ttsService } from '../services/TTSService'
+import { enhancedBackend, ttsService } from '../services/TTSService'
 import { rankVoices } from '../services/voiceSelection'
 import { useTheme } from '../hooks/useTheme'
 import { storage } from '../storage'
@@ -175,6 +175,33 @@ export function SettingsScreen() {
     anchor.click()
     URL.revokeObjectURL(url)
     setBackupStatus('Exported.')
+  }
+
+  // §10.5 enhanced neural voice. The download is ~60 MB, so it is explicit,
+  // shows real progress, and never starts on its own.
+  const [voiceStatus, setVoiceStatus] = useState<string | undefined>()
+  const [voiceBusy, setVoiceBusy] = useState(false)
+
+  const enableEnhancedVoice = async () => {
+    setVoiceBusy(true)
+    setVoiceStatus('Downloading voice… 0%')
+    const ok = await enhancedBackend.init((loaded, total) => {
+      const pct = total ? Math.round((loaded / total) * 100) : 0
+      setVoiceStatus(`Downloading voice… ${pct}%`)
+    })
+    setVoiceBusy(false)
+    if (ok) {
+      await updateActiveUser({ ttsEngine: 'enhanced' })
+      setVoiceStatus('Enhanced voice ready.')
+      ttsService.speak(PREVIEW_TEXT)
+    } else {
+      setVoiceStatus('Could not load the enhanced voice — still using the standard voice.')
+    }
+  }
+
+  const useStandardVoice = async () => {
+    await updateActiveUser({ ttsEngine: 'platform' })
+    setVoiceStatus(undefined)
   }
 
   // §14.3 full device backup — everything, not just vocabulary. The .obz
@@ -784,6 +811,33 @@ export function SettingsScreen() {
               />
             )}
           </View>
+        </View>
+
+        {/* 4c. Enhanced voice (§10.5) */}
+        <Text style={[styles.sectionTitle, mutedT]}>Enhanced Voice</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
+            A natural-sounding voice that runs entirely ON THIS DEVICE — nothing
+            is sent to a server. It is a one-time ~60 MB download and works
+            offline afterwards. The standard voice keeps working either way.
+          </Text>
+          <View style={styles.chipRow}>
+            <Chip
+              label={
+                (activeUser.ttsEngine ?? 'platform') === 'platform'
+                  ? 'Standard voice'
+                  : 'Use standard voice'
+              }
+              selected={(activeUser.ttsEngine ?? 'platform') === 'platform'}
+              onPress={useStandardVoice}
+            />
+            <Chip
+              label={voiceBusy ? 'Downloading…' : 'Enhanced voice'}
+              selected={activeUser.ttsEngine === 'enhanced'}
+              onPress={voiceBusy ? () => {} : enableEnhancedVoice}
+            />
+          </View>
+          {voiceStatus ? <Text style={styles.hint}>{voiceStatus}</Text> : null}
         </View>
 
         {/* 5. Vocabulary level (§19) — only where the board defines levels */}

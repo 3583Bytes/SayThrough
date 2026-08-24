@@ -17,6 +17,15 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [~] **Enhanced neural voice (Piper, §10.5)** — synthesizing in-browser from
+  fully self-hosted assets: `"I want juice"` → 1.03 s of real audio, session
+  init 921 ms once, then **RTF 0.18** (5x faster than realtime). The spike's
+  RTF 2.25 was `vits-web` rebuilding the ONNX session every call; one
+  persistent session is ~13x better. Optional ~60 MB download, standard voice
+  stays the default, and the router falls back per-utterance so a failed model
+  can never leave someone without a voice.
+  **Remaining:** model as a release asset at deploy, cache pre-warming, storage
+  management, and real-device QA (iOS needs a user gesture for AudioContext).
 - [~] **Vocabulary sizes + levels — the structural spine (§19.2/§19.3).**
   The seed generator is now size-driven: each grid size is an independently
   authored page set (§19.2 — a motor-plan layout cannot be reflowed), with
@@ -103,7 +112,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 | Item | Why it wins | Effort | Status |
 |---|---|---|---|
-| **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Piper already validated at 0.8×. Needs a pluggable TTS backend + self-hosted model assets | L (~1–2 wk) | [ ] |
+| **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets; remaining work is deploy packaging and real-device QA | L (~1–2 wk) | [~] |
 | **Spanish core set → multilingual** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. Huge underserved reach | M | [ ] |
 | **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique | M | [ ] |
 | **Recorded button audio** ("Mom's voice" / own voice) | TD Snap's *paid* My-Own-Voice. Model fields `audioUri`/`audioCueUri` already exist — just needs an `expo-audio` record UI | S–M | [~] |

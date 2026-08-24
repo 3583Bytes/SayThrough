@@ -1546,11 +1546,22 @@ noise_w]`). Output is float32 PCM at the config's `sample_rate`.
 `length_scale` 1.25 (≈0.8× speed) is the enhanced-voice default — the setting
 the voice was validated at. The shipped model config defaults to 1.0.
 
-**Open items:** phonemization (text → phoneme ids needs espeak-ng wasm), the
-inference wrapper, audio playback and cache, the download/storage UI, the
-deploy pipeline for the model, word-boundary reporting for word-by-word
-highlight (§Tier-1 — neural synthesis emits no boundary events, so they must
-be derived), and real-device QA on low-end tablets and iPad Safari.
+**Verified in-browser** (Chromium, self-hosted assets, `tests/e2e/enhancedVoice.spec.ts`):
+`"I want juice"` → `aɪ wˈɔnt dʒˈuːs` → 33 ids → 1.03 s of audio, peak
+amplitude 0.22. Session init 921 ms, inference 188 ms (RTF 0.18).
+
+**Word boundaries are derived, not reported.** Neural synthesis emits no
+boundary events, so each token is given a share of the clip proportional to
+its character length (`boundaryOffsets`). It is an estimate; the alternative
+was losing word-by-word highlight (§Tier-1) whenever the enhanced voice is on.
+
+**Open items:** publishing the model as a release asset and unpacking it at
+deploy (`public/voices/` is gitignored, as `public/symbols/` is), pre-warming
+the cache with core words so the first tap of a common word is instant,
+storage management (letting a caregiver delete the model), and real-device QA
+on low-end tablets and iPad Safari — where the ~900 ms init and RTF will both
+be worse than a dev machine, and where iOS requires a user gesture before an
+AudioContext will produce sound.
 
 
 ## 11. Navigation & Routing
