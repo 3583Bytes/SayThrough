@@ -929,21 +929,21 @@ export function SettingsScreen() {
         <Text style={[styles.sectionTitle, mutedT]}>Privacy</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
-            SayThrough counts how many times the app is opened, so the project
-            can tell whether anyone is using it. That count is the ONLY thing
-            that ever leaves this device, and it carries no name, account or
-            identifier — it cannot be traced back to anyone. Words, messages,
-            pages and recordings never leave the device at all.
+            While the app is open it checks in, so the project can tell
+            whether anyone is using it. The check-in carries a random code that
+            changes every time you open the app and is never stored — no name,
+            no account, nothing that identifies you. It is the ONLY thing that
+            leaves this device: words, messages, pages and recordings never do.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Count app opens</Text>
+            <Text style={styles.switchLabel}>Report that the app is in use</Text>
             <Switch
               value={countingOn}
               onValueChange={(value) => {
                 setUsageCountingEnabled(value)
                 setCountingOn(value)
               }}
-              accessibilityLabel="Count app opens"
+              accessibilityLabel="Report app usage"
             />
           </View>
         </View>

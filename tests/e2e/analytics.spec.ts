@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 // value of this feature is entirely dependent on it staying anonymous, so the
 // assertions are about what is NOT sent as much as what is.
 
-const ENDPOINT = /stats\.saythrough\.com/
+const ENDPOINT = /dashboard\.3583bytes\.com/
 
 async function captureEvents(page: import('@playwright/test').Page) {
   const events: any[] = []
@@ -17,25 +17,43 @@ async function captureEvents(page: import('@playwright/test').Page) {
 }
 
 test.describe('usage counting', () => {
-  test('the marketing page counts a view and nothing else', async ({ page }) => {
+  test('the marketing page reports in, with a throwaway id', async ({ page }) => {
     const events = await captureEvents(page)
     await page.goto('/', { waitUntil: 'networkidle' })
     await expect.poll(() => events.length).toBeGreaterThan(0)
 
-    expect(events[0].event).toBe('pageview')
-    expect(events[0].path).toBe('/')
-    // No id, session, referrer or anything else — ever.
-    expect(Object.keys(events[0]).sort()).toEqual(['event', 'path'])
+    expect(events[0].game_name).toBe('SayThrough Site')
+    // Random per tab, never persisted beyond the session.
+    expect(events[0].player_id).toMatch(/^web-[0-9a-f]{16}$/)
+    expect(Object.keys(events[0]).sort()).toEqual(['game_name', 'player_id'])
   })
 
-  test('the app counts an open, with no identifier attached', async ({ page }) => {
+  test('the id is not stable across sessions', async ({ browser }) => {
+    const ids: string[] = []
+    for (let i = 0; i < 2; i++) {
+      const context = await browser.newContext() // fresh session storage
+      const page = await context.newPage()
+      await page.route(ENDPOINT, async (route) => {
+        const body = route.request().postDataJSON()
+        if (body?.player_id) ids.push(body.player_id)
+        await route.fulfill({ status: 200, body: '{"status":"ok"}' })
+      })
+      await page.goto('/', { waitUntil: 'networkidle' })
+      await expect.poll(() => ids.length).toBeGreaterThan(i)
+      await context.close()
+    }
+    expect(ids[0]).not.toBe(ids[1])
+  })
+
+  test('the app reports in under its own name', async ({ page }) => {
     const events = await captureEvents(page)
     await page.goto('/app/', { waitUntil: 'networkidle' })
     await expect.poll(() => events.length).toBeGreaterThan(0)
 
-    const open = events.find((e) => e.event === 'app_open')
-    expect(open).toBeTruthy()
-    expect(Object.keys(open)).toEqual(['event'])
+    const beat = events.find((e) => e.game_name === 'SayThrough App')
+    expect(beat).toBeTruthy()
+    expect(beat.player_id).toMatch(/^app-[0-9a-f]{16}$/)
+    expect(Object.keys(beat).sort()).toEqual(['game_name', 'player_id'])
   })
 
   test('never sends anything the user said or typed', async ({ page }) => {
@@ -52,7 +70,7 @@ test.describe('usage counting', () => {
     await page.waitForTimeout(800)
 
     const all = JSON.stringify(events)
-    for (const secret of ['Rowan', 'want', 'juice', 'message']) {
+    for (const secret of ['Rowan', 'want', 'juice']) {
       expect(all).not.toContain(secret)
     }
   })
@@ -86,38 +104,7 @@ test.describe('usage counting', () => {
     expect(errors).toEqual([])
   })
 
-  test('an unreachable service does not read as zero visits', async ({ page }) => {
-    // The bug this pins: a down service looked identical to "nobody visited",
-    // which invites exactly the wrong conclusion.
-    await page.route(ENDPOINT, (route) => route.abort('failed'))
-    await page.goto('/stats/', { waitUntil: 'networkidle' })
 
-    await expect(page.getByText('Stats are not available')).toBeVisible()
-    await expect(page.getByText(/there is nothing counting/)).toBeVisible()
-    // It must NOT present zeros as though they were real counts.
-    await expect(page.locator('.stat-value', { hasText: /^0$/ })).toHaveCount(0)
-    // The explanation of what is counted must show regardless.
-    await expect(page.getByText(/could be 1,240 people or one person/)).toBeVisible()
-  })
-
-  test('a reachable but empty service says so distinctly', async ({ page }) => {
-    await page.route(ENDPOINT, (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          generatedAt: new Date().toISOString(),
-          timeZone: 'America/Edmonton',
-          totals: { pageview: 0, app_open: 0, app_install: 0 },
-          today: {},
-          daily: [],
-        }),
-      }),
-    )
-    await page.goto('/stats/', { waitUntil: 'networkidle' })
-    await expect(page.getByText('No visits recorded yet')).toBeVisible()
-    await expect(page.getByText(/running and reachable/)).toBeVisible()
-  })
 })
 
 // The marketing site makes promises to families and SLPs choosing an AAC

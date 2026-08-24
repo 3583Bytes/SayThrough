@@ -57,14 +57,14 @@ are a planned follow-up.
 
 ## Usage counting
 
-`stats-service/` is a small Express service (deploy at **stats.saythrough.com** —
-the subdomain matters, districts whitelist by domain) storing **aggregate
-counts with no identifiers of any kind**. No user id, session, cookie or IP
-log; daily-uniques are deliberately not offered because counting uniques means
-identifying people, and the users here are largely children with disabilities.
-Clients: `site/analytics.js` (marketing), `src/services/usageCounter.ts` (app),
-dashboard at `site/stats/`. Both honour DNT/GPC and the shared opt-out in
-Settings → Privacy. See `stats-service/README.md`.
+SayThrough reports to the **Presence** service (`dashboard.3583bytes.com`,
+separate repo) as `SayThrough Site` and `SayThrough App`. It cannot self-host
+this: saythrough.com is GitHub Pages, which is static and returns 405 to any
+POST. Clients are `site/analytics.js` and `src/services/usageCounter.ts`; both
+send a **random session id that is never persisted**, honour DNT/GPC, and share
+the `saythrough-usage-counting` opt-out surfaced in Settings → Privacy.
+Nothing anyone says or types is ever sent. Counts undercount on school
+networks that block unlisted domains — accepted knowingly.
 
 ## Deploy
 
