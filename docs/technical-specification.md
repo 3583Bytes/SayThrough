@@ -2416,6 +2416,39 @@ topic is called "House" for this reason. Weather is not in the plan below and
 was dropped to keep the home page to one screen with headroom — it returns on
 the 6×10 board, which has far more navigation room.
 
+**Core pages vs topic pages.** The persistent core region is small by
+necessity — `rows × coreColumns` cells, 24 at the largest size — but core
+vocabulary in the research sense is 200–400 words. Commercial sets resolve
+this with a small persistent region *plus dedicated core-word pages one tap
+from home*, organised grammatically rather than semantically.
+
+`coreWords.json` marks those with `corePages`, which maps a page to the
+Fitzgerald colour of its contents. Two consequences:
+
+- **Core pages are ordered first** on the home page, ahead of topic pages, and
+  are always level 1. Core is not something to unlock.
+- **Their nav buttons carry their content's colour** — green leads to verbs,
+  purple to describing words, pink to social — instead of every navigation
+  button being category grey. Reaching for "again" is a different job from
+  reaching for "giraffe", and the home page should say so.
+
+Core pages are Actions, Describing, Feelings, Social, Questions, Little Words,
+Time and Quantity — the last four added because no amount of filling the first
+four reaches the 200–400 target without the grammatical categories they cover.
+
+**Board size decides how much core fits, and that is a real trade.** 6×10 has
+35 navigation slots and carries all eight core pages plus every topic: 247 core
+words, 450 total. 5×6 has **14** slots, so it takes only the two highest-value
+new core pages (Questions, Little Words) and gives up Clothes and House to do
+it. Overflowing the home page instead would put those topics three selections
+away, breaking §19.1 principle 2 — `tests/unit/vocabulary.test.ts` asserts no
+size ever exceeds its navigation slots, because an over-eager vocabulary
+expansion degrades the board silently otherwise.
+
+Word order within a page is utility order, and level is assigned by position
+(first third Basic, then Intermediate, then Full), so reducing a user's level
+keeps the most powerful words on every page rather than an arbitrary subset.
+
 **Original plan:**
 
 - **Persistent core (15 words, candidate list pending SLP validation):**

@@ -1,3 +1,4 @@
+import { POS_COLORS } from '../../src/constants/colors'
 import coreWordsJson from '../../src/data/coreWords.json'
 import {
   CORE_SET_ID,
@@ -124,24 +125,22 @@ describe('topic overflow', () => {
     }
   })
 
-  it('reaches an overflow page through a More button', async () => {
+  // Overflow is a SAFETY NET, not a feature to aim for: a word behind "More"
+  // costs a third selection, and §19.1 wants at most two. So these assert it is
+  // correct WHEN it happens, rather than requiring it to happen.
+  it('links every More button to a real page', async () => {
     const { pages, buttons } = await seed()
-    const more = buttons.filter((b) => b.label === 'More')
-    expect(more.length).toBeGreaterThan(0)
     const pageIds = new Set(pages.map((p) => p.id))
-    for (const button of more) {
+    for (const button of buttons.filter((b) => b.label === 'More')) {
       const target = button.actions.find((a) => a.type === 'navigate')
       expect(target).toBeTruthy()
-      // No dead links.
       expect(pageIds.has((target as { pageId: string }).pageId)).toBe(true)
     }
   })
 
-  it('keeps the core region and a Back button on overflow pages', async () => {
+  it('keeps the core region and a Back button on any overflow page', async () => {
     const { pages, buttons } = await seed()
-    const overflow = pages.filter((p) => /-\d+$/.test(p.id))
-    expect(overflow.length).toBeGreaterThan(0)
-    for (const page of overflow) {
+    for (const page of pages.filter((p) => /-\d+$/.test(p.id))) {
       const onPage = buttons.filter((b) => b.pageId === page.id)
       const coreColumns = coreColumnsForPageSet(page.pageSetId)
       expect(onPage.filter((b) => b.column < coreColumns).length).toBe(
@@ -151,6 +150,27 @@ describe('topic overflow', () => {
         true,
       )
     }
+  })
+
+  // §19.1 principle 2. Overshooting the navigation slots pushes topics onto a
+  // second home page, putting those words three selections away — which is how
+  // an over-eager vocabulary expansion silently degrades the board.
+  it('reaches every topic in at most two selections', async () => {
+    const { pages, buttons } = await seed()
+    for (const [size, layout] of Object.entries<any>(layouts)) {
+      const extraHomePages = pages.filter(
+        (p) =>
+          /^Home \d+$/.test(p.name) &&
+          p.rows === layout.rows &&
+          p.columns === layout.columns,
+      )
+      expect(extraHomePages).toHaveLength(0)
+      // ...which means every topic fits in the home page's navigation slots.
+      const slots = layout.rows * (layout.columns - layout.coreColumns) - 1
+      expect(Object.keys(layout.topics).length).toBeLessThanOrEqual(slots)
+      expect(size).toBeTruthy()
+    }
+    expect(buttons.length).toBeGreaterThan(0)
   })
 
   it('leaves a free cell on every core-board page for personalisation', async () => {
@@ -187,6 +207,56 @@ describe('topic overflow', () => {
       for (const home of homePages) {
         const onPage = buttons.filter((b) => b.pageId === home.id)
         expect(onPage.length).toBeLessThanOrEqual(home.rows * home.columns)
+      }
+    }
+  })
+})
+
+// §19.4 — core vocabulary works in ANY context; topic vocabulary is
+// context-specific. Reaching for "again" is a different job from reaching for
+// "giraffe", so the two must not read as peers on the home page.
+describe('core pages vs topic pages', () => {
+  it('puts core pages before topic pages', async () => {
+    const { pages, buttons } = await seed()
+    for (const [size, layout] of Object.entries<any>(layouts)) {
+      const core = Object.keys(layout.corePages ?? {})
+      if (!core.length) continue
+      const home = pages.find(
+        (p) => p.name === 'Home' && p.rows === layout.rows && p.columns === layout.columns,
+      )!
+      const navs = buttons
+        .filter((b) => b.pageId === home.id && b.isNavigationButton && b.label !== 'More')
+        .sort((a, b) => a.row - b.row || a.column - b.column)
+        .map((b) => b.label)
+      // Every core page appears before the first topic page.
+      const lastCore = Math.max(...core.map((c) => navs.indexOf(c)))
+      const firstTopic = navs.findIndex((n) => !core.includes(n))
+      expect(lastCore).toBeLessThan(firstTopic)
+      expect(size).toBeTruthy()
+    }
+  })
+
+  it('colours a core page button like the words behind it', async () => {
+    const { buttons } = await seed()
+    const byLabel = new Map(
+      buttons.filter((b) => b.isNavigationButton).map((b) => [b.label, b]),
+    )
+    // Green leads to verbs, purple to describing words, pink to social.
+    expect(byLabel.get('Actions')!.backgroundColor).toBe(POS_COLORS.verb)
+    expect(byLabel.get('Describing')!.backgroundColor).toBe(POS_COLORS.descriptor)
+    expect(byLabel.get('Social')!.backgroundColor).toBe(POS_COLORS.social)
+    // Topic pages stay category grey.
+    expect(byLabel.get('Food')!.backgroundColor).toBe(POS_COLORS.category)
+    expect(byLabel.get('Animals')!.backgroundColor).toBe(POS_COLORS.category)
+  })
+
+  it('keeps core pages reachable at every vocabulary level', async () => {
+    const { buttons } = await seed()
+    for (const [, layout] of Object.entries<any>(layouts)) {
+      for (const page of Object.keys(layout.corePages ?? {})) {
+        const nav = buttons.find((b) => b.isNavigationButton && b.label === page)!
+        // Level 1 = introduced from the start; core is not something to unlock.
+        expect(levelOfButton(nav.id)).toBe(1)
       }
     }
   })

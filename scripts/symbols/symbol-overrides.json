@@ -10,7 +10,7 @@
   "smoothie": 8503,
   "ears": 2871,
   "math": 10260,
-  "_pendingVisualCheck": "Found by searching the index for synonyms, NOT visually verified, because the label had no exact keyword match. Check the images before v1.0 (§19.6): describing, social, desk, loud, shorts, art, done, class, maybe, not",
+  "_pendingVisualCheck": "Found by searching the index for synonyms, NOT visually verified, because the label had no exact keyword match. Check the images before v1.0 (§19.6): describing, social, desk, loud, shorts, art, done, class, maybe, not, questions, little words, down, careful",
   "describing": 11713,
   "social": 4740,
   "desk": 11302,
@@ -20,5 +20,9 @@
   "done": 5358,
   "class": 5913,
   "maybe": 11696,
-  "not": 5800
+  "not": 5800,
+  "questions": 7217,
+  "little words": 9837,
+  "down": 5355,
+  "careful": 25618
 }

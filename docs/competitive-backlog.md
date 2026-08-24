@@ -17,6 +17,26 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Core vocabulary depth (§19.4)** — the expanded board now carries **247
+  core words** (24 persistent + 8 core pages), inside the 200–400 research
+  target, and **450 words total**. Added the grammatical categories that were
+  missing entirely: Questions, Little Words, Time, Quantity. Words are ordered
+  by utility and levelled by position, so a Basic learner gets the most
+  powerful third of every page.
+  The standard 5×6 board **prioritises rather than overflows**: it has 14
+  navigation slots, so it takes Questions and Little Words and drops Clothes
+  and House (both still on 6×10). Question words and prepositions are used in
+  every sentence; scarves are not — and spilling topics onto a second home page
+  would have put those words three selections away, breaking §19.1's
+  ≤2-selections rule.
+- [x] **Core pages split from topic pages (§19.4)** — core vocabulary pages
+  (Actions, Describing, Feelings, Social) now sort ahead of fringe topics on
+  the home page and carry their content's Fitzgerald colour, so green leads to
+  verbs and purple to describing words instead of every nav button being grey.
+  Core pages are always level 1. **Next for depth:** the persistent region caps
+  at 24 words, so growing core toward the research target of 200–400 means
+  filling these pages — 6×10 currently holds 307 words of a possible 1,214
+  without any new machinery.
 - [~] **Enhanced neural voice (Piper, §10.5)** — synthesizing in-browser from
   fully self-hosted assets: `"I want juice"` → 1.03 s of real audio, session
   init 921 ms once, then **RTF 0.18** (5x faster than realtime). The spike's

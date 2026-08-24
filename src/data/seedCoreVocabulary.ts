@@ -30,6 +30,11 @@ interface SizeLayout {
   coreColumns: number
   core: Word[]
   topicLevels: Record<string, VocabularyLevel>
+  /**
+   * Pages holding CORE vocabulary — words that work in any context — mapped to
+   * the Fitzgerald colour of their contents. Everything else is a topic page.
+   */
+  corePages: Record<string, PartOfSpeech>
   topics: Record<string, Word[]>
 }
 
@@ -274,11 +279,14 @@ function buildSet(size: string, now: number): BuiltSet {
     const offset = chunkIndex === 0 ? 0 : 1
     navChunk.forEach(([topic, targetPageId], i) => {
       const index = i + offset
+      // A core page's button carries its content's colour, so the home page
+      // reads at a glance: green leads to verbs, purple to describing words.
+      // Topic pages stay category grey.
       add(
         makeButton(
           pageId,
           topic,
-          'category',
+          layout.corePages?.[topic] ?? 'category',
           Math.floor(index / contentColumns),
           layout.coreColumns + (index % contentColumns),
           [{ type: 'navigate', pageId: targetPageId }],
@@ -458,7 +466,7 @@ const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when bundled content changes. From v6 on, a bump runs a
 // data-preserving migration (rebuildBuiltInContent) — NOT a wipe.
-const SEED_VERSION = '9'
+const SEED_VERSION = '10'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
