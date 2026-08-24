@@ -128,15 +128,22 @@ class EnhancedBackend implements TtsBackend {
     this.ort = ort
     this.createPhonemizer = phonemize
 
-    // A 404 means the voice-v1 release has not been published to this
-    // deployment — a different situation from a broken download, and worth
-    // saying so rather than blaming the user's connection.
+    // "Not published to this deployment" is a different situation from a
+    // broken download, and worth saying so rather than blaming the network.
+    // A 404 is the obvious signal, but hosts that serve an SPA fallback answer
+    // 200 with HTML instead — so the body is checked too, rather than letting
+    // JSON.parse fail with something unreadable.
     const configResponse = await fetch(`${BASE}/voices/${VOICE_ID}.onnx.json`)
-    if (configResponse.status === 404) {
-      throw new Error('The enhanced voice is not available on this site yet.')
-    }
+    const missing = new Error('The enhanced voice is not available on this site yet.')
+    if (configResponse.status === 404) throw missing
     if (!configResponse.ok) throw new Error('Could not load the voice settings.')
-    this.config = (await configResponse.json()) as PiperConfig
+    const configText = await configResponse.text()
+    if (configText.trimStart().startsWith('<')) throw missing
+    try {
+      this.config = JSON.parse(configText) as PiperConfig
+    } catch {
+      throw missing
+    }
 
     const model = await this.fetchModel(onProgress)
     this.session = await ort.InferenceSession.create(model, {

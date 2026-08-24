@@ -33,6 +33,23 @@ test.describe('enhanced voice (§10.5)', () => {
     await setupProfile(page)
     await page.goto('/app/', { waitUntil: 'networkidle' })
 
+    // The 60 MB model is gitignored and fetched from the voice-v1 release at
+    // deploy, so CI does not have it. Skip rather than fail — and detect it by
+    // parsing, because the dev server answers /app/* with the SPA shell (200 +
+    // HTML) rather than a 404.
+    const modelPresent = await page.evaluate(async () => {
+      try {
+        const r = await fetch('/app/voices/en_US-hfc_female-medium.onnx.json')
+        if (!r.ok) return false
+        const text = await r.text()
+        if (text.trimStart().startsWith('<')) return false
+        return Boolean(JSON.parse(text).audio?.sample_rate)
+      } catch {
+        return false
+      }
+    })
+    test.skip(!modelPresent, 'voice model not present (publish the voice-v1 release)')
+
     // Drive the backend directly: audio playback cannot be asserted, but the
     // sample buffer it would play can.
     const result = await page.evaluate(async () => {
