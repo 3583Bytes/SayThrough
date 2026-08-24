@@ -131,3 +131,40 @@ test.describe('marketing claims stay true', () => {
     }
   })
 })
+
+test.describe('contact page', () => {
+  test('shows a working email address without a click', async ({ page }) => {
+    await page.goto('/contact/', { waitUntil: 'networkidle' })
+    const link = page.getByRole('link', { name: 'contact@3583bytes.com' })
+    await expect(link).toBeVisible()
+    await expect(link).toHaveAttribute('href', 'mailto:contact@3583bytes.com')
+  })
+
+  test('the address is real text, not an image', async ({ page }) => {
+    // An image of an email is invisible to screen readers — unacceptable for
+    // an accessibility product. It must be selectable, copyable text.
+    await page.goto('/contact/', { waitUntil: 'networkidle' })
+    const slot = page.locator('#email-slot')
+    await expect(slot).toContainText('contact@3583bytes.com')
+    expect(await slot.locator('img').count()).toBe(0)
+  })
+
+  test('the address is absent from the served HTML', async ({ request }) => {
+    // What a scraper that does not run JS actually receives.
+    const html = await (await request.get('/contact/')).text()
+    expect(html).not.toContain('contact@3583bytes.com')
+    expect(html.toLowerCase()).not.toContain('mailto:contact')
+  })
+
+  test('is reachable from the rest of the site', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Contact' }).click()
+    await expect(page.getByRole('heading', { name: 'Get in touch' })).toBeVisible()
+  })
+
+  test('warns against sending personal information', async ({ page }) => {
+    await page.goto('/contact/', { waitUntil: 'networkidle' })
+    await expect(page.getByText(/don't send personal information/i)).toBeVisible()
+    await expect(page.getByText(/not a secure or HIPAA-covered channel/i)).toBeVisible()
+  })
+})
