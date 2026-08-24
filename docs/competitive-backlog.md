@@ -5,7 +5,7 @@ comparison against the major AAC apps. Companion to
 `aac-requirements.txt` (the requirements) and `technical-specification.md`
 (the build spec). Update the checkboxes as items ship.
 
-**Last reviewed:** 2026-08-13
+**Last reviewed:** 2026-08-24
 **Benchmarked against:** TD Snap (Tobii Dynavox), Proloquo2Go / Proloquo
 (AssistiveWare), LAMP Words for Life & TouchChat (PRC-Saltillo), Speak for
 Yourself, CoughDrop, and the open-source field (Cboard, AsTeRICS Grid).
@@ -17,6 +17,12 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Full device backup (§14.3)** — one JSON file carrying profiles, voice
+  and access-method tuning, PIN, pages, word lists, history, learned
+  prediction words and tracking. `.obz` is vocabulary-only, so until now a
+  cleared browser or a replaced device lost everything a family and SLP had
+  configured. Restore validates and describes the file, then requires a second
+  confirming tap before replacing anything.
 - [x] **Word prediction (§18)** — 30k-word offline lexicon (filtered from
   OpenSubtitles frequency data) blended with a per-profile model that learns
   from spoken messages, plus the user's own button labels, plus seeded AAC
@@ -94,7 +100,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 | Item | Why | Effort | Status |
 |---|---|---|---|
-| **Optional cloud sync + team sharing** (SLP ↔ parent ↔ teacher) | CoughDrop's core selling point; unlocks multi-device. Stay local-first/private by default, sync opt-in | L | [ ] |
+| **Optional cloud sync + team sharing** (SLP ↔ parent ↔ teacher) | CoughDrop's core selling point; unlocks multi-device. Stay local-first/private by default, sync opt-in. Full backup (§14.3) already covers device loss and device transfer, so this is now about live sharing, not durability | L | [ ] |
 | **SLP dashboard** (multi-student, IEP goal tracking) | Paid elsewhere; therapists are the buyers/recommenders | L | [ ] |
 | **Cloud data-tracking reports** | Extends the local, consent-gated tracking already built | M | [ ] |
 
@@ -116,8 +122,12 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 ## 4. Recommended sequence
 
-1. **Quick wins remaining:** grid-size / vocabulary-level at onboarding →
-   recorded button audio (data-ready).
+1. **Vocabulary depth + grid size / level at setup.** The deepest remaining
+   hole: 15 core words in a 15-cell region (100% full) and 144 words total,
+   two levels deep. §19.2 rules out reflowing a motor-plan layout, so sizes
+   are separately *authored* variants chosen once at setup, while levels
+   reveal words in place so nothing ever moves. Everything else compounds on
+   this — a great voice reading a 144-word board is still a 144-word board.
 2. **The flagship bet:** **Piper natural TTS.** Highest strategic
    leverage — permanently ends the robot-voice problem *and* becomes a
    free-premium-voice headline no competitor matches. De-risked (already

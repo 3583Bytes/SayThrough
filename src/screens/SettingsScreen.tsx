@@ -18,6 +18,12 @@ import type * as Speech from 'expo-speech'
 import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
 import { restoreBuiltInPageSets } from '../data/seedCoreVocabulary'
+import {
+  createBackup,
+  parseBackup,
+  restoreBackup,
+  serializeBackup,
+} from '../services/backupService'
 import { exportPageSet, importPageSet } from '../services/OBFService'
 import { resetLearning } from '../services/predictionModel'
 import {
@@ -160,6 +166,71 @@ export function SettingsScreen() {
     anchor.click()
     URL.revokeObjectURL(url)
     setBackupStatus('Exported.')
+  }
+
+  // §14.3 full device backup — everything, not just vocabulary. The .obz
+  // export above carries a page set; this carries profiles, access-method
+  // tuning, voice, PIN, word lists, history and tracking, so a lost device or
+  // evicted browser storage is recoverable.
+  const [restoreFile, setRestoreFile] = useState<string | null>(null)
+
+  const exportEverything = async () => {
+    if (Platform.OS !== 'web') return
+    setBackupStatus('Exporting…')
+    const backup = await createBackup(storage)
+    const blob = new Blob([serializeBackup(backup)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    const stamp = new Date(backup.exportedAt).toISOString().slice(0, 10)
+    anchor.download = `saythrough-backup-${stamp}.json`
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setBackupStatus('Full backup saved. Keep it somewhere safe — it contains this device\u2019s profiles and history.')
+  }
+
+  // Two steps on purpose: restoring REPLACES everything on this device, so
+  // the file is validated and described before anything is written.
+  const chooseRestoreFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: false,
+    })
+    if (result.canceled || !result.assets?.[0]) return
+    try {
+      const response = await fetch(result.assets[0].uri)
+      const text = await response.text()
+      const backup = parseBackup(text)
+      const when = new Date(backup.exportedAt).toLocaleDateString()
+      const names = backup.data.users.map((u) => u.name).join(', ')
+      setRestoreFile(text)
+      setBackupStatus(
+        `Backup from ${when} — ${backup.data.users.length} profile(s): ${names}. ` +
+          'Restoring REPLACES everything currently on this device. Tap "Confirm restore" to continue.',
+      )
+    } catch (error) {
+      setRestoreFile(null)
+      setBackupStatus(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  const confirmRestore = async () => {
+    if (!restoreFile) return
+    setBackupStatus('Restoring…')
+    try {
+      await restoreBackup(storage, parseBackup(restoreFile))
+      setRestoreFile(null)
+      await useUserStore.getState().load()
+      const user = useUserStore.getState().activeUser
+      const pageSet = user ? await storage.getPageSet(user.activePageSetId) : null
+      if (pageSet) {
+        useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
+      }
+      setPageSets(await storage.getPageSets())
+      setWordLists(user ? await storage.getWordLists(user.id) : [])
+      setBackupStatus('Restored.')
+    } catch (error) {
+      setBackupStatus(`Restore failed: ${String(error)}`)
+    }
   }
 
   // §18.4 — clears the learned prediction model for this profile only,
@@ -762,9 +833,34 @@ export function SettingsScreen() {
         <Text style={[styles.sectionTitle, mutedT]}>Backup & Restore</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
-            Open Board Format (.obz) — works with CoughDrop, TD Snap, and
-            other AAC apps. Back up regularly: browser storage can be
-            evicted.
+            A full backup saves EVERYTHING on this device — profiles, voice and
+            access settings, your pages, word lists, history and tracking — to
+            one file. Use it to move to a new device or recover if browser
+            storage is cleared. It contains personal data, so store it
+            somewhere private.
+          </Text>
+          <View style={styles.chipRow}>
+            <Chip
+              label="Save full backup"
+              selected={false}
+              onPress={exportEverything}
+            />
+            <Chip
+              label={restoreFile ? 'Choose a different file' : 'Restore from backup'}
+              selected={false}
+              onPress={chooseRestoreFile}
+            />
+            {restoreFile ? (
+              <Chip label="Confirm restore" selected onPress={confirmRestore} />
+            ) : null}
+          </View>
+        </View>
+
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
+            Open Board Format (.obz) moves VOCABULARY ONLY between apps — it
+            works with CoughDrop, TD Snap and others, but does not carry
+            profiles or settings. Use a full backup above for those.
           </Text>
           <View style={styles.chipRow}>
             <Chip

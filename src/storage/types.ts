@@ -21,6 +21,10 @@ export interface Storage {
   // meta key-value (extraction flags, active ids, …)
   getMeta(key: string): Promise<string | null>
   setMeta(key: string, value: string): Promise<void>
+  // Every meta row. Needed by the full backup (§14.3): meta holds the
+  // active profile, seed version, per-profile message history and the
+  // learned prediction model, none of which are reachable by key alone.
+  getAllMeta(): Promise<Record<string, string>>
 
   getUsers(): Promise<UserProfile[]>
   createUser(user: UserProfile): Promise<void>

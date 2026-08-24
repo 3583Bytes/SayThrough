@@ -418,6 +418,13 @@ class SqliteStorage implements Storage {
     )
   }
 
+  async getAllMeta(): Promise<Record<string, string>> {
+    const rows = await this.db.getAllAsync<{ key: string; value: string }>(
+      'SELECT key, value FROM meta',
+    )
+    return Object.fromEntries(rows.map((row) => [row.key, row.value]))
+  }
+
   async getPageSets(): Promise<PageSet[]> {
     const rows = await this.db.getAllAsync<PageSetRow>('SELECT * FROM page_sets')
     return rows.map(toPageSet)

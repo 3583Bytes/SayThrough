@@ -71,6 +71,16 @@ export async function learnFromMessage(
 }
 
 /**
+ * Drop the memoized model without touching what is stored. Needed after a
+ * full restore (§14.3), which can put different data behind the same profile
+ * id — the cache would otherwise survive the restore.
+ */
+export function invalidateModelCache(): void {
+  cachedKey = null
+  cached = EMPTY_MODEL
+}
+
+/**
  * Clear learned words for one profile, leaving tracking, history and
  * vocabulary untouched (§18.4).
  */

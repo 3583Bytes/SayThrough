@@ -174,6 +174,22 @@ class WebStorage implements Storage {
     await promisify(this.store('meta', 'readwrite').put(value, key))
   }
 
+  async getAllMeta(): Promise<Record<string, string>> {
+    // 'meta' is the one store with out-of-line keys, so keys and values
+    // come back from separate calls and are paired by position. Both
+    // requests are issued before either is awaited — an IndexedDB
+    // transaction auto-commits once it has no pending requests, so
+    // awaiting between them can leave the second one inactive.
+    const store = this.store('meta')
+    const keysRequest = store.getAllKeys()
+    const valuesRequest = store.getAll()
+    const [keys, values] = await Promise.all([
+      promisify(keysRequest) as Promise<string[]>,
+      promisify(valuesRequest) as Promise<string[]>,
+    ])
+    return Object.fromEntries(keys.map((key, i) => [key, values[i]]))
+  }
+
   async getPageSets(): Promise<PageSet[]> {
     return promisify(this.store('pageSets').getAll()) as Promise<PageSet[]>
   }

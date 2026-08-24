@@ -18,7 +18,7 @@ Version 1.0 — April 2026
 11. [Navigation & Routing](#11-navigation--routing)
 12. [Functional Specifications](#12-functional-specifications)
 13. [Edit Mode Specification](#13-edit-mode-specification)
-14. [Open Board Format (Import/Export)](#14-open-board-format-importexport)
+14. [Interchange & Backup](#14-interchange--backup)
 15. [MVP Scope](#15-mvp-scope)
 16. [Project File Structure](#16-project-file-structure)
 17. [Accessibility](#17-accessibility)
@@ -1705,7 +1705,7 @@ Stack is cleared when exiting edit mode.
 
 ---
 
-## 14. Open Board Format (Import/Export)
+## 14. Interchange & Backup
 
 ### 14.1 Export (.obz)
 
@@ -1756,6 +1756,66 @@ export async function importPageSet(
   // Return new pageSetId
 }
 ```
+
+---
+
+### 14.3 Full Device Backup (.json)
+
+`.obz` is an *interchange* format: it carries a page set and nothing else. It
+does not carry profiles, TTS voice, access-method tuning (dwell time, scan
+speed, touch accommodations), the caregiver PIN, word lists, message history,
+the learned prediction model, or tracking data.
+
+That gap is a real risk rather than a missing nicety. The web build stores
+everything in IndexedDB; `createStorage.web.ts` requests
+`navigator.storage.persist()`, but persistence is best-effort, and a cleared
+browser, a replaced device or a school reimaging a tablet loses the lot —
+including access settings an SLP tuned in a therapy session. Every competitor
+solves this with a cloud account. We solve it without one.
+
+```typescript
+// services/backupService.ts
+interface BackupFile {
+  format: 'saythrough-backup'
+  version: number
+  exportedAt: number
+  data: {
+    meta: Record<string, string>   // active profile, seed version,
+                                   // per-profile history + prediction model
+    users: UserProfile[]
+    pageSets: PageSet[]
+    pages: Page[]
+    buttons: Button[]
+    wordLists: WordList[]
+    wordListItems: Array<{ wordListId: string; buttonId: string }>
+    trackingEvents: TrackingEvent[]
+  }
+}
+
+createBackup(storage): Promise<BackupFile>
+parseBackup(text): BackupFile        // throws, with user-facing messages
+restoreBackup(storage, backup): Promise<void>
+```
+
+Design notes:
+
+- **A plain JSON file, not cloud sync.** It keeps the local-first, no-account
+  promise while removing the "one wipe and it's gone" failure. Optional sync
+  (Tier 4) can come later and reuse this shape.
+- **`Storage.getAllMeta()` exists for this.** Everything else is reachable
+  through the existing repository methods, but `meta` could only be read by
+  key, and it holds the per-profile message history and prediction model.
+- **Restore replaces; it does not merge.** Merging would have to invent
+  answers for conflicting ids. Writes are ordered page sets → pages →
+  buttons and word lists → items so the SQLite driver's foreign keys hold at
+  every step, and the memoized prediction model is invalidated afterwards
+  because a restore can put different data behind the same profile id.
+- **Validation happens before the wipe.** `restoreBackup` destroys the device's
+  data, so `parseBackup` rejects malformed, foreign or newer-versioned files
+  first, and the UI describes the backup (date, profile names) and requires a
+  second confirming tap before anything is written.
+- **The file contains personal data** — PIN hash, tracking, history, learned
+  words. It is never uploaded anywhere, and the UI says so.
 
 ---
 
