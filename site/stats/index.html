@@ -66,11 +66,29 @@
                '</div><div class="stat-label">' + label + '</div></div>'
       }
 
+      function panel(title, body) {
+        return '<div class="stat" style="grid-column:1/-1"><div class="stat-value" ' +
+               'style="font-size:1.15rem">' + title + '</div>' +
+               '<div class="stat-label">' + body + '</div></div>'
+      }
+
       fetch(ENDPOINT + '/summary')
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json() })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
         .then(function (data) {
+          var total = data.totals.app_open + data.totals.pageview
           document.getElementById('generated').textContent =
-            'Updated ' + new Date(data.generatedAt).toLocaleString() + ' · ' + data.timeZone
+            'Updated ' + new Date(data.generatedAt).toLocaleString() + ' \u00b7 ' + data.timeZone
+
+          if (total === 0) {
+            // Reachable but empty — a genuinely different situation from the
+            // service being down, and worth saying so plainly.
+            document.getElementById('totals').innerHTML = panel(
+              'No visits recorded yet',
+              'The stats service is running and reachable \u2014 it just has not counted anything so far.'
+            )
+            document.getElementById('chart-note').textContent = 'Nothing to chart yet.'
+            return
+          }
 
           document.getElementById('totals').innerHTML =
             card(data.totals.app_open, 'App opens, all time') +
@@ -97,9 +115,19 @@
                 }).join('')
               : '<tr><td class="muted">No page views recorded today.</td></tr>'
         })
-        .catch(function () {
-          document.getElementById('generated').textContent =
-            'Stats are unavailable right now.'
+        .catch(function (error) {
+          // Unreachable is NOT the same as zero. Saying "0 visits" here would
+          // be actively misleading, so the page says what actually happened.
+          document.getElementById('generated').textContent = ''
+          document.getElementById('totals').innerHTML = panel(
+            'Stats are not available',
+            'The counting service at <code>' + ENDPOINT.replace('https://', '') +
+            '</code> could not be reached (' + error.message + '), so nothing is being ' +
+            'recorded right now. This does not mean nobody is visiting \u2014 it means ' +
+            'there is nothing counting.'
+          )
+          document.getElementById('chart-note').textContent = ''
+          document.querySelector('#paths tbody').innerHTML = ''
         })
     </script>
     <script src="/analytics.js" defer></script>

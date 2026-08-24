@@ -86,11 +86,61 @@ test.describe('usage counting', () => {
     expect(errors).toEqual([])
   })
 
-  test('the dashboard degrades when stats are unavailable', async ({ page }) => {
+  test('an unreachable service does not read as zero visits', async ({ page }) => {
+    // The bug this pins: a down service looked identical to "nobody visited",
+    // which invites exactly the wrong conclusion.
     await page.route(ENDPOINT, (route) => route.abort('failed'))
     await page.goto('/stats/', { waitUntil: 'networkidle' })
-    await expect(page.getByText('Stats are unavailable right now.')).toBeVisible()
+
+    await expect(page.getByText('Stats are not available')).toBeVisible()
+    await expect(page.getByText(/there is nothing counting/)).toBeVisible()
+    // It must NOT present zeros as though they were real counts.
+    await expect(page.locator('.stat-value', { hasText: /^0$/ })).toHaveCount(0)
     // The explanation of what is counted must show regardless.
     await expect(page.getByText(/could be 1,240 people or one person/)).toBeVisible()
+  })
+
+  test('a reachable but empty service says so distinctly', async ({ page }) => {
+    await page.route(ENDPOINT, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          generatedAt: new Date().toISOString(),
+          timeZone: 'America/Edmonton',
+          totals: { pageview: 0, app_open: 0, app_install: 0 },
+          today: {},
+          daily: [],
+        }),
+      }),
+    )
+    await page.goto('/stats/', { waitUntil: 'networkidle' })
+    await expect(page.getByText('No visits recorded yet')).toBeVisible()
+    await expect(page.getByText(/running and reachable/)).toBeVisible()
+  })
+})
+
+// The marketing site makes promises to families and SLPs choosing an AAC
+// system. These pin the claims that were found to be false in an audit, so a
+// future edit cannot quietly reintroduce them.
+test.describe('marketing claims stay true', () => {
+  test('does not advertise features that do not exist', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' })
+    const text = (await page.locator('body').innerText()).toLowerCase()
+
+    // Printable/PDF boards: backlog Tier 2, not started.
+    expect(text).not.toContain('printable')
+    // Modeling mode: isModeling() is hardcoded false.
+    expect(text).not.toMatch(/\bmodeling\b/)
+    // Mulberry symbols are not in the build yet.
+    expect(text).not.toContain('16,500')
+  })
+
+  test('advertises what does ship', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' })
+    const text = (await page.locator('body').innerText()).toLowerCase()
+    for (const shipped of ['word prediction', 'board sizes', 'full backup', 'quick phrases']) {
+      expect(text).toContain(shipped)
+    }
   })
 })
