@@ -195,7 +195,10 @@ export function SettingsScreen() {
       setVoiceStatus('Enhanced voice ready.')
       ttsService.speak(PREVIEW_TEXT)
     } else {
-      setVoiceStatus('Could not load the enhanced voice — still using the standard voice.')
+      const reason = ttsService.fallbackReason() ?? enhancedBackend.lastError()
+      setVoiceStatus(
+        `${reason ?? 'Could not load the enhanced voice.'} Still using the standard voice.`,
+      )
     }
   }
 

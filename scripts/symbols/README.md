@@ -25,9 +25,11 @@ gh release create symbols-v1 \
   scripts/symbols/data/saythrough-symbols.tar.gz
 ```
 
-The deploy workflow downloads the `symbols-v1` release asset and unpacks
-it into the site at build time (`continue-on-error`: deploys fall back to
-the seed subset until the release exists). For local full-catalog
+The deploy workflow downloads the `symbols-v1` release asset and unpacks it
+into the site at build time. If the release does not exist the deploy still
+succeeds and logs a notice, falling back to the committed seed subset; a
+release that exists but fails to download fails the deploy, because that is a
+real problem rather than an expected state. For local full-catalog
 testing: `node scripts/symbols/sync-library.mjs` (public/symbols/ is
 gitignored beyond the committed seed subset).
 

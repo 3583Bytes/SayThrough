@@ -61,6 +61,7 @@ class EnhancedBackend implements TtsBackend {
   private ready = false
   private initPromise: Promise<boolean> | null = null
   private progress: { loaded: number; total: number } | null = null
+  private error: string | null = null
 
   private audio: AudioContext | null = null
   private playing: AudioBufferSourceNode | null = null
@@ -75,6 +76,11 @@ class EnhancedBackend implements TtsBackend {
   }
 
   /** Has the model already been fetched into the HTTP cache? */
+  /** Why the last init failed, for Settings to show verbatim. */
+  lastError(): string | null {
+    return this.error
+  }
+
   async isDownloaded(): Promise<boolean> {
     try {
       const cache = await caches.open('saythrough-v1')
@@ -92,7 +98,9 @@ class EnhancedBackend implements TtsBackend {
   init(onProgress?: (loaded: number, total: number) => void): Promise<boolean> {
     if (this.ready) return Promise.resolve(true)
     if (this.initPromise) return this.initPromise
-    this.initPromise = this.load(onProgress).catch(() => {
+    this.error = null
+    this.initPromise = this.load(onProgress).catch((cause) => {
+      this.error = cause instanceof Error ? cause.message : String(cause)
       // Leave the app on the platform voice; Settings surfaces the failure.
       this.initPromise = null
       return false
@@ -120,8 +128,14 @@ class EnhancedBackend implements TtsBackend {
     this.ort = ort
     this.createPhonemizer = phonemize
 
+    // A 404 means the voice-v1 release has not been published to this
+    // deployment — a different situation from a broken download, and worth
+    // saying so rather than blaming the user's connection.
     const configResponse = await fetch(`${BASE}/voices/${VOICE_ID}.onnx.json`)
-    if (!configResponse.ok) throw new Error('Voice config missing.')
+    if (configResponse.status === 404) {
+      throw new Error('The enhanced voice is not available on this site yet.')
+    }
+    if (!configResponse.ok) throw new Error('Could not load the voice settings.')
     this.config = (await configResponse.json()) as PiperConfig
 
     const model = await this.fetchModel(onProgress)
@@ -138,7 +152,10 @@ class EnhancedBackend implements TtsBackend {
     onProgress?: (loaded: number, total: number) => void,
   ): Promise<Uint8Array> {
     const response = await fetch(`${BASE}/voices/${VOICE_ID}.onnx`)
-    if (!response.ok || !response.body) throw new Error('Voice model missing.')
+    if (response.status === 404) {
+      throw new Error('The enhanced voice is not available on this site yet.')
+    }
+    if (!response.ok || !response.body) throw new Error('Could not download the voice.')
 
     const total = Number(response.headers.get('content-length') ?? 0)
     const reader = response.body.getReader()

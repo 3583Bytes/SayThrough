@@ -26,6 +26,10 @@ class EnhancedBackendStub implements TtsBackend {
   downloadProgress(): { loaded: number; total: number } | null {
     return null
   }
+  lastError(): string | null {
+    return 'The enhanced voice is not available on this platform.'
+  }
+
   isDownloaded(): Promise<boolean> {
     return Promise.resolve(false)
   }

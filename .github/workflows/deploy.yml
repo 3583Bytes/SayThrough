@@ -30,20 +30,41 @@ jobs:
 
       - run: npm ci
 
-      # Full symbol library ships as a release asset (never in git).
-      # continue-on-error: deploys still work with the committed seed
-      # subset until the symbols-v1 release exists.
+      # Full symbol library ships as a release asset (never in git — ~165 MB).
+      # A missing release is EXPECTED before it is first published, so it is
+      # reported as a notice; a release that exists but fails to download is a
+      # real problem and fails the deploy. `continue-on-error` used to hide
+      # both cases behind the same red "exit code 1".
       - name: Fetch full symbol library
-        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if ! gh release view symbols-v1 >/dev/null 2>&1; then
+            echo "::notice::No symbols-v1 release yet — building with the $(git ls-files public/symbols | wc -l | tr -d ' ') committed seed symbols."
+            exit 0
+          fi
           gh release download symbols-v1 --pattern 'saythrough-symbols.tar.gz' --output /tmp/symbols.tar.gz
           mkdir -p public/symbols
           tar -xzf /tmp/symbols.tar.gz -C public/symbols
           # the tar carries the full search index — promote it to the app root
           mv public/symbols/symbolIndex.json public/symbolIndex.json
           echo "symbols in build: $(ls public/symbols/arasaac | wc -l)"
+
+      # Enhanced neural voice model (§10.5) — ~60 MB, also never in git.
+      # Without it the app is fully functional: ttsService falls back to the
+      # platform voice, and Settings reports that the enhanced voice is
+      # unavailable rather than failing silently.
+      - name: Fetch enhanced voice model
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view voice-v1 >/dev/null 2>&1; then
+            echo "::notice::No voice-v1 release yet — the enhanced voice will be offered but unavailable."
+            exit 0
+          fi
+          mkdir -p public/voices
+          gh release download voice-v1 --pattern '*.onnx*' --dir public/voices
+          echo "voice files in build: $(ls public/voices | wc -l)"
 
       # Served at the saythrough.com root (custom domain), so NO base-path
       # prefix — this makes the deployed bundle identical to the local/CI
