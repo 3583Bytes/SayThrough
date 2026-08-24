@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { warmLexicon } from '../services/prediction'
+import { loadModel } from '../services/predictionModel'
 import { ttsService } from '../services/TTSService'
 import { storage } from '../storage'
 import type { UserProfile } from '../types/models'
@@ -28,6 +30,15 @@ function applyTtsSettings(user: UserProfile) {
   })
 }
 
+// Everything that must follow the active profile. Prediction is per-profile
+// (§18.2), so switching users without this would leave one user typing
+// against another's learned words.
+function activateProfile(user: UserProfile) {
+  applyTtsSettings(user)
+  warmLexicon(user.language)
+  void loadModel(user.id)
+}
+
 export const useUserStore = create<UserState>((set, get) => ({
   activeUser: null,
   users: [],
@@ -36,7 +47,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     const users = await storage.getUsers()
     const activeId = await storage.getMeta('activeUserId')
     const activeUser = users.find((u) => u.id === activeId) ?? users[0] ?? null
-    if (activeUser) applyTtsSettings(activeUser)
+    if (activeUser) activateProfile(activeUser)
     set({ users, activeUser })
   },
 
@@ -44,7 +55,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     const user = get().users.find((u) => u.id === userId)
     if (!user) return
     await storage.setMeta('activeUserId', userId)
-    applyTtsSettings(user)
+    activateProfile(user)
     set({ activeUser: user })
   },
 
@@ -78,7 +89,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
     await storage.createUser(user)
     await storage.setMeta('activeUserId', user.id)
-    applyTtsSettings(user)
+    activateProfile(user)
     set({ users: [...get().users, user], activeUser: user })
     return user
   },
@@ -99,7 +110,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       createdAt: now,
       updatedAt: now,
     }
-    applyTtsSettings(guest)
+    activateProfile(guest)
     set({ activeUser: guest })
   },
 

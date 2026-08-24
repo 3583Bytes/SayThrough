@@ -2,6 +2,7 @@ import { storage } from '../storage'
 import { useUserStore } from '../stores/userStore'
 import type { Button } from '../types/models'
 import { uuid } from '../utils/uuid'
+import { isModeling } from './modelingMode'
 
 // §4.13 — logs only when the caregiver has opted in (trackingEnabled,
 // default OFF per DT-05). All data stays on device. Modeling mode
@@ -21,7 +22,7 @@ function log(event: {
     userId: user.id,
     timestamp: Date.now(),
     accessMethod: 'touch', // DT-01; scanning/dwell report theirs in v1.1
-    isModeling: false,
+    isModeling: isModeling(),
     sessionId,
     ...event,
   })

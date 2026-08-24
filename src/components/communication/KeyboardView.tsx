@@ -1,23 +1,40 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { FONTS } from '../../constants/typography'
+import { usePredictions } from '../../hooks/usePredictions'
+import { useScanning, type ScanItem } from '../../hooks/useScanning'
 import { useTheme } from '../../hooks/useTheme'
+import { applyCaseOf } from '../../services/prediction'
 import { useMessageStore } from '../../stores/messageStore'
+import { useUserStore } from '../../stores/userStore'
+import { PredictionBar, predictionSlotId } from './PredictionBar'
 
-// §5.5 v1.0 basic keyboard: QWERTY, typed text becomes a message-bar
-// token on space/period/Speak. Prediction bar and alternate layouts
-// arrive in v1.1 (§18). This is the escape hatch for any word without
-// a button.
-const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+// §5.5 keyboard: QWERTY type-to-speak into the message bar, with the §18
+// prediction bar above it. This is the escape hatch for any word without a
+// button, so it has to be able to write real sentences — that means the
+// apostrophe (no "I'm", "don't" or "can't" without it) and end punctuation,
+// not just letters.
+//
+// The letter layout never moves. Digits and symbols live behind a mode toggle
+// rather than being crammed in, so the motor plan for the letters is stable
+// (§19.5, applied to the keyboard).
+const LETTER_ROWS = ['qwertyuiop', "asdfghjkl'", 'zxcvbnm']
+const SYMBOL_ROWS = ['1234567890', '-/:;()$&@"', ',!%+=#*']
 
-export function KeyboardView() {
+export function KeyboardView({ onClose }: { onClose: () => void }) {
   const theme = useTheme()
   const [buffer, setBuffer] = useState('')
   const [shift, setShift] = useState(false)
+  const [symbols, setSymbols] = useState(false)
+  const activeUser = useUserStore((s) => s.activeUser)
   const appendToken = useMessageStore((s) => s.appendToken)
+  const appendToLastToken = useMessageStore((s) => s.appendToLastToken)
   const deleteLastToken = useMessageStore((s) => s.deleteLastToken)
   const speakMessage = useMessageStore((s) => s.speakMessage)
+
+  const predictions = usePredictions(buffer)
+  const rows = symbols ? SYMBOL_ROWS : LETTER_ROWS
 
   const commit = () => {
     const word = buffer.trim()
@@ -30,10 +47,89 @@ export function KeyboardView() {
     setShift(false)
   }
 
+  // Punctuation closes the current word rather than starting a new token.
+  const punctuate = (mark: string) => {
+    const word = buffer.trim()
+    if (word) {
+      appendToken(word + mark)
+      setBuffer('')
+    } else {
+      appendToLastToken(mark)
+    }
+  }
+
   const backspace = () => {
     if (buffer) setBuffer((b) => b.slice(0, -1))
     else deleteLastToken()
   }
+
+  const speak = () => {
+    commit()
+    speakMessage()
+  }
+
+  const selectPrediction = (word: string) => {
+    // Mirror what the user typed — "Wa" → "Want". With an empty buffer, an
+    // armed shift still capitalizes.
+    appendToken(applyCaseOf(buffer || (shift ? 'A' : ''), word))
+    setBuffer('')
+    setShift(false)
+  }
+
+  // §AM-05 — the keyboard scans itself while open. Without this a switch user
+  // cannot type at all, and prediction, which saves the most keystrokes for
+  // the slowest access methods, would be unreachable by the people it helps
+  // most. Groups mirror the visual rows so the highlight matches the layout.
+  const scanGroups = useMemo<ScanItem[][]>(() => {
+    const groups: ScanItem[][] = [
+      predictions.map((prediction, index) => ({
+        id: predictionSlotId(index),
+        label: prediction.word,
+        activate: () => selectPrediction(prediction.word),
+      })),
+    ]
+
+    rows.forEach((row, index) => {
+      const keys: ScanItem[] = row.split('').map((key) => ({
+        id: `key-${key}`,
+        label: key,
+        activate: () => typeKey(key),
+      }))
+      if (index === 2) {
+        if (!symbols) {
+          keys.unshift({ id: 'key-shift', label: 'Shift', activate: () => setShift((s) => !s) })
+        }
+        keys.push({ id: 'key-backspace', label: 'Delete', activate: backspace })
+      }
+      groups.push(keys)
+    })
+
+    groups.push([
+      {
+        id: 'key-mode',
+        label: symbols ? 'Letters' : 'Numbers and symbols',
+        activate: () => setSymbols((s) => !s),
+      },
+      { id: 'key-space', label: 'Space', activate: commit },
+      { id: 'key-period', label: 'Period', activate: () => punctuate('.') },
+      { id: 'key-question', label: 'Question mark', activate: () => punctuate('?') },
+      { id: 'key-speak', label: 'Speak', activate: speak },
+      { id: 'key-close', label: 'Close keyboard', activate: onClose },
+    ])
+
+    return groups.filter((group) => group.length > 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [predictions, rows, symbols, shift, buffer])
+
+  const { highlightedIds } = useScanning({
+    enabled: activeUser?.accessMethod === 'scanning',
+    groups: scanGroups,
+    resetKey: symbols ? 'symbols' : 'letters',
+    mode: activeUser?.scanMode ?? 'auto',
+    pattern: activeUser?.scanPattern ?? 'row-column',
+    speed: activeUser?.scanSpeed ?? 1500,
+    auditory: activeUser?.scanAuditory ?? false,
+  })
 
   return (
     <View
@@ -48,31 +144,86 @@ export function KeyboardView() {
       >
         {buffer || ' '}
       </Text>
-      {ROWS.map((row, index) => (
+
+      <PredictionBar
+        predictions={predictions}
+        onSelect={selectPrediction}
+        highlightedIds={highlightedIds}
+      />
+
+      {rows.map((row, index) => (
         <View key={row} style={styles.row}>
-          {index === 2 && (
-            <Key label="⇧" onPress={() => setShift((s) => !s)} active={shift} wide />
+          {index === 2 && !symbols && (
+            <Key
+              label="⇧"
+              scanId="key-shift"
+              highlightedIds={highlightedIds}
+              onPress={() => setShift((s) => !s)}
+              active={shift}
+              wide
+            />
           )}
           {row.split('').map((key) => (
             <Key
               key={key}
-              label={shift ? key.toUpperCase() : key}
+              label={shift && !symbols ? key.toUpperCase() : key}
+              scanId={`key-${key}`}
+              highlightedIds={highlightedIds}
               onPress={() => typeKey(key)}
             />
           ))}
-          {index === 2 && <Key label="⌫" onPress={backspace} wide />}
+          {index === 2 && (
+            <Key
+              label="⌫"
+              scanId="key-backspace"
+              highlightedIds={highlightedIds}
+              onPress={backspace}
+              wide
+            />
+          )}
         </View>
       ))}
+
       <View style={styles.row}>
-        <Key label="space" onPress={commit} space />
-        <Key label="." onPress={commit} />
+        <Key
+          label={symbols ? 'ABC' : '?123'}
+          scanId="key-mode"
+          highlightedIds={highlightedIds}
+          onPress={() => setSymbols((s) => !s)}
+          wide
+        />
+        <Key
+          label="space"
+          scanId="key-space"
+          highlightedIds={highlightedIds}
+          onPress={commit}
+          space
+        />
+        <Key
+          label="."
+          scanId="key-period"
+          highlightedIds={highlightedIds}
+          onPress={() => punctuate('.')}
+        />
+        <Key
+          label="?"
+          scanId="key-question"
+          highlightedIds={highlightedIds}
+          onPress={() => punctuate('?')}
+        />
         <Key
           label="▶ Speak"
-          onPress={() => {
-            commit()
-            speakMessage()
-          }}
+          scanId="key-speak"
+          highlightedIds={highlightedIds}
+          onPress={speak}
           speak
+        />
+        <Key
+          label="Done"
+          scanId="key-close"
+          highlightedIds={highlightedIds}
+          onPress={onClose}
+          wide
         />
       </View>
     </View>
@@ -82,6 +233,8 @@ export function KeyboardView() {
 function Key({
   label,
   onPress,
+  scanId,
+  highlightedIds,
   wide,
   space,
   speak,
@@ -89,12 +242,15 @@ function Key({
 }: {
   label: string
   onPress: () => void
+  scanId?: string
+  highlightedIds?: Set<string>
   wide?: boolean
   space?: boolean
   speak?: boolean
   active?: boolean
 }) {
   const theme = useTheme()
+  const highlighted = scanId ? (highlightedIds?.has(scanId) ?? false) : false
   return (
     <Pressable
       accessibilityRole="button"
@@ -107,6 +263,7 @@ function Key({
         space && styles.keySpace,
         speak && styles.keySpeak, // green stays
         active && styles.keyActive,
+        highlighted && styles.keyScanned,
         pressed && styles.pressed,
       ]}
     >
@@ -175,6 +332,11 @@ const styles = StyleSheet.create({
   },
   keyActive: {
     backgroundColor: '#BBDEFB',
+  },
+  // §AM-05: high-visibility scan cursor, matching the grid and message bar
+  keyScanned: {
+    borderWidth: 4,
+    borderColor: '#1565C0',
   },
   keyText: {
     fontFamily: FONTS.bold,

@@ -1,0 +1,7 @@
+Word-frequency lexicons in this folder are derived from FrequencyWords
+(https://github.com/hermitdave/FrequencyWords) by Hermit Dave, generated
+from the OpenSubtitles corpus and distributed under CC BY-SA 4.0.
+
+SayThrough filters that data (profanity, slurs, tokenizer artifacts) and
+restores split contractions; the resulting lists remain CC BY-SA 4.0.
+See scripts/prediction/ for the build pipeline.

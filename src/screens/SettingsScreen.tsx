@@ -19,6 +19,7 @@ import type { RootStackParamList } from '../../App'
 import { UI_COLORS } from '../constants/colors'
 import { restoreBuiltInPageSets } from '../data/seedCoreVocabulary'
 import { exportPageSet, importPageSet } from '../services/OBFService'
+import { resetLearning } from '../services/predictionModel'
 import {
   getInstallState,
   onInstallAvailable,
@@ -159,6 +160,14 @@ export function SettingsScreen() {
     anchor.click()
     URL.revokeObjectURL(url)
     setBackupStatus('Exported.')
+  }
+
+  // §18.4 — clears the learned prediction model for this profile only,
+  // leaving tracking data, message history and vocabulary untouched.
+  const [learnedCleared, setLearnedCleared] = useState(false)
+  const clearLearnedWords = async () => {
+    await resetLearning(activeUser?.id)
+    setLearnedCleared(true)
   }
 
   const [restoreArmed, setRestoreArmed] = useState(false)
@@ -694,6 +703,33 @@ export function SettingsScreen() {
                 }
               />
             )}
+          </View>
+        </View>
+
+        {/* 5a. Word Prediction (§18) */}
+        <Text style={[styles.sectionTitle, mutedT]}>Word Prediction</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.hint, mutedT]}>
+            Suggests words above the keyboard as you type. It learns from
+            messages you speak — including words tapped on the grid — so the
+            words you actually use come first. Learned words stay ON THIS
+            DEVICE, are never sent anywhere, and are separate from data
+            tracking below.
+          </Text>
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Suggest words while typing</Text>
+            <Switch
+              value={activeUser.predictionEnabled ?? true}
+              onValueChange={(value) => updateActiveUser({ predictionEnabled: value })}
+              accessibilityLabel="Word prediction enabled"
+            />
+          </View>
+          <View style={styles.chipRow}>
+            <Chip
+              label={learnedCleared ? 'Learned words cleared' : 'Clear learned words'}
+              selected={false}
+              onPress={clearLearnedWords}
+            />
           </View>
         </View>
 

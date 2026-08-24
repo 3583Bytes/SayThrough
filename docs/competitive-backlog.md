@@ -5,7 +5,7 @@ comparison against the major AAC apps. Companion to
 `aac-requirements.txt` (the requirements) and `technical-specification.md`
 (the build spec). Update the checkboxes as items ship.
 
-**Last reviewed:** 2026-07-30
+**Last reviewed:** 2026-08-13
 **Benchmarked against:** TD Snap (Tobii Dynavox), Proloquo2Go / Proloquo
 (AssistiveWare), LAMP Words for Life & TouchChat (PRC-Saltillo), Speak for
 Yourself, CoughDrop, and the open-source field (Cboard, AsTeRICS Grid).
@@ -17,6 +17,17 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Word prediction (§18)** — 30k-word offline lexicon (filtered from
+  OpenSubtitles frequency data) blended with a per-profile model that learns
+  from spoken messages, plus the user's own button labels, plus seeded AAC
+  frames for next-word. Learning is on-device, excluded from modeling, and
+  clearable on its own in Settings.
+- [x] **Keyboard can write real sentences** — the apostrophe key (no "I'm" or
+  "don't" without it), end punctuation that attaches to the previous word, and
+  a digits/symbols mode that leaves the letter layout fixed.
+- [x] **The keyboard is scannable** — switch users could not type at all
+  before; the prediction bar and each key row are scan groups, and prediction
+  saves the most keystrokes for exactly the slowest access methods.
 - [x] **Access methods ahead of roadmap** — dwell (hover-to-select) + switch
   scanning (row-column/linear, auto/step) already in, though the roadmap
   files them under Phase 2.
@@ -55,7 +66,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 | Item | Why it matters (who has it) | Effort | Status |
 |---|---|---|---|
-| **Word prediction** (offline n-gram) in the keyboard | Every major app; makes the text/literacy path usable. `KeyboardView` already reserves a spot | M | [ ] |
+| **Word prediction** (offline n-gram) in the keyboard | Every major app; makes the text/literacy path usable | M | [x] |
 | **Word forms / grammar** (long-press → plural, tense, possessive) | Proloquo, Grid 3; separates "toddler board" from real language | M–L | [x] |
 | **Grid size + vocabulary level** at setup | All of them; model already stores per-page `rows`/`columns` — needs UI + starter templates | M | [~] |
 | **Message history / favorites** | Proloquo2Go, TD Snap | S | [x] |
@@ -106,14 +117,14 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 ## 4. Recommended sequence
 
 1. **Quick wins remaining:** grid-size / vocabulary-level at onboarding →
-   recorded button audio (data-ready) → word-by-word highlight.
+   recorded button audio (data-ready).
 2. **The flagship bet:** **Piper natural TTS.** Highest strategic
    leverage — permanently ends the robot-voice problem *and* becomes a
    free-premium-voice headline no competitor matches. De-risked (already
    validated); first step is a pluggable TTS backend + graceful fallback.
 3. **Reach expander:** **Spanish core set** — biggest new-user unlock for
    the effort; proves the "free, multilingual, open" thesis.
-4. **Then:** word prediction → word forms → VSD → cloud sync / SLP tools.
+4. **Then:** VSD → cloud sync / SLP tools.
 
 ---
 

@@ -62,8 +62,9 @@ See [`docs/technical-specification.md`](docs/technical-specification.md) for arc
 - **Application code:** MIT License — see [`LICENSE`](LICENSE).
 - **ARASAAC pictograms:** © Government of Aragón (Spain), created by Sergio Palao for [ARASAAC](https://arasaac.org), distributed under **CC BY-NC-SA 4.0**. Free for non-commercial and educational use with attribution.
 - **Mulberry Symbols:** © Steve Lee, **CC BY-SA 4.0** (joining the symbol set in a later release).
+- **Word-prediction lexicons:** derived from [FrequencyWords](https://github.com/hermitdave/FrequencyWords) © Hermit Dave, generated from the OpenSubtitles corpus, **CC BY-SA 4.0**. Our filtered lists are a derivative and remain CC BY-SA 4.0 — see [`scripts/prediction/`](scripts/prediction/).
 
-The MIT license covers the code only; the bundled symbol libraries carry their own licenses above. Organizations using this for paid services should review the ARASAAC non-commercial terms.
+The MIT license covers the code only; the bundled symbol libraries and lexicons carry their own licenses above. Organizations using this for paid services should review the ARASAAC non-commercial terms.
 
 ## Contributing
 

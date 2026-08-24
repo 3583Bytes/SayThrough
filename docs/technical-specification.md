@@ -2026,70 +2026,127 @@ pipeline and schema-migration decisions affect scaffolding.
 
 ### 18.2 Architecture — Two-Layer Model
 
-**Layer 1 — Base model (shipped asset, read-only).** Built offline by a dev
-script from an open corpus (candidates: OpenSubtitles-derived frequency
-lists, Google Books n-grams — verify the license permits redistributing
-derived counts before committing):
+**Layer 1 — Base lexicon (shipped asset, read-only).** Built by
+`scripts/prediction/` from [FrequencyWords](https://github.com/hermitdave/FrequencyWords)
+(OpenSubtitles-derived; generator MIT, **lists CC BY-SA 4.0**, so our derived
+lists stay CC BY-SA and are attributed in the root README):
 
-- Unigrams: top 150,000 words with frequency ranks
-- Bigrams: top ~20 continuations per head word (pruned)
-- Trigrams: top ~5 continuations per word pair (aggressively pruned)
-- Packaged per language: `assets/prediction/en.json.gz` (~3–5 MB target)
-- Loaded into memory lazily the first time the keyboard opens
+- `public/prediction/{lang}.txt` — top 30,000 words, one per line, most
+  frequent first, **no counts and no header**
+- ~237 KB raw / ~114 KB gzipped per language; committed to the repo
+- Fetched lazily on first keyboard open, then held in module memory; the
+  service worker's stale-while-revalidate rule caches it offline (no precache
+  entry, matching `symbolIndex.json`)
 
-**Layer 2 — Personal model (SQLite, per user).** Unigram + bigram counts
-updated when a message is spoken — NOT on every keystroke, and never while
-modeling mode is active (the SLP's demonstrations must not train the
-user's model):
+Three decisions here replaced the original sketch, which called for 150k
+unigrams plus pruned bigrams and trigrams in a 3–5 MB gzipped bundle:
 
-```sql
--- Added in v1.1 (schema_version 2 migration)
-CREATE TABLE prediction_ngrams (
-  user_id TEXT NOT NULL,
-  context TEXT NOT NULL,        -- '' for unigrams, head word for bigrams
-  word TEXT NOT NULL,
-  count INTEGER NOT NULL DEFAULT 1,
-  updated_at INTEGER NOT NULL,
-  PRIMARY KEY (user_id, context, word)
-);
+1. **Order is the only frequency signal, so counts are not shipped.** The
+   engine scans from the top and stops at the first K prefix matches, which
+   are by definition the K most frequent matches. Storing ranks alongside
+   would double the asset to feed a column nothing reads. This also replaces
+   the binary-search-over-sorted-lexicon plan in §18.3 — a linear scan with
+   early exit is simpler, needs no counts, and returns candidates
+   pre-ranked.
+2. **30k words, not 150k.** Measured against the corpus, 10k drops
+   *broccoli*, *giraffe*, *inhaler*, *trampoline* (ranks 11k–21k) — the
+   concrete nouns the keyboard exists to reach, since anything commoner is
+   already on a button. Past 30k the tail is film proper nouns. A 3–5 MB
+   download is also a poor trade for a PWA that must install over school
+   wi-fi.
+3. **No shipped bigram/trigram tables in v1.** They are where the size
+   actually explodes, and the licensing on raw corpora is murkier than on
+   derived frequency lists. Next-word prediction comes from the personal
+   model plus a small seeded frame list; a real bigram asset can land later
+   without changing the engine's interface.
 
-CREATE TABLE abbreviations (
-  user_id TEXT NOT NULL,
-  shorthand TEXT NOT NULL,      -- 'omw'
-  expansion TEXT NOT NULL,      -- 'On my way!'
-  PRIMARY KEY (user_id, shorthand)
-);
+Raw subtitle data cannot be shipped as-is — profanity ranks near the top
+(`shit` 285th, `fuck` 299th), contractions are tokenized apart (no `don't`
+anywhere; the orphaned stem `don` ranks 31st), and the list carries clitics
+and stutter debris. `scripts/prediction/README.md` documents the filtering,
+the exact-match-only blocklist rule, and the clinical/protective vocabulary
+that is deliberately kept and force-restored.
+
+**Layer 2 — Personal model (per profile).** Unigram + bigram counts updated
+when a message is **spoken** — NOT on every keystroke (words typed and then
+deleted must not train the model), and never while modeling mode is active
+(`TrackingEvent.isModeling`): an SLP demonstrating on the device must not
+train the user's model.
+
+Stored as a per-profile JSON blob in the `meta` table, following the
+`services/messageHistory.ts` precedent, rather than the dedicated
+`prediction_ngrams` table originally specced:
+
+```typescript
+// meta key: `prediction:${userId}`
+interface PersonalModel {
+  unigrams: Record<string, number>
+  bigrams: Record<string, Record<string, number>>   // head → next → count
+}
 ```
+
+The model is capped (~500 unigrams / ~1000 bigram heads) and aged by halving
+all counts when it exceeds the cap, so the blob stays a few KB and a rewrite
+per spoken message is cheaper than the two storage-driver implementations
+plus schema migration a table would need — `createStorage.ts` is SQLite but
+`createStorage.web.ts` is IndexedDB, so a table is not one piece of work. If
+the model outgrows the blob, promote it to a table then; the engine only sees
+the `PersonalModel` shape.
+
+Abbreviation expansion (requirements §4.5) is **deferred**; the `Prediction`
+union below already reserves its source tag so adding it later does not
+change the engine's interface.
 
 ### 18.3 Scoring & API
 
 ```typescript
-// services/PredictionService.ts
+// services/prediction.ts
 interface Prediction {
   word: string
-  source: 'abbreviation' | 'personal' | 'base'
+  source: 'abbreviation' | 'personal' | 'vocabulary' | 'base'
 }
 
-predict(contextWords: string[], prefix: string, limit = 5): Prediction[]
+predict(prefix: string, previousWord: string | undefined, limit = 4): Prediction[]
 learnFromMessage(userId: string, words: string[]): void
-resetLearning(userId: string): void   // deletes prediction_ngrams rows ONLY
+resetLearning(userId: string): void   // clears the personal model ONLY
 ```
 
-- Candidate set: abbreviation matches (always ranked first), then lexicon
-  words matching the typed prefix (binary search over the sorted lexicon).
-- `score(w) = 0.5·P_personal(w | last word) + 0.3·P_base(w | last two words,
-  trigram→bigram→unigram backoff) + 0.2·P_base(w)`
-- Interpolation weights are named constants — tune against real usage later;
-  keep the scoring function pure so it is trivially unit-testable.
+Four ranked sources are merged, each normalized to 0–1 and combined with
+named constant weights (kept pure, so `tests/unit/prediction.test.ts` covers
+the ranking without touching storage or the network):
+
+| Source | Weight | Notes |
+|---|---|---|
+| Personal bigram (given previous word) | highest | what this user actually says next |
+| Personal unigram | high | this user's own words |
+| The user's own button labels | medium | a profile with a "grandma" button must beat corpus `gra…` |
+| Base lexicon rank | low | `1 − log(index+1)/log(N+1)`, Zipf-shaped |
+
+The vocabulary source matters more than its weight suggests: prediction
+driven purely by a generic corpus feels wrong to AAC users, because the words
+they most want are the ones already meaningful in their own page set.
+
+With an empty personal model the blend collapses to plain corpus frequency,
+which is the correct cold-start behavior.
+
+**Early exit and correctness.** Personal and vocabulary candidates are small
+sets and are scanned in full, so capping the lexicon scan cannot hide a
+high-scoring personal word. The scan collects up to `limit × 5` matches to
+leave the blend room to reorder.
 
 ### 18.4 Performance & Privacy
 
-- Target < 30 ms per keystroke on 2018-era hardware. The lexicon is a sorted
-  in-memory array (~2 MB), so a prefix lookup is two binary searches — no web
-  worker unless profiling proves otherwise.
+- A prefix lookup is one linear scan over a 30k-element array with early exit
+  — sub-millisecond in practice, and typing rate is the real bound. No web
+  worker, and no binary search, unless profiling proves otherwise.
 - The personal model never leaves the device: excluded from .obz exports and
   from future cloud sync unless the user explicitly includes it in a full
-  backup. Deleted when the profile is deleted.
+  backup. Deleted when the profile is deleted, and clearable on its own from
+  Settings ("Clear learned words") without touching tracking data.
+- Learning is **not** consent-gated. It is a communication convenience rather
+  than analytics — the same reasoning `services/messageHistory.ts` already
+  applies to recents and favorites — so it is on by default, disclosed, and
+  independently clearable. Data tracking (§4.13) stays opt-in as before.
 
 ---
 

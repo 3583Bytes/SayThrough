@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { recordSpoken } from '../services/messageHistory'
+import { learnFromMessage } from '../services/predictionModel'
 import { logMessageSpoken } from '../services/TrackingService'
 import { ttsService } from '../services/TTSService'
 import { tokenIdAtChar } from '../utils/tokenRanges'
@@ -23,6 +24,9 @@ interface MessageState {
   ) => void
   deleteLastToken: () => void
   removeToken: (id: string) => void
+  // Punctuation typed with an empty buffer belongs on the previous word —
+  // "how are you" then "?" should read "you?", not add a lone "?" token.
+  appendToLastToken: (text: string) => void
   clearMessage: () => void
   speakMessage: () => void
   // Replace the bar with a saved/recent phrase (text only — re-speakable,
@@ -53,6 +57,15 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   removeToken: (id) =>
     set((state) => ({ tokens: state.tokens.filter((t) => t.id !== id) })),
 
+  appendToLastToken: (text) =>
+    set((state) => {
+      if (!state.tokens.length) return state
+      const tokens = [...state.tokens]
+      const last = tokens[tokens.length - 1]
+      tokens[tokens.length - 1] = { ...last, text: last.text + text }
+      return { tokens }
+    }),
+
   clearMessage: () => set({ tokens: [] }),
 
   loadMessage: (text) =>
@@ -79,6 +92,13 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     const user = useUserStore.getState().activeUser
     logMessageSpoken(message) // no-op unless caregiver opted in (tracking)
     void recordSpoken(user?.id, message) // history — always on, per profile
+    // §18.2: train on SPOKEN messages only, so words typed and then deleted
+    // never enter the model. Learns from grid taps as much as from typing —
+    // most of a user's language happens on the buttons, not the keyboard.
+    void learnFromMessage(
+      user?.id,
+      tokens.map((t) => t.text),
+    )
     // §UX post-speak options (both default off): clear the bar and/or jump
     // home so the next utterance starts from core. Text is already captured
     // above, so mutating tokens here is safe.

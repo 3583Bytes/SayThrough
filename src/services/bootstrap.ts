@@ -2,6 +2,7 @@ import { seedIfNeeded } from '../data/seedCoreVocabulary'
 import { storage } from '../storage'
 import { useNavigationStore } from '../stores/navigationStore'
 import { useUserStore } from '../stores/userStore'
+import { warmLexicon } from './prediction'
 import { initPwa, warmupSymbolCache } from './pwa'
 import { getSymbolUri } from './SymbolService'
 import { ttsService } from './TTSService'
@@ -28,6 +29,14 @@ export async function bootstrap(): Promise<void> {
 
   initPwa()
   void pickAndPersistDefaultVoice() // non-blocking — voices load async
+
+  // Prediction (§18). Fetching the lexicon now rather than on first keyboard
+  // open means the service worker has it cached before the user ever goes
+  // offline; the keyboard would otherwise be the one screen that silently
+  // loses a feature on a plane or a school bus. The personal model is loaded
+  // by userStore alongside the profile — this covers first run, where there is
+  // no profile yet and onboarding is about to happen.
+  warmLexicon(activeUser?.language)
 }
 
 // §10.2: without this, the browser picks its own default voice for the

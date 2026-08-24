@@ -150,6 +150,9 @@ export function CommunicationScreen() {
     return groups
   }, [page, buttons, speakMessage, deleteLastToken])
 
+  // The keyboard runs its OWN scanning while it is open (§AM-05) — its keys,
+  // prediction slots and buffer live inside KeyboardView, and the two scanners
+  // are mutually exclusive on keyboardOpen, so they never run together.
   const scanningEnabled =
     !!page && !isEditMode && !keyboardOpen && activeUser?.accessMethod === 'scanning'
 
@@ -516,7 +519,9 @@ export function CommunicationScreen() {
         {!isEditMode && activeUser?.messageBarPosition === 'bottom' && (
           <MessageBar scanHighlightIds={scanHighlightIds} />
         )}
-        {!isEditMode && keyboardOpen && <KeyboardView />}
+        {!isEditMode && keyboardOpen && (
+          <KeyboardView onClose={() => setKeyboardOpen(false)} />
+        )}
         {!isEditMode && page.showToolbar && (
           <Toolbar
             activeSection={activeSection}

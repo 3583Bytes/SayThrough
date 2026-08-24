@@ -1,0 +1,74 @@
+{
+  "_comment": [
+    "Words removed from the prediction lexicon. The source corpus is film and",
+    "TV subtitles, so raw frequency puts 'shit' at rank 285 and 'fuck' at 299 —",
+    "unusable in a classroom app. Matching is EXACT, never prefix or substring:",
+    "a prefix rule on 'ass' would eat assistant, assume, assault and assignment,",
+    "and a substring rule on 'cock' would eat cocktail. Add inflected forms",
+    "explicitly; each is its own corpus entry.",
+    "",
+    "Scope is deliberately narrow. This removes vulgar and slur vocabulary from",
+    "AUTOCOMPLETE only. It is not a censor: a user or SLP can still put any word",
+    "on a button or type it letter by letter. Blocking a word here only means we",
+    "will not suggest it unprompted."
+  ],
+
+  "_keptDeliberately": {
+    "_why": [
+      "AAC users experience abuse at far higher rates than the general",
+      "population, and lacking the vocabulary to describe bodies, sex, and",
+      "assault is a documented barrier to disclosure. Stripping clinical and",
+      "protective vocabulary out of prediction would make the app worse at the",
+      "moment it matters most. These words stay, and build-lexicon.mjs asserts",
+      "that no future blocklist edit removes them."
+    ],
+    "anatomy": ["penis", "vagina", "breast", "breasts", "nipple", "nipples", "anus", "buttocks", "butt", "bottom", "genitals", "testicles", "pubic", "erection"],
+    "health": ["period", "periods", "menstruation", "pregnant", "condom", "tampon", "puberty", "sex", "sexual", "sexuality", "naked", "nude", "spastic"],
+    "protective": ["rape", "raped", "rapist", "abuse", "abused", "abusive", "hurt", "hurts", "touch", "touched", "touching", "private", "secret", "scared", "afraid", "stop", "no"]
+  },
+
+  "profanity": [
+    "fuck", "fucks", "fucked", "fucking", "fuckin", "fucker", "fuckers", "fuckup",
+    "motherfucker", "motherfuckers", "motherfucking", "clusterfuck",
+    "shit", "shits", "shitty", "shitting", "shithead", "shitheads", "shitless",
+    "shithole", "bullshit", "horseshit", "dogshit",
+    "ass", "asses", "asshole", "assholes", "jackass", "jackasses", "dumbass",
+    "badass", "smartass", "arse", "arsehole",
+    "bitch", "bitches", "bitching", "bitchy", "sonofabitch",
+    "bastard", "bastards",
+    "damn", "damned", "damnit", "dammit", "goddamn", "goddamned", "goddamnit",
+    "crap", "craps", "crappy",
+    "piss", "pissed", "pissing", "pisses", "pissy",
+    "cunt", "cunts",
+    "dick", "dicks", "dickhead", "dickheads",
+    "cock", "cocks", "prick", "pricks",
+    "pussy", "pussies",
+    "twat", "twats",
+    "wank", "wanker", "wankers", "wanking",
+    "bollocks", "bugger", "buggered",
+    "douche", "douchebag", "douchebags",
+    "whore", "whores", "whoring",
+    "slut", "sluts", "slutty"
+  ],
+
+  "sexual": [
+    "sexy", "horny", "orgasm", "orgasms", "orgasmic",
+    "cum", "cumming", "jizz", "blowjob", "blowjobs", "handjob",
+    "masturbate", "masturbating", "masturbation",
+    "porn", "porno", "pornography",
+    "hooker", "hookers", "pimp", "pimps",
+    "tits", "titty", "titties", "boob", "boobs"
+  ],
+
+  "slurs": [
+    "nigger", "niggers", "nigga", "niggas",
+    "chink", "chinks", "spic", "spics", "wetback", "wetbacks",
+    "kike", "kikes", "gook", "gooks", "wop", "dago",
+    "paki", "pakis", "coon", "coons", "jap", "japs",
+    "raghead", "towelhead", "whitey", "honky", "gyp",
+    "faggot", "faggots", "fag", "fags", "dyke", "dykes",
+    "tranny", "trannies", "homo",
+    "retard", "retards", "retarded", "tard",
+    "spaz", "spazz", "cripple", "crippled", "midget", "midgets"
+  ]
+}

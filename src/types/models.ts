@@ -49,6 +49,11 @@ export interface UserProfile {
   // Data tracking (§4.13) — default OFF: caregiver must opt in
   // (COPPA/GDPR consent; requirements DT-05)
   trackingEnabled?: boolean
+  // Word prediction (§18) — default ON (undefined = enabled). Unlike
+  // tracking this is a communication convenience rather than analytics, so
+  // it is disclosed and clearable rather than consent-gated, matching how
+  // message history already works.
+  predictionEnabled?: boolean
   // Layout preferences (§6.1 requirements)
   messageBarPosition?: 'top' | 'bottom' // bottom = easier reach when mounted
   buttonGap?: 'compact' | 'normal' | 'wide' // wide reduces mis-hits

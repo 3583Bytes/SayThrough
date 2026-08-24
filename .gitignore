@@ -41,6 +41,11 @@ yarn-error.*
 /android
 scripts/symbols/data/
 
+# raw frequency lists fetched by scripts/prediction/download-lexicon.mjs —
+# the built lexicon in public/prediction/ IS committed (~237 KB, so every
+# clone gets working prediction without running the pipeline)
+scripts/prediction/data/
+
 # full symbol library is synced locally / fetched in CI — only the
 # committed seed subset is tracked (gitignore doesn't untrack it)
 public/symbols/
