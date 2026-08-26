@@ -123,6 +123,37 @@ test.describe('marketing claims stay true', () => {
     expect(text).not.toContain('16,500')
   })
 
+  test('the symbol count it advertises is actually served', async ({ page, request }) => {
+    await page.goto('/', { waitUntil: 'networkidle' })
+    const text = await page.locator('body').innerText()
+    // Whatever figure the page quotes must be one the site can actually back
+    // up — "13,800+" was an overclaim against a 13,799-image library.
+    const quoted = text.match(/([\d,]+)\+ symbols/)
+    if (!quoted) return
+    const claimed = Number(quoted[1].replace(/,/g, ''))
+    const index = await (await request.get('/app/symbolIndex.json')).json()
+    expect(index.length).toBeGreaterThanOrEqual(claimed)
+    // and a sample of them must really resolve
+    for (const entry of [index[0], index[Math.floor(index.length / 2)], index[index.length - 1]]) {
+      const id = entry.id.split(':')[1]
+      expect((await request.get(`/app/symbols/arasaac/${id}.webp`)).status()).toBe(200)
+    }
+  })
+
+  test('quotes vocabulary sizes that match the shipped boards', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' })
+    const text = await page.locator('body').innerText()
+    const sizes = require('../../src/data/coreWords.json').sizes as Record<string, any>
+    const totals = Object.values(sizes).map(
+      (v) => v.core.length + Object.values<any[]>(v.topics).reduce((n, w) => n + w.length, 0),
+    )
+    // Whatever numbers the page quotes must be real board sizes.
+    for (const quoted of text.match(/\b(\d{2,4})-word\b/g) ?? []) {
+      const n = Number(quoted.replace('-word', ''))
+      expect(totals).toContain(n)
+    }
+  })
+
   test('advertises what does ship', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' })
     const text = (await page.locator('body').innerText()).toLowerCase()

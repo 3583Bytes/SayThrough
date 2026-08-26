@@ -54,9 +54,9 @@ public/voices/
 # clone gets working prediction without running the pipeline)
 scripts/prediction/data/
 
-# full symbol library is synced locally / fetched in CI — only the
-# committed seed subset is tracked (gitignore doesn't untrack it)
-public/symbols/
+# The full ARASAAC library (~146 MB, 13,799 images) IS committed, so the
+# symbol picker can search all of it without depending on a release asset.
+# Only the download/packing staging area stays out of git.
 
 # playwright
 test-results/
