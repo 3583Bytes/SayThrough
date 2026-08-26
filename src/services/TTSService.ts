@@ -132,4 +132,29 @@ export class TtsRouter {
 }
 
 export const ttsService = new TtsRouter([platformBackend, enhancedBackend])
+
+/**
+ * Absorb the speech engine's cold start on the user's FIRST interaction.
+ *
+ * Browsers refuse to speak before a user gesture, and the first utterance is
+ * slow to begin — measured at ~486 ms in Firefox on macOS, which clips the
+ * opening word off a sentence. A silent utterance beforehand brings that down
+ * to ~53 ms.
+ *
+ * This listens for the first gesture ANYWHERE, because the previous trigger
+ * was `onTouchStart` on the grid, which never fires for a mouse or trackpad
+ * click — so on desktop the warm-up never happened and every session clipped
+ * its first word.
+ */
+export function warmUpOnFirstGesture(): void {
+  if (typeof document === 'undefined') return
+  const events = ['pointerdown', 'touchstart', 'keydown', 'mousedown']
+  const fire = () => {
+    for (const event of events) document.removeEventListener(event, fire, true)
+    ttsService.warmUp()
+  }
+  for (const event of events) {
+    document.addEventListener(event, fire, { capture: true, passive: true })
+  }
+}
 export { enhancedBackend }

@@ -15,7 +15,19 @@ export default defineConfig({
     trace: 'on-first-retry',
     viewport: { width: 1024, height: 768 },
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Firefox is checked on the platform-sensitive paths only, so CI stays
+    // fast. Chromium-only coverage previously missed a bug that made the app
+    // completely unusable in Firefox: storage.init() awaited
+    // navigator.storage.persist(), which Firefox answers with a permission
+    // prompt and never resolves, so the app hung on its loading screen.
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: /(speech|communication|offline)\.spec\.ts/,
+    },
+  ],
   webServer: {
     command: 'node scripts/serve-dist.mjs',
     url: 'http://localhost:8090',

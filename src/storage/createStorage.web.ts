@@ -26,9 +26,15 @@ class WebStorage implements Storage {
   private db!: IDBDatabase
 
   async init(): Promise<void> {
-    // Reduce the risk of the browser evicting the vocabulary (§8)
+    // Reduce the risk of the browser evicting the vocabulary (§8).
+    //
+    // NOT awaited, deliberately. Firefox answers this with a permission
+    // prompt and leaves the promise pending until the user responds — so
+    // awaiting it hangs startup on the loading screen indefinitely, and the
+    // app never opens. It is a durability optimisation; it must never gate
+    // whether someone can speak.
     try {
-      await navigator.storage?.persist?.()
+      void navigator.storage?.persist?.()
     } catch {
       // best effort only
     }

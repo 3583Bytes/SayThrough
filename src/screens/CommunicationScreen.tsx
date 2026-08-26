@@ -439,7 +439,7 @@ export function CommunicationScreen() {
       style={[styles.screen, { backgroundColor: theme.screen }]}
     >
       {/* §10.4: first touch anywhere warms the TTS engine */}
-      <View style={styles.content} onTouchStart={() => ttsService.warmUp()}>
+      <View style={styles.content}>
         {isEditMode ? (
           <EditBar
             pageName={page.name}

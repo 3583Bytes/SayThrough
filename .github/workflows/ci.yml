@@ -34,12 +34,16 @@ jobs:
       - name: Build web
         run: npm run build
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
 
       - name: E2E tests
         # dist/ is already built above; Playwright's webServer serves it
         run: npx playwright test --project=chromium
+
+      # Firefox runs the platform-sensitive specs only (see playwright.config).
+      - name: E2E tests (Firefox)
+        run: npx playwright test --project=firefox
 
       - name: Upload Playwright report on failure
         if: failure()

@@ -6,7 +6,7 @@ import { warmLexicon } from './prediction'
 import { startUsageCounting } from './usageCounter'
 import { initPwa, warmupSymbolCache } from './pwa'
 import { getSymbolUri } from './SymbolService'
-import { ttsService } from './TTSService'
+import { ttsService, warmUpOnFirstGesture } from './TTSService'
 
 // App startup: storage → seed → profile → navigation → TTS.
 // Runs once from App before the navigator renders.
@@ -29,6 +29,9 @@ export async function bootstrap(): Promise<void> {
   }
 
   initPwa()
+
+  // §10.4 — absorb the engine's cold start before the first real sentence.
+  warmUpOnFirstGesture()
 
   // Usage reporting (Presence). Session-scoped random id, opt-out honoured,
   // failure silent — see usageCounter.ts.
