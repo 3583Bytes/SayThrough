@@ -25,7 +25,7 @@ test.describe('vocabulary levels (§19)', () => {
   test('Basic hides later words while keeping core', async ({ page }) => {
     await setupProfile(page)
     // Full board by default — an advanced word is present.
-    await expect(page.getByLabel('Animals, opens page')).toBeVisible()
+    await expect(page.getByLabel('School, opens page')).toBeVisible()
 
     await openSettings(page)
     await page.getByLabel('Basic', { exact: true }).click()
@@ -35,7 +35,7 @@ test.describe('vocabulary levels (§19)', () => {
     await expect(page.getByLabel('want', { exact: true })).toBeVisible()
     await expect(page.getByLabel('help', { exact: true })).toBeVisible()
     // A level-2 topic is not introduced yet.
-    await expect(page.getByLabel('Animals, opens page')).toHaveCount(0)
+    await expect(page.getByLabel('School, opens page')).toHaveCount(0)
     // A level-1 topic still is.
     await expect(page.getByLabel('Food, opens page')).toBeVisible()
   })
@@ -60,7 +60,7 @@ test.describe('vocabulary levels (§19)', () => {
     expect(await boxOf(page, 'want')).toEqual(before.want)
     expect(await boxOf(page, 'help')).toEqual(before.help)
     expect(await boxOf(page, 'Food, opens page')).toEqual(before.Food)
-    await expect(page.getByLabel('Animals, opens page')).toBeVisible()
+    await expect(page.getByLabel('School, opens page')).toBeVisible()
   })
 
   test('a level applies inside topic pages too', async ({ page }) => {

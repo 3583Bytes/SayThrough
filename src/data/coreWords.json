@@ -112,6 +112,7 @@
       ],
       "topicLevels": {
         "Actions": 1,
+        "Helping Words": 1,
         "Describing": 1,
         "Feelings": 1,
         "Social": 1,
@@ -123,8 +124,7 @@
         "People": 1,
         "Places": 2,
         "School": 2,
-        "Body": 2,
-        "Animals": 2
+        "Body": 2
       },
       "topics": {
         "Actions": [
@@ -191,6 +191,68 @@
           [
             "sit",
             "verb",
+            3
+          ]
+        ],
+        "Helping Words": [
+          [
+            "am",
+            "verb",
+            1
+          ],
+          [
+            "is",
+            "verb",
+            1
+          ],
+          [
+            "are",
+            "verb",
+            1
+          ],
+          [
+            "can",
+            "verb",
+            1
+          ],
+          [
+            "will",
+            "verb",
+            2
+          ],
+          [
+            "was",
+            "verb",
+            2
+          ],
+          [
+            "have",
+            "verb",
+            2
+          ],
+          [
+            "did",
+            "verb",
+            2
+          ],
+          [
+            "he",
+            "pronoun",
+            3
+          ],
+          [
+            "she",
+            "pronoun",
+            3
+          ],
+          [
+            "we",
+            "pronoun",
+            3
+          ],
+          [
+            "they",
+            "pronoun",
             3
           ]
         ],
@@ -997,77 +1059,11 @@
             "noun",
             2
           ]
-        ],
-        "Animals": [
-          [
-            "dog",
-            "noun",
-            1
-          ],
-          [
-            "cat",
-            "noun",
-            1
-          ],
-          [
-            "bird",
-            "noun",
-            2
-          ],
-          [
-            "fish",
-            "noun",
-            2
-          ],
-          [
-            "horse",
-            "noun",
-            2
-          ],
-          [
-            "cow",
-            "noun",
-            3
-          ],
-          [
-            "pig",
-            "noun",
-            3
-          ],
-          [
-            "chicken",
-            "noun",
-            3
-          ],
-          [
-            "rabbit",
-            "noun",
-            3
-          ],
-          [
-            "bear",
-            "noun",
-            3
-          ],
-          [
-            "lion",
-            "noun",
-            3
-          ],
-          [
-            "elephant",
-            "noun",
-            3
-          ],
-          [
-            "duck",
-            "noun",
-            2
-          ]
         ]
       },
       "corePages": {
         "Actions": "verb",
+        "Helping Words": "verb",
         "Describing": "descriptor",
         "Feelings": "descriptor",
         "Social": "social",
@@ -1366,6 +1362,8 @@
       ],
       "topicLevels": {
         "Actions": 1,
+        "Helping Words": 1,
+        "Pronouns": 1,
         "Describing": 1,
         "Feelings": 1,
         "Social": 1,
@@ -1555,6 +1553,335 @@
           [
             "tell",
             "verb",
+            3
+          ]
+        ],
+        "Helping Words": [
+          [
+            "am",
+            "verb",
+            1
+          ],
+          [
+            "is",
+            "verb",
+            1
+          ],
+          [
+            "are",
+            "verb",
+            1
+          ],
+          [
+            "can",
+            "verb",
+            1
+          ],
+          [
+            "will",
+            "verb",
+            1
+          ],
+          [
+            "was",
+            "verb",
+            1
+          ],
+          [
+            "did",
+            "verb",
+            1
+          ],
+          [
+            "be",
+            "verb",
+            1
+          ],
+          [
+            "does",
+            "verb",
+            1
+          ],
+          [
+            "has",
+            "verb",
+            1
+          ],
+          [
+            "don't",
+            "verb",
+            1
+          ],
+          [
+            "can't",
+            "verb",
+            2
+          ],
+          [
+            "didn't",
+            "verb",
+            2
+          ],
+          [
+            "isn't",
+            "verb",
+            2
+          ],
+          [
+            "won't",
+            "verb",
+            2
+          ],
+          [
+            "would",
+            "verb",
+            2
+          ],
+          [
+            "could",
+            "verb",
+            2
+          ],
+          [
+            "should",
+            "verb",
+            2
+          ],
+          [
+            "were",
+            "verb",
+            2
+          ],
+          [
+            "had",
+            "verb",
+            2
+          ],
+          [
+            "going to",
+            "verb",
+            2
+          ],
+          [
+            "want to",
+            "verb",
+            3
+          ],
+          [
+            "need to",
+            "verb",
+            3
+          ],
+          [
+            "let",
+            "verb",
+            3
+          ],
+          [
+            "say",
+            "verb",
+            3
+          ],
+          [
+            "know",
+            "verb",
+            3
+          ],
+          [
+            "think",
+            "verb",
+            3
+          ],
+          [
+            "might",
+            "verb",
+            3
+          ],
+          [
+            "must",
+            "verb",
+            3
+          ],
+          [
+            "never",
+            "little",
+            3
+          ],
+          [
+            "always",
+            "little",
+            3
+          ]
+        ],
+        "Pronouns": [
+          [
+            "he",
+            "pronoun",
+            1
+          ],
+          [
+            "she",
+            "pronoun",
+            1
+          ],
+          [
+            "we",
+            "pronoun",
+            1
+          ],
+          [
+            "they",
+            "pronoun",
+            1
+          ],
+          [
+            "him",
+            "pronoun",
+            1
+          ],
+          [
+            "her",
+            "pronoun",
+            1
+          ],
+          [
+            "them",
+            "pronoun",
+            1
+          ],
+          [
+            "us",
+            "pronoun",
+            1
+          ],
+          [
+            "his",
+            "pronoun",
+            1
+          ],
+          [
+            "hers",
+            "pronoun",
+            1
+          ],
+          [
+            "our",
+            "pronoun",
+            1
+          ],
+          [
+            "their",
+            "pronoun",
+            1
+          ],
+          [
+            "your",
+            "pronoun",
+            2
+          ],
+          [
+            "mine",
+            "pronoun",
+            2
+          ],
+          [
+            "yours",
+            "pronoun",
+            2
+          ],
+          [
+            "everyone",
+            "pronoun",
+            2
+          ],
+          [
+            "someone",
+            "pronoun",
+            2
+          ],
+          [
+            "anyone",
+            "pronoun",
+            2
+          ],
+          [
+            "nobody",
+            "pronoun",
+            2
+          ],
+          [
+            "myself",
+            "pronoun",
+            2
+          ],
+          [
+            "yourself",
+            "pronoun",
+            2
+          ],
+          [
+            "itself",
+            "pronoun",
+            2
+          ],
+          [
+            "each other",
+            "pronoun",
+            2
+          ],
+          [
+            "something",
+            "pronoun",
+            3
+          ],
+          [
+            "anything",
+            "pronoun",
+            3
+          ],
+          [
+            "nothing",
+            "pronoun",
+            3
+          ],
+          [
+            "a",
+            "little",
+            3
+          ],
+          [
+            "the",
+            "little",
+            3
+          ],
+          [
+            "these",
+            "little",
+            3
+          ],
+          [
+            "those",
+            "little",
+            3
+          ],
+          [
+            "any",
+            "little",
+            3
+          ],
+          [
+            "other",
+            "little",
+            3
+          ],
+          [
+            "same",
+            "descriptor",
+            3
+          ],
+          [
+            "another",
+            "descriptor",
             3
           ]
         ],
@@ -2288,12 +2615,12 @@
             3
           ],
           [
-            "instead",
+            "a",
             "little",
             3
           ],
           [
-            "anyway",
+            "the",
             "little",
             3
           ]
@@ -3557,6 +3884,8 @@
       },
       "corePages": {
         "Actions": "verb",
+        "Helping Words": "verb",
+        "Pronouns": "pronoun",
         "Describing": "descriptor",
         "Feelings": "descriptor",
         "Social": "social",

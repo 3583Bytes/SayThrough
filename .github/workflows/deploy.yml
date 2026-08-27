@@ -45,7 +45,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if ! gh release view voice-v1 >/dev/null 2>&1; then
-            echo "::notice::No voice-v1 release yet — the enhanced voice will be offered but unavailable."
+            echo "::warning::No voice-v1 release — the enhanced voice will be UNAVAILABLE on the deployed site. Publish it with: gh release create voice-v1 public/voices/en_US-hfc_female-medium.onnx public/voices/en_US-hfc_female-medium.onnx.json"
             exit 0
           fi
           mkdir -p public/voices
@@ -73,3 +73,10 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # A green build is not the same as a working site. This fetches the
+      # deployed URLs and fails if anything the app needs is missing —
+      # including the case where Pages answers a missing file with the SPA
+      # shell, which a status-code check would happily accept.
+      - name: Verify the deployed site
+        run: node scripts/check-deploy.mjs "${{ steps.deployment.outputs.page_url || 'https://saythrough.com' }}"

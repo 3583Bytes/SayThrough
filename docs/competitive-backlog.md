@@ -17,6 +17,17 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **The verb "to be", auxiliaries and pronouns (§19.4)** — found by a user
+  searching for "am" and getting nothing. **No form of "to be" existed on any
+  board** — not am, is, are, was, were, be — nor most auxiliaries (can, will,
+  would, did, does, has, had) or half the pronouns (he, she, we, they). An
+  audit against published core lists found **32 high-frequency words absent**.
+  Without them the board only produces telegraphic speech: "I hungry", never
+  "I am hungry". Added a **Helping Words** page (copula, auxiliaries,
+  contractions) at every size and a **Pronouns** page at 6×10; articles a/the
+  replaced the two least useful Little Words in place. 6×10 is now **515
+  words, 312 of them core**. The 5×6 board gave up Animals for it — sentence
+  building beats topic breadth on a 14-slot board.
 - [x] **Core vocabulary depth (§19.4)** — the expanded board now carries **247
   core words** (24 persistent + 8 core pages), inside the 200–400 research
   target, and **450 words total**. Added the grammatical categories that were

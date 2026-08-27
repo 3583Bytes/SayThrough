@@ -52,7 +52,8 @@
     "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en",
     "voice": "node scripts/voice/download-voice.mjs",
     "lint": "tsc --noEmit",
-    "check-symbols": "node scripts/symbols/check-seed-coverage.mjs"
+    "check-symbols": "node scripts/symbols/check-seed-coverage.mjs",
+    "check-deploy": "node scripts/check-deploy.mjs"
   },
   "private": true
 }

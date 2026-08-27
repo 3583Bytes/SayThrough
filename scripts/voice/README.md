@@ -28,7 +28,9 @@ gh release create voice-v1 \
 ```
 
 `.github/workflows/deploy.yml` downloads these into `public/voices/` before the
-build. **Until the release exists the deploy still succeeds** — it logs a
+build, and `scripts/check-deploy.mjs` verifies afterwards that the deployed
+site actually serves them — a green build is not the same as a working site.
+**Until the release exists the deploy still succeeds** — it logs a
 notice, and the app reports "The enhanced voice is not available on this site
 yet" instead of failing silently. The standard platform voice is unaffected
 either way.

@@ -50,9 +50,12 @@ test.describe('word prediction (§18)', () => {
     await type(page, ['w', 'a'])
     await expect(page.getByLabel(/^Insert /).first()).toBeVisible({ timeout: 10_000 })
 
-    // "wash" is a seeded button label and nowhere near the top of the corpus
-    // for "wa" — its presence proves the vocabulary source is wired up.
-    await expect(page.getByLabel('Insert wash', { exact: true })).toBeVisible()
+    // "water" is a board word; "way" is NOT, and ranks higher in the corpus
+    // for "wa". Water winning a slot that way would otherwise take is what
+    // proves the vocabulary source is wired up.
+    const words = await page.getByLabel(/^Insert /).allInnerTexts()
+    expect(words).toContain('water')
+    expect(words).not.toContain('way')
   })
 
   test('the bar holds four slots open so suggestions never move', async ({ page }) => {
