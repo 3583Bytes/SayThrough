@@ -56,13 +56,13 @@ jobs:
       - name: Fetch enhanced voice model
         if: steps.voice-cache.outputs.cache-hit != 'true'
         run: |
-          # A failure here must not block the deploy: the app falls back to the
-          # platform voice and Settings says the enhanced voice is unavailable.
-          if npm run voice; then
-            echo "voice files: $(ls public/voices | wc -l)"
-          else
-            echo "::warning::Could not fetch the enhanced voice model — the site will deploy without it and fall back to the standard voice."
-          fi
+          # Fails the deploy on purpose. Warning and carrying on is how the
+          # enhanced voice sat dead in production for days behind a green
+          # build — shipping a feature that silently does not work is worse
+          # than not shipping the change at all. Retry the run if the source
+          # was briefly unavailable.
+          npm run voice
+          echo "voice files: $(ls public/voices | wc -l)"
 
       # Served at the saythrough.com root (custom domain), so NO base-path
       # prefix — this makes the deployed bundle identical to the local/CI

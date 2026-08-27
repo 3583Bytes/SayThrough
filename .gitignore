@@ -41,9 +41,10 @@ yarn-error.*
 /android
 scripts/symbols/data/
 
-# ONNX Runtime wasm, copied out of node_modules by scripts/voice/build-runtime.mjs
-# (~19 MB, regenerated on every build — never committed)
+# Regenerated from node_modules on every build (~19 MB each) — never committed.
+# scripts/voice/build-runtime.mjs and build-phonemizer.mjs produce these.
 public/ort/
+public/voice/
 # Piper voice model, fetched by scripts/voice/download-voice.mjs (~63 MB).
 # Published as a release asset and unpacked at deploy, like the symbol library.
 scripts/voice/data/
