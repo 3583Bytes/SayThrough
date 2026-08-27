@@ -53,7 +53,8 @@
     "voice": "node scripts/voice/download-voice.mjs",
     "lint": "tsc --noEmit",
     "check-symbols": "node scripts/symbols/check-seed-coverage.mjs",
-    "check-deploy": "node scripts/check-deploy.mjs"
+    "check-deploy": "node scripts/check-deploy.mjs",
+    "review-packet": "node scripts/vocabulary/build-review-packet.mjs"
   },
   "private": true
 }
