@@ -33,7 +33,21 @@ test('the app boots and speaks with no network', async ({ page, context }) => {
   )
 
   await context.setOffline(true)
-  await page.reload({ waitUntil: 'domcontentloaded' })
+
+  // Chromium sometimes rejects the navigation outright (ERR_INTERNET_DISCONNECTED)
+  // instead of letting the service worker answer it — a race between
+  // setOffline and the reload, in the harness rather than the app. Retry that
+  // one case; anything else is a real failure and rethrows.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      break
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (attempt >= 3 || !message.includes('ERR_INTERNET_DISCONNECTED')) throw error
+      await page.waitForTimeout(500)
+    }
+  }
 
   try {
     await page.getByLabel('want', { exact: true }).waitFor({ timeout: 45_000 })

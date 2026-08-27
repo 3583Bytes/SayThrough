@@ -43,6 +43,21 @@ await writeFile(htmlPath, html)
 // relative, so they resolve under /app/ automatically).
 const jsDir = join(dist, '_expo', 'static', 'js', 'web')
 const bundles = (await readdir(jsDir)).map((f) => `_expo/static/js/web/${f}`)
+
+// Fonts must be precached, not left to stale-while-revalidate. App.tsx will
+// not render until useFonts resolves, so a font missing from the cache means
+// the app sits on its splash screen offline — which is exactly what happened
+// once storage pressure evicted them.
+async function findFonts(dir, prefix = '') {
+  const found = []
+  for (const entry of await readdir(join(dist, dir), { withFileTypes: true })) {
+    const rel = prefix ? `${prefix}/${entry.name}` : entry.name
+    if (entry.isDirectory()) found.push(...(await findFonts(join(dir, entry.name), rel)))
+    else if (entry.name.endsWith('.ttf')) found.push(`assets/${rel}`)
+  }
+  return found
+}
+const fonts = await findFonts('assets').catch(() => [])
 const precache = [
   'index.html',
   'manifest.json',
@@ -50,6 +65,7 @@ const precache = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   ...bundles,
+  ...fonts,
 ]
 const swPath = join(dist, 'sw.js')
 let sw = await readFile(swPath, 'utf8')
@@ -59,4 +75,4 @@ sw = sw.replace(
 )
 await writeFile(swPath, sw)
 
-console.log(`postbuild-web: app under dist/app — manifest injected, ${precache.length} precache URLs`)
+console.log(`postbuild-web: app under dist/app — manifest injected, ${precache.length} precache URLs (${fonts.length} fonts)`)

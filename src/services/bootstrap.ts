@@ -11,31 +11,23 @@ import { ttsService, warmUpOnFirstGesture } from './TTSService'
 // App startup: storage → seed → profile → navigation → TTS.
 // Runs once from App before the navigator renders.
 export async function bootstrap(): Promise<void> {
-  const __t0 = Date.now()
-  const __step = (n: string) => { (globalThis as any).__boot = ((globalThis as any).__boot ?? []); (globalThis as any).__boot.push(`${n}@${Date.now()-__t0}ms`) }
-  __step('start')
   await storage.init()
-  __step('storage.init')
   const coreSetId = await seedIfNeeded(storage)
 
   // No auto-created profile: with no users, App routes to onboarding
   // (§5.2), which creates the first profile or starts a guest session
-  __step('seed')
   await useUserStore.getState().load()
 
-  __step('userStore.load')
   const activeUser = useUserStore.getState().activeUser
   const pageSet = activeUser
     ? ((await storage.getPageSet(activeUser.activePageSetId)) ??
       (await storage.getPageSet(coreSetId)))
     : await storage.getPageSet(coreSetId)
-  __step('getPageSet')
   if (pageSet) {
     useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
     void warmupActiveSetSymbols(pageSet.id) // fire-and-forget
   }
 
-  __step('navigation')
   initPwa()
 
   // §10.4 — absorb the engine's cold start before the first real sentence.
@@ -52,9 +44,7 @@ export async function bootstrap(): Promise<void> {
   // loses a feature on a plane or a school bus. The personal model is loaded
   // by userStore alongside the profile — this covers first run, where there is
   // no profile yet and onboarding is about to happen.
-  __step('pwa+counting')
   warmLexicon(activeUser?.language)
-  __step('done')
 }
 
 // §10.2: without this, the browser picks its own default voice for the

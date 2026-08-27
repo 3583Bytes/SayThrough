@@ -30,10 +30,20 @@ export default function App() {
   const [bootError, setBootError] = useState<string | null>(null)
   const hasProfile = useUserStore((s) => s.activeUser !== null)
   const theme = useTheme()
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     AtkinsonHyperlegible_400Regular,
     AtkinsonHyperlegible_700Bold,
   })
+  // Never let a typeface decide whether someone can speak. If the fonts fail
+  // or are slow — offline with an evicted cache, say — carry on with the
+  // system font. Blocking on them is how the app ended up stuck on its splash
+  // screen: useFonts simply never resolved and there was no way past it.
+  const [fontTimedOut, setFontTimedOut] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setFontTimedOut(true), 3000)
+    return () => clearTimeout(timer)
+  }, [])
+  const fontsReady = fontsLoaded || Boolean(fontError) || fontTimedOut
 
   useEffect(() => {
     // ALWAYS finish booting, even if startup failed. Without the catch, any
@@ -79,7 +89,7 @@ export default function App() {
     )
   }
 
-  if (!booted || !fontsLoaded) {
+  if (!booted || !fontsReady) {
     return (
       <View style={[styles.loading, { backgroundColor: theme.screen }]}>
         <Text style={styles.loadingTitle}>SayThrough</Text>
