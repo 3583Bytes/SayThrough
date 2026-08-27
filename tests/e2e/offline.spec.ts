@@ -34,7 +34,34 @@ test('the app boots and speaks with no network', async ({ page, context }) => {
 
   await context.setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByLabel('want', { exact: true }).waitFor({ timeout: 45_000 })
+
+  try {
+    await page.getByLabel('want', { exact: true }).waitFor({ timeout: 45_000 })
+  } catch (error) {
+    // Distinguish "the app cannot boot offline" from "the browser threw our
+    // cache away". Only the first is a product bug, and the two look identical
+    // from a timed-out locator.
+    const state = await page.evaluate(async () => {
+      const paths = (await (await caches.open('saythrough-v1')).keys()).map(
+        (k) => new URL(k.url).pathname,
+      )
+      return {
+        persisted: await navigator.storage.persisted(),
+        shell: paths.some((p) => /index\.html$|\/app\/$/.test(p)),
+        bundle: paths.some((p) => p.includes('/_expo/') && p.endsWith('.js')),
+        entries: paths.length,
+        controller: Boolean(navigator.serviceWorker.controller),
+        body: document.body.innerText.slice(0, 80).replace(/\s+/g, ' '),
+      }
+    })
+    throw new Error(
+      (state.shell && state.bundle
+        ? 'App failed to boot offline despite shell and bundle being cached — a real defect. '
+        : 'Cache was evicted before the offline reload (shell=' +
+          state.shell + ', bundle=' + state.bundle + '), so this is storage pressure, not the app. ') +
+        JSON.stringify(state),
+    )
+  }
 
   // Symbols come from the cache, not the network.
   await page.getByLabel('Feelings, opens page').click()

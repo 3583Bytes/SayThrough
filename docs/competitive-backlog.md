@@ -17,6 +17,18 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Clinical review pass on the vocabulary (§19.4)** — applied core
+  vocabulary research (Banajee et al. 2003 toddler core) rather than waiting
+  for the §19.6 sign-off, which is still outstanding. Three findings fixed:
+  the **3×4 board was built backwards** for emergent communicators (6 core
+  words against 20 topic nouns; now 14 core, and toddler-core coverage 6→9 of
+  24); **"Basic" was not a beginner's level** (163 words on 6×10, assigned by
+  mechanical thirds — now 52 words across 14 pages, with levels controlling
+  page count and page density independently); and three words carried
+  **different Fitzgerald colours on different pages** (`wait`, `again`,
+  `together` — `back` left alone, since a body back and going back are
+  different words). `npm run review-packet` regenerates `docs/slp-review.md`
+  for the clinician who still has to sign this off.
 - [x] **The verb "to be", auxiliaries and pronouns (§19.4)** — found by a user
   searching for "am" and getting nothing. **No form of "to be" existed on any
   board** — not am, is, are, was, were, be — nor most auxiliaries (can, will,

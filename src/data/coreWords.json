@@ -141,17 +141,17 @@
           [
             "give",
             "verb",
-            1
+            2
           ],
           [
             "get",
             "verb",
-            1
+            2
           ],
           [
             "put",
             "verb",
-            1
+            2
           ],
           [
             "wash",
@@ -161,17 +161,17 @@
           [
             "read",
             "verb",
-            2
+            3
           ],
           [
             "write",
             "verb",
-            2
+            3
           ],
           [
             "sing",
             "verb",
-            2
+            3
           ],
           [
             "dance",
@@ -208,12 +208,12 @@
           [
             "are",
             "verb",
-            1
+            2
           ],
           [
             "can",
             "verb",
-            1
+            2
           ],
           [
             "will",
@@ -228,12 +228,12 @@
           [
             "have",
             "verb",
-            2
+            3
           ],
           [
             "did",
             "verb",
-            2
+            3
           ],
           [
             "he",
@@ -270,17 +270,17 @@
           [
             "fast",
             "descriptor",
-            1
+            2
           ],
           [
             "slow",
             "descriptor",
-            1
+            2
           ],
           [
             "loud",
             "descriptor",
-            1
+            2
           ],
           [
             "quiet",
@@ -290,17 +290,17 @@
           [
             "dirty",
             "descriptor",
-            2
+            3
           ],
           [
             "clean",
             "descriptor",
-            2
+            3
           ],
           [
             "new",
             "descriptor",
-            2
+            3
           ],
           [
             "old",
@@ -337,17 +337,17 @@
           [
             "mad",
             "descriptor",
-            1
+            2
           ],
           [
             "tired",
             "descriptor",
-            1
+            2
           ],
           [
             "scared",
             "descriptor",
-            1
+            2
           ],
           [
             "silly",
@@ -357,17 +357,17 @@
           [
             "sick",
             "descriptor",
-            2
+            3
           ],
           [
             "hurt",
             "descriptor",
-            2
+            3
           ],
           [
             "excited",
             "descriptor",
-            2
+            3
           ],
           [
             "calm",
@@ -404,17 +404,17 @@
           [
             "please",
             "social",
-            1
+            2
           ],
           [
             "thanks",
             "social",
-            1
+            2
           ],
           [
             "sorry",
             "social",
-            1
+            2
           ],
           [
             "okay",
@@ -424,21 +424,21 @@
           [
             "maybe",
             "social",
-            2
+            3
           ],
           [
             "wait",
-            "social",
-            2
+            "verb",
+            3
           ],
           [
             "ready",
             "social",
-            2
+            3
           ],
           [
             "again",
-            "social",
+            "little",
             3
           ],
           [
@@ -471,17 +471,17 @@
           [
             "where",
             "question",
-            1
+            2
           ],
           [
             "when",
             "question",
-            1
+            2
           ],
           [
             "why",
             "question",
-            1
+            2
           ],
           [
             "how",
@@ -491,17 +491,17 @@
           [
             "which",
             "question",
-            2
+            3
           ],
           [
             "whose",
             "question",
-            2
+            3
           ],
           [
             "how many",
             "question",
-            2
+            3
           ],
           [
             "how much",
@@ -538,17 +538,17 @@
           [
             "out",
             "little",
-            1
+            2
           ],
           [
             "up",
             "little",
-            1
+            2
           ],
           [
             "down",
             "little",
-            1
+            2
           ],
           [
             "off",
@@ -558,17 +558,17 @@
           [
             "to",
             "little",
-            2
+            3
           ],
           [
             "with",
             "little",
-            2
+            3
           ],
           [
             "for",
             "little",
-            2
+            3
           ],
           [
             "and",
@@ -605,7 +605,7 @@
           [
             "cookie",
             "noun",
-            1
+            2
           ],
           [
             "apple",
@@ -625,7 +625,7 @@
           [
             "pizza",
             "noun",
-            2
+            3
           ],
           [
             "cheese",
@@ -655,7 +655,7 @@
           [
             "egg",
             "noun",
-            2
+            3
           ]
         ],
         "Drinks": [
@@ -672,7 +672,7 @@
           [
             "water",
             "noun",
-            1
+            2
           ],
           [
             "milk",
@@ -687,22 +687,22 @@
           [
             "smoothie",
             "noun",
-            3
+            2
           ],
           [
             "cup",
             "noun",
-            1
+            3
           ],
           [
             "straw",
             "noun",
-            2
+            3
           ],
           [
             "ice",
             "noun",
-            2
+            3
           ],
           [
             "tea",
@@ -717,12 +717,12 @@
           [
             "bottle",
             "noun",
-            2
+            3
           ],
           [
             "empty",
             "descriptor",
-            2
+            3
           ]
         ],
         "Play": [
@@ -754,7 +754,7 @@
           [
             "outside",
             "noun",
-            1
+            2
           ],
           [
             "swing",
@@ -774,17 +774,17 @@
           [
             "toy",
             "noun",
-            2
+            3
           ],
           [
             "my turn",
             "social",
-            1
+            3
           ],
           [
             "your turn",
             "social",
-            2
+            3
           ],
           [
             "doll",
@@ -806,7 +806,7 @@
           [
             "teacher",
             "noun",
-            1
+            2
           ],
           [
             "friend",
@@ -826,7 +826,7 @@
           [
             "grandma",
             "noun",
-            2
+            3
           ],
           [
             "grandpa",
@@ -846,17 +846,17 @@
           [
             "boy",
             "noun",
-            2
+            3
           ],
           [
             "girl",
             "noun",
-            2
+            3
           ],
           [
             "family",
             "noun",
-            2
+            3
           ]
         ],
         "Places": [
@@ -883,7 +883,7 @@
           [
             "bathroom",
             "noun",
-            1
+            2
           ],
           [
             "bed",
@@ -893,7 +893,7 @@
           [
             "car",
             "noun",
-            2
+            3
           ],
           [
             "doctor",
@@ -908,12 +908,12 @@
           [
             "playground",
             "noun",
-            2
+            3
           ],
           [
             "hospital",
             "noun",
-            2
+            3
           ],
           [
             "restaurant",
@@ -923,7 +923,7 @@
           [
             "inside",
             "little",
-            2
+            3
           ]
         ],
         "School": [
@@ -935,7 +935,7 @@
           [
             "pencil",
             "noun",
-            2
+            1
           ],
           [
             "paper",
@@ -945,7 +945,7 @@
           [
             "backpack",
             "noun",
-            3
+            2
           ],
           [
             "computer",
@@ -960,7 +960,7 @@
           [
             "art",
             "noun",
-            2
+            3
           ],
           [
             "math",
@@ -970,12 +970,12 @@
           [
             "recess",
             "noun",
-            2
+            3
           ],
           [
             "lunch",
             "noun",
-            1
+            3
           ],
           [
             "homework",
@@ -990,7 +990,7 @@
           [
             "desk",
             "noun",
-            2
+            3
           ]
         ],
         "Body": [
@@ -1022,22 +1022,22 @@
           [
             "hands",
             "noun",
-            1
+            2
           ],
           [
             "feet",
             "noun",
-            2
+            3
           ],
           [
             "tummy",
             "noun",
-            1
+            3
           ],
           [
             "teeth",
             "noun",
-            2
+            3
           ],
           [
             "hair",
@@ -1057,7 +1057,7 @@
           [
             "fingers",
             "noun",
-            2
+            3
           ]
         ]
       },
@@ -1089,18 +1089,18 @@
           1
         ],
         [
+          "go",
+          "verb",
+          1
+        ],
+        [
           "more",
           "little",
           1
         ],
         [
-          "help",
-          "verb",
-          1
-        ],
-        [
-          "stop",
-          "verb",
+          "my",
+          "pronoun",
           1
         ],
         [
@@ -1110,13 +1110,35 @@
         ]
       ],
       "topicLevels": {
+        "Words": 1,
         "Feelings": 1,
         "Food": 1,
         "Drinks": 1,
-        "Play": 1,
         "People": 1
       },
       "topics": {
+        "Words": [
+          [
+            "help",
+            "verb",
+            1
+          ],
+          [
+            "stop",
+            "verb",
+            1
+          ],
+          [
+            "that",
+            "pronoun",
+            1
+          ],
+          [
+            "it",
+            "pronoun",
+            1
+          ]
+        ],
         "Feelings": [
           [
             "happy",
@@ -1183,28 +1205,6 @@
             1
           ]
         ],
-        "Play": [
-          [
-            "play",
-            "verb",
-            1
-          ],
-          [
-            "ball",
-            "noun",
-            1
-          ],
-          [
-            "outside",
-            "noun",
-            1
-          ],
-          [
-            "my turn",
-            "social",
-            1
-          ]
-        ],
         "People": [
           [
             "mom",
@@ -1229,6 +1229,7 @@
         ]
       },
       "corePages": {
+        "Words": "verb",
         "Feelings": "descriptor"
       }
     },
@@ -1380,7 +1381,7 @@
         "Body": 2,
         "Clothes": 3,
         "Animals": 2,
-        "House": 1,
+        "House": 3,
         "Weather": 3
       },
       "topics": {
@@ -1398,107 +1399,107 @@
           [
             "give",
             "verb",
-            1
+            2
           ],
           [
             "get",
             "verb",
-            1
+            2
           ],
           [
             "put",
             "verb",
-            1
+            2
           ],
           [
             "wash",
             "verb",
-            1
+            2
           ],
           [
             "read",
             "verb",
-            1
+            3
           ],
           [
             "write",
             "verb",
-            1
+            3
           ],
           [
             "sing",
             "verb",
-            1
+            3
           ],
           [
             "dance",
             "verb",
-            1
+            3
           ],
           [
             "run",
             "verb",
-            1
+            3
           ],
           [
             "jump",
             "verb",
-            1
+            3
           ],
           [
             "sit",
             "verb",
-            2
+            3
           ],
           [
             "turn on",
             "verb",
-            2
+            3
           ],
           [
             "turn off",
             "verb",
-            2
+            3
           ],
           [
             "push",
             "verb",
-            2
+            3
           ],
           [
             "pull",
             "verb",
-            2
+            3
           ],
           [
             "throw",
             "verb",
-            2
+            3
           ],
           [
             "catch",
             "verb",
-            2
+            3
           ],
           [
             "fix",
             "verb",
-            2
+            3
           ],
           [
             "build",
             "verb",
-            2
+            3
           ],
           [
             "cut",
             "verb",
-            2
+            3
           ],
           [
             "cook",
             "verb",
-            2
+            3
           ],
           [
             "carry",
@@ -1570,97 +1571,97 @@
           [
             "are",
             "verb",
-            1
+            2
           ],
           [
             "can",
             "verb",
-            1
+            2
           ],
           [
             "will",
             "verb",
-            1
+            2
           ],
           [
             "was",
             "verb",
-            1
+            2
           ],
           [
             "did",
             "verb",
-            1
+            3
           ],
           [
             "be",
             "verb",
-            1
+            3
           ],
           [
             "does",
             "verb",
-            1
+            3
           ],
           [
             "has",
             "verb",
-            1
+            3
           ],
           [
             "don't",
             "verb",
-            1
+            3
           ],
           [
             "can't",
             "verb",
-            2
+            3
           ],
           [
             "didn't",
             "verb",
-            2
+            3
           ],
           [
             "isn't",
             "verb",
-            2
+            3
           ],
           [
             "won't",
             "verb",
-            2
+            3
           ],
           [
             "would",
             "verb",
-            2
+            3
           ],
           [
             "could",
             "verb",
-            2
+            3
           ],
           [
             "should",
             "verb",
-            2
+            3
           ],
           [
             "were",
             "verb",
-            2
+            3
           ],
           [
             "had",
             "verb",
-            2
+            3
           ],
           [
             "going to",
             "verb",
-            2
+            3
           ],
           [
             "want to",
@@ -1727,107 +1728,107 @@
           [
             "we",
             "pronoun",
-            1
+            2
           ],
           [
             "they",
             "pronoun",
-            1
+            2
           ],
           [
             "him",
             "pronoun",
-            1
+            2
           ],
           [
             "her",
             "pronoun",
-            1
+            2
           ],
           [
             "them",
             "pronoun",
-            1
+            3
           ],
           [
             "us",
             "pronoun",
-            1
+            3
           ],
           [
             "his",
             "pronoun",
-            1
+            3
           ],
           [
             "hers",
             "pronoun",
-            1
+            3
           ],
           [
             "our",
             "pronoun",
-            1
+            3
           ],
           [
             "their",
             "pronoun",
-            1
+            3
           ],
           [
             "your",
             "pronoun",
-            2
+            3
           ],
           [
             "mine",
             "pronoun",
-            2
+            3
           ],
           [
             "yours",
             "pronoun",
-            2
+            3
           ],
           [
             "everyone",
             "pronoun",
-            2
+            3
           ],
           [
             "someone",
             "pronoun",
-            2
+            3
           ],
           [
             "anyone",
             "pronoun",
-            2
+            3
           ],
           [
             "nobody",
             "pronoun",
-            2
+            3
           ],
           [
             "myself",
             "pronoun",
-            2
+            3
           ],
           [
             "yourself",
             "pronoun",
-            2
+            3
           ],
           [
             "itself",
             "pronoun",
-            2
+            3
           ],
           [
             "each other",
             "pronoun",
-            2
+            3
           ],
           [
             "something",
@@ -1889,102 +1890,102 @@
           [
             "fast",
             "descriptor",
-            1
+            2
           ],
           [
             "slow",
             "descriptor",
-            1
+            2
           ],
           [
             "loud",
             "descriptor",
-            1
+            2
           ],
           [
             "quiet",
             "descriptor",
-            1
+            2
           ],
           [
             "dirty",
             "descriptor",
-            1
+            3
           ],
           [
             "clean",
             "descriptor",
-            1
+            3
           ],
           [
             "new",
             "descriptor",
-            1
+            3
           ],
           [
             "old",
             "descriptor",
-            1
+            3
           ],
           [
             "good",
             "descriptor",
-            1
+            3
           ],
           [
             "bad",
             "descriptor",
-            2
+            3
           ],
           [
             "soft",
             "descriptor",
-            2
+            3
           ],
           [
             "heavy",
             "descriptor",
-            2
+            3
           ],
           [
             "same",
             "descriptor",
-            2
+            3
           ],
           [
             "different",
             "descriptor",
-            2
+            3
           ],
           [
             "pretty",
             "descriptor",
-            2
+            3
           ],
           [
             "wet",
             "descriptor",
-            2
+            3
           ],
           [
             "dry",
             "descriptor",
-            2
+            3
           ],
           [
             "hot",
             "descriptor",
-            2
+            3
           ],
           [
             "cold",
             "descriptor",
-            2
+            3
           ],
           [
             "long",
             "descriptor",
-            2
+            3
           ],
           [
             "short",
@@ -2056,87 +2057,87 @@
           [
             "mad",
             "descriptor",
-            1
+            2
           ],
           [
             "tired",
             "descriptor",
-            1
+            2
           ],
           [
             "scared",
             "descriptor",
-            1
+            2
           ],
           [
             "silly",
             "descriptor",
-            1
+            2
           ],
           [
             "sick",
             "descriptor",
-            1
+            3
           ],
           [
             "hurt",
             "descriptor",
-            1
+            3
           ],
           [
             "excited",
             "descriptor",
-            1
+            3
           ],
           [
             "calm",
             "descriptor",
-            1
+            3
           ],
           [
             "bored",
             "descriptor",
-            2
+            3
           ],
           [
             "proud",
             "descriptor",
-            2
+            3
           ],
           [
             "worried",
             "descriptor",
-            2
+            3
           ],
           [
             "love",
             "verb",
-            2
+            3
           ],
           [
             "lonely",
             "descriptor",
-            2
+            3
           ],
           [
             "shy",
             "descriptor",
-            2
+            3
           ],
           [
             "brave",
             "descriptor",
-            2
+            3
           ],
           [
             "angry",
             "descriptor",
-            2
+            3
           ],
           [
             "surprised",
             "descriptor",
-            2
+            3
           ],
           [
             "confused",
@@ -2198,97 +2199,97 @@
           [
             "please",
             "social",
-            1
+            2
           ],
           [
             "thanks",
             "social",
-            1
+            2
           ],
           [
             "sorry",
             "social",
-            1
+            2
           ],
           [
             "okay",
             "social",
-            1
+            2
           ],
           [
             "maybe",
             "social",
-            1
+            3
           ],
           [
             "wait",
-            "social",
-            1
+            "verb",
+            3
           ],
           [
             "ready",
             "social",
-            1
+            3
           ],
           [
             "again",
-            "social",
-            1
+            "little",
+            3
           ],
           [
             "welcome",
             "social",
-            1
+            3
           ],
           [
             "share",
             "social",
-            2
+            3
           ],
           [
             "hug",
             "social",
-            2
+            3
           ],
           [
             "excuse me",
             "social",
-            2
+            3
           ],
           [
             "together",
-            "social",
-            2
+            "little",
+            3
           ],
           [
             "alone",
             "social",
-            2
+            3
           ],
           [
             "listen",
             "verb",
-            2
+            3
           ],
           [
             "talk",
             "verb",
-            2
+            3
           ],
           [
             "goodbye",
             "social",
-            2
+            3
           ],
           [
             "hello",
             "social",
-            2
+            3
           ],
           [
             "my turn",
             "social",
-            2
+            3
           ],
           [
             "your turn",
@@ -2355,62 +2356,62 @@
           [
             "why",
             "question",
-            1
+            2
           ],
           [
             "how",
             "question",
-            1
+            2
           ],
           [
             "which",
             "question",
-            1
+            2
           ],
           [
             "whose",
             "question",
-            1
+            2
           ],
           [
             "how many",
             "question",
-            1
+            3
           ],
           [
             "how much",
             "question",
-            2
+            3
           ],
           [
             "what happened",
             "question",
-            2
+            3
           ],
           [
             "where is it",
             "question",
-            2
+            3
           ],
           [
             "is it",
             "question",
-            2
+            3
           ],
           [
             "can i",
             "question",
-            2
+            3
           ],
           [
             "do you",
             "question",
-            2
+            3
           ],
           [
             "are you",
             "question",
-            2
+            3
           ],
           [
             "did you",
@@ -2457,107 +2458,107 @@
           [
             "out",
             "little",
-            1
+            2
           ],
           [
             "up",
             "little",
-            1
+            2
           ],
           [
             "down",
             "little",
-            1
+            2
           ],
           [
             "off",
             "little",
-            1
+            2
           ],
           [
             "to",
             "little",
-            1
+            3
           ],
           [
             "with",
             "little",
-            1
+            3
           ],
           [
             "for",
             "little",
-            1
+            3
           ],
           [
             "and",
             "little",
-            1
+            3
           ],
           [
             "but",
             "little",
-            1
+            3
           ],
           [
             "or",
             "little",
-            1
+            3
           ],
           [
             "this",
             "little",
-            2
+            3
           ],
           [
             "here",
             "little",
-            2
+            3
           ],
           [
             "there",
             "little",
-            2
+            3
           ],
           [
             "under",
             "little",
-            2
+            3
           ],
           [
             "over",
             "little",
-            2
+            3
           ],
           [
             "because",
             "little",
-            2
+            3
           ],
           [
             "too",
             "little",
-            2
+            3
           ],
           [
             "just",
             "little",
-            2
+            3
           ],
           [
             "very",
             "little",
-            2
+            3
           ],
           [
             "again",
             "little",
-            2
+            3
           ],
           [
             "about",
             "little",
-            2
+            3
           ],
           [
             "from",
@@ -2629,72 +2630,72 @@
           [
             "wait",
             "verb",
-            1
+            2
           ],
           [
             "today",
             "little",
-            1
+            2
           ],
           [
             "tomorrow",
             "little",
-            1
+            2
           ],
           [
             "soon",
             "little",
-            1
+            2
           ],
           [
             "before",
             "little",
-            1
+            3
           ],
           [
             "after",
             "little",
-            1
+            3
           ],
           [
             "first",
             "little",
-            2
+            3
           ],
           [
             "next",
             "little",
-            2
+            3
           ],
           [
             "last",
             "little",
-            2
+            3
           ],
           [
             "yesterday",
             "little",
-            2
+            3
           ],
           [
             "always",
             "little",
-            2
+            3
           ],
           [
             "never",
             "little",
-            2
+            3
           ],
           [
             "sometimes",
             "little",
-            2
+            3
           ],
           [
             "morning",
             "noun",
-            2
+            3
           ],
           [
             "night",
@@ -2751,57 +2752,57 @@
           [
             "none",
             "descriptor",
-            1
+            2
           ],
           [
             "another",
             "descriptor",
-            1
+            2
           ],
           [
             "lots",
             "descriptor",
-            1
+            2
           ],
           [
             "little bit",
             "descriptor",
-            1
+            2
           ],
           [
             "enough",
             "descriptor",
-            1
+            3
           ],
           [
             "empty",
             "descriptor",
-            2
+            3
           ],
           [
             "full",
             "descriptor",
-            2
+            3
           ],
           [
             "half",
             "descriptor",
-            2
+            3
           ],
           [
             "both",
             "descriptor",
-            2
+            3
           ],
           [
             "many",
             "descriptor",
-            2
+            3
           ],
           [
             "few",
             "descriptor",
-            2
+            3
           ],
           [
             "extra",
@@ -2848,7 +2849,7 @@
           [
             "cookie",
             "noun",
-            1
+            2
           ],
           [
             "apple",
@@ -2868,7 +2869,7 @@
           [
             "pizza",
             "noun",
-            2
+            3
           ],
           [
             "cheese",
@@ -2898,17 +2899,17 @@
           [
             "egg",
             "noun",
-            2
+            3
           ],
           [
             "rice",
             "noun",
-            2
+            3
           ],
           [
             "soup",
             "noun",
-            2
+            3
           ],
           [
             "potato",
@@ -2918,17 +2919,17 @@
           [
             "carrot",
             "noun",
-            2
+            3
           ],
           [
             "orange",
             "noun",
-            2
+            3
           ],
           [
             "grapes",
             "noun",
-            2
+            3
           ]
         ],
         "Drinks": [
@@ -2945,7 +2946,7 @@
           [
             "water",
             "noun",
-            1
+            2
           ],
           [
             "milk",
@@ -2960,22 +2961,22 @@
           [
             "smoothie",
             "noun",
-            3
+            2
           ],
           [
             "cup",
             "noun",
-            1
+            3
           ],
           [
             "straw",
             "noun",
-            2
+            3
           ],
           [
             "ice",
             "noun",
-            2
+            3
           ],
           [
             "tea",
@@ -2990,12 +2991,12 @@
           [
             "bottle",
             "noun",
-            2
+            3
           ],
           [
             "empty",
             "descriptor",
-            2
+            3
           ],
           [
             "coffee",
@@ -3010,17 +3011,17 @@
           [
             "cold",
             "descriptor",
-            2
+            3
           ],
           [
             "warm",
             "descriptor",
-            2
+            3
           ],
           [
             "glass",
             "noun",
-            2
+            3
           ],
           [
             "pour",
@@ -3057,7 +3058,7 @@
           [
             "outside",
             "noun",
-            1
+            2
           ],
           [
             "swing",
@@ -3077,17 +3078,17 @@
           [
             "toy",
             "noun",
-            2
+            3
           ],
           [
             "my turn",
             "social",
-            1
+            3
           ],
           [
             "your turn",
             "social",
-            2
+            3
           ],
           [
             "doll",
@@ -3097,17 +3098,17 @@
           [
             "swim",
             "verb",
-            2
+            3
           ],
           [
             "draw",
             "verb",
-            2
+            3
           ],
           [
             "paint",
             "verb",
-            2
+            3
           ],
           [
             "sand",
@@ -3122,7 +3123,7 @@
           [
             "music",
             "noun",
-            2
+            3
           ]
         ],
         "People": [
@@ -3139,7 +3140,7 @@
           [
             "teacher",
             "noun",
-            1
+            2
           ],
           [
             "friend",
@@ -3159,7 +3160,7 @@
           [
             "grandma",
             "noun",
-            2
+            3
           ],
           [
             "grandpa",
@@ -3179,32 +3180,32 @@
           [
             "boy",
             "noun",
-            2
+            3
           ],
           [
             "girl",
             "noun",
-            2
+            3
           ],
           [
             "family",
             "noun",
-            2
+            3
           ],
           [
             "man",
             "noun",
-            2
+            3
           ],
           [
             "woman",
             "noun",
-            2
+            3
           ],
           [
             "kid",
             "noun",
-            2
+            3
           ],
           [
             "cousin",
@@ -3246,7 +3247,7 @@
           [
             "bathroom",
             "noun",
-            1
+            2
           ],
           [
             "bed",
@@ -3256,7 +3257,7 @@
           [
             "car",
             "noun",
-            2
+            3
           ],
           [
             "doctor",
@@ -3271,12 +3272,12 @@
           [
             "playground",
             "noun",
-            2
+            3
           ],
           [
             "hospital",
             "noun",
-            2
+            3
           ],
           [
             "restaurant",
@@ -3286,27 +3287,27 @@
           [
             "inside",
             "little",
-            2
+            3
           ],
           [
             "beach",
             "noun",
-            2
+            3
           ],
           [
             "zoo",
             "noun",
-            2
+            3
           ],
           [
             "farm",
             "noun",
-            2
+            3
           ],
           [
             "pool",
             "noun",
-            2
+            3
           ],
           [
             "road",
@@ -3328,7 +3329,7 @@
           [
             "pencil",
             "noun",
-            2
+            1
           ],
           [
             "paper",
@@ -3338,7 +3339,7 @@
           [
             "backpack",
             "noun",
-            3
+            2
           ],
           [
             "computer",
@@ -3353,7 +3354,7 @@
           [
             "art",
             "noun",
-            2
+            3
           ],
           [
             "math",
@@ -3363,12 +3364,12 @@
           [
             "recess",
             "noun",
-            2
+            3
           ],
           [
             "lunch",
             "noun",
-            1
+            3
           ],
           [
             "homework",
@@ -3383,12 +3384,12 @@
           [
             "desk",
             "noun",
-            2
+            3
           ],
           [
             "learn",
             "verb",
-            2
+            3
           ],
           [
             "test",
@@ -3398,12 +3399,12 @@
           [
             "letters",
             "noun",
-            2
+            3
           ],
           [
             "numbers",
             "noun",
-            2
+            3
           ],
           [
             "library",
@@ -3440,22 +3441,22 @@
           [
             "hands",
             "noun",
-            1
+            2
           ],
           [
             "feet",
             "noun",
-            2
+            3
           ],
           [
             "tummy",
             "noun",
-            1
+            3
           ],
           [
             "teeth",
             "noun",
-            2
+            3
           ],
           [
             "hair",
@@ -3475,12 +3476,12 @@
           [
             "fingers",
             "noun",
-            2
+            3
           ],
           [
             "back",
             "noun",
-            2
+            3
           ],
           [
             "neck",
@@ -3490,7 +3491,7 @@
           [
             "toes",
             "noun",
-            2
+            3
           ],
           [
             "shoulder",
@@ -3522,7 +3523,7 @@
           [
             "shoes",
             "noun",
-            1
+            2
           ],
           [
             "socks",
@@ -3567,7 +3568,7 @@
           [
             "shorts",
             "noun",
-            2
+            3
           ],
           [
             "skirt",
@@ -3577,12 +3578,12 @@
           [
             "jacket",
             "noun",
-            2
+            3
           ],
           [
             "sweater",
             "noun",
-            2
+            3
           ],
           [
             "jeans",
@@ -3634,7 +3635,7 @@
           [
             "cow",
             "noun",
-            3
+            2
           ],
           [
             "pig",
@@ -3669,12 +3670,12 @@
           [
             "duck",
             "noun",
-            2
+            3
           ],
           [
             "sheep",
             "noun",
-            2
+            3
           ],
           [
             "goat",
@@ -3684,7 +3685,7 @@
           [
             "frog",
             "noun",
-            2
+            3
           ],
           [
             "turtle",
@@ -3699,7 +3700,7 @@
           [
             "monkey",
             "noun",
-            2
+            3
           ]
         ],
         "House": [
@@ -3711,17 +3712,17 @@
           [
             "window",
             "noun",
-            2
+            1
           ],
           [
             "table",
             "noun",
-            1
+            2
           ],
           [
             "chair",
             "noun",
-            1
+            2
           ],
           [
             "couch",
@@ -3736,32 +3737,32 @@
           [
             "kitchen",
             "noun",
-            2
+            3
           ],
           [
             "tv",
             "noun",
-            1
+            3
           ],
           [
             "phone",
             "noun",
-            1
+            3
           ],
           [
             "light",
             "noun",
-            2
+            3
           ],
           [
             "blanket",
             "noun",
-            2
+            3
           ],
           [
             "pillow",
             "noun",
-            2
+            3
           ],
           [
             "towel",
@@ -3771,12 +3772,12 @@
           [
             "stairs",
             "noun",
-            2
+            3
           ],
           [
             "garden",
             "noun",
-            2
+            3
           ],
           [
             "garage",
@@ -3786,7 +3787,7 @@
           [
             "fridge",
             "noun",
-            2
+            3
           ],
           [
             "oven",
@@ -3823,17 +3824,17 @@
           [
             "windy",
             "descriptor",
-            3
+            2
           ],
           [
             "hot",
             "descriptor",
-            1
+            2
           ],
           [
             "cold",
             "descriptor",
-            1
+            3
           ],
           [
             "rainbow",
@@ -3843,32 +3844,32 @@
           [
             "sky",
             "noun",
-            2
+            3
           ],
           [
             "sun",
             "noun",
-            1
+            3
           ],
           [
             "moon",
             "noun",
-            2
+            3
           ],
           [
             "star",
             "noun",
-            2
+            3
           ],
           [
             "umbrella",
             "noun",
-            2
+            3
           ],
           [
             "snow",
             "noun",
-            2
+            3
           ]
         ]
       },

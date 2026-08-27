@@ -34,7 +34,16 @@ class WebStorage implements Storage {
     // app never opens. It is a durability optimisation; it must never gate
     // whether someone can speak.
     try {
-      void navigator.storage?.persist?.()
+      // Raced against a timeout rather than awaited outright. Firefox answers
+      // this with a permission prompt and leaves the promise pending until the
+      // user responds — awaiting it hung startup on the loading screen
+      // forever. But firing and forgetting is not right either: the request
+      // should be in flight BEFORE anything is cached, or the browser may
+      // evict the service-worker cache and the app stops working offline.
+      await Promise.race([
+        Promise.resolve(navigator.storage?.persist?.()),
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+      ])
     } catch {
       // best effort only
     }
@@ -66,8 +75,32 @@ class WebStorage implements Storage {
           events.createIndex('userId', 'userId')
         }
       }
-      open.onsuccess = () => resolve(open.result)
-      open.onerror = () => reject(open.error)
+      // Without these two, opening the database can never settle, and the
+      // app waits on its splash screen forever with nothing said:
+      //
+      //   onblocked — fires instead of success/error when another connection
+      //     still holds the database, which a reload can easily cause. Neither
+      //     of the handlers above would ever run.
+      //   the timeout — a backstop for any other way the request goes quiet.
+      //
+      // Failing is fine; App.tsx shows an error with a retry. Hanging is not:
+      // this is a device somebody speaks through.
+      open.onblocked = () =>
+        reject(new Error('The saved vocabulary is open in another tab or window.'))
+      open.onsuccess = () => {
+        clearTimeout(timer)
+        // Let a future version upgrade instead of blocking on this connection.
+        open.result.onversionchange = () => open.result.close()
+        resolve(open.result)
+      }
+      open.onerror = () => {
+        clearTimeout(timer)
+        reject(open.error ?? new Error('Could not open local storage.'))
+      }
+      const timer = setTimeout(
+        () => reject(new Error('Local storage did not respond.')),
+        10_000,
+      )
     })
   }
 
