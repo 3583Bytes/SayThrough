@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  # deploy-pages v4+ requires this
+  actions: read
   pages: write
   id-token: write
 
@@ -21,9 +23,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -36,21 +38,31 @@ jobs:
       # skipped whenever the release did not exist, which shipped a board full
       # of broken images without failing the build.
 
-      # Enhanced neural voice model (§10.5) — ~60 MB, also never in git.
-      # Without it the app is fully functional: ttsService falls back to the
-      # platform voice, and Settings reports that the enhanced voice is
-      # unavailable rather than failing silently.
+      # Enhanced neural voice model (§10.5). Fetched straight from its source
+      # — one file from a stable public URL, ~20s — rather than staged through
+      # a release asset. The symbol library is staged that way because it is
+      # assembled from ~13,800 individual API calls; this is not, and making a
+      # human run `gh release create` before the feature works was a pattern
+      # copied from a situation that did not apply.
+      #
+      # Cached between runs so a normal deploy does not re-download it.
+      - name: Restore cached voice model
+        id: voice-cache
+        uses: actions/cache@v5
+        with:
+          path: public/voices
+          key: voice-en_US-hfc_female-medium-v1
+
       - name: Fetch enhanced voice model
-        env:
-          GH_TOKEN: ${{ github.token }}
+        if: steps.voice-cache.outputs.cache-hit != 'true'
         run: |
-          if ! gh release view voice-v1 >/dev/null 2>&1; then
-            echo "::warning::No voice-v1 release — the enhanced voice will be UNAVAILABLE on the deployed site. Publish it with: gh release create voice-v1 public/voices/en_US-hfc_female-medium.onnx public/voices/en_US-hfc_female-medium.onnx.json"
-            exit 0
+          # A failure here must not block the deploy: the app falls back to the
+          # platform voice and Settings says the enhanced voice is unavailable.
+          if npm run voice; then
+            echo "voice files: $(ls public/voices | wc -l)"
+          else
+            echo "::warning::Could not fetch the enhanced voice model — the site will deploy without it and fall back to the standard voice."
           fi
-          mkdir -p public/voices
-          gh release download voice-v1 --pattern '*.onnx*' --dir public/voices
-          echo "voice files in build: $(ls public/voices | wc -l)"
 
       # Served at the saythrough.com root (custom domain), so NO base-path
       # prefix — this makes the deployed bundle identical to the local/CI
@@ -65,14 +77,14 @@ jobs:
       # -f build_type=workflow`). The Actions token can't create the site
       # itself, so we don't pass enablement:true — this step just reads the
       # existing Pages config.
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # A green build is not the same as a working site. This fetches the
       # deployed URLs and fails if anything the app needs is missing —

@@ -16,21 +16,23 @@ in exactly the districts this app is built for.
 The first two are regenerated from `node_modules` on every build, so they need
 no release. The model is too big for git and is fetched by the deploy.
 
-## Publishing the model (one-time, and on any voice change)
+## Getting the model
 
 ```sh
-npm run voice                       # → public/voices/ (gitignored, ~60 MB)
-gh release create voice-v1 \
-  --title "Enhanced voice v1" \
-  --notes "Piper en_US-hfc_female-medium (MIT). Self-hosted for §10.5." \
-  public/voices/en_US-hfc_female-medium.onnx \
-  public/voices/en_US-hfc_female-medium.onnx.json
+npm run voice     # → public/voices/ (gitignored, ~60 MB, ~20s)
 ```
 
-`.github/workflows/deploy.yml` downloads these into `public/voices/` before the
-build, and `scripts/check-deploy.mjs` verifies afterwards that the deployed
-site actually serves them — a green build is not the same as a working site.
-**Until the release exists the deploy still succeeds** — it logs a
+**The deploy does this itself** — there is no manual publishing step. It runs
+the same command, cached between runs so a normal deploy does not re-download.
+An earlier design staged the model through a `voice-v1` release, which meant
+the feature stayed silently dead until a human remembered to publish it. The
+symbol library is staged that way because it is assembled from ~13,800
+individual API calls; a single file from a stable public URL is not the same
+problem.
+
+`scripts/check-deploy.mjs` verifies afterwards that the deployed site actually
+serves the model — a green build is not the same as a working site. **If the
+download fails the deploy still succeeds** — it logs a
 notice, and the app reports "The enhanced voice is not available on this site
 yet" instead of failing silently. The standard platform voice is unaffected
 either way.

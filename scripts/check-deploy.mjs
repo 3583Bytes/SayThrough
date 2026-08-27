@@ -38,9 +38,8 @@ const CHECKS = [
     required: false,
     label: 'enhanced voice model',
     hint:
-      'publish it with:  gh release create voice-v1 ' +
-      'public/voices/en_US-hfc_female-medium.onnx ' +
-      'public/voices/en_US-hfc_female-medium.onnx.json',
+      'the deploy fetches this itself (npm run voice) — a warning here means ' +
+      'that download failed, not that a manual step was missed',
     verify: async (res) => {
       const config = await res.json()
       return `${config.audio?.sample_rate} Hz`
