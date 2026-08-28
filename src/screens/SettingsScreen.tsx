@@ -417,6 +417,34 @@ export function SettingsScreen() {
           <Text style={[styles.hint, mutedT]}>{t('settings.languageHint')}</Text>
         </View>
 
+        {/* 1c. Grammatical gender (§19.7) — only where the language marks it */}
+        {langCode(activeUser.language) === 'pl' && (
+          <>
+            <Text style={[styles.sectionTitle, mutedT]}>
+              {t('settings.grammaticalGender')}
+            </Text>
+            <View style={[styles.card, cardT]}>
+              <View style={styles.chipRow}>
+                {(
+                  [
+                    [undefined, 'settings.genderUnset'],
+                    ['masculine', 'settings.genderMasculine'],
+                    ['feminine', 'settings.genderFeminine'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <Chip
+                    key={label}
+                    label={t(label)}
+                    selected={activeUser.grammaticalGender === value}
+                    onPress={() => updateActiveUser({ grammaticalGender: value })}
+                  />
+                ))}
+              </View>
+              <Text style={[styles.hint, mutedT]}>{t('settings.genderHint')}</Text>
+            </View>
+          </>
+        )}
+
         {/* 2. Speech */}
         <Text style={[styles.sectionTitle, mutedT]}>{t('settings.speech')}</Text>
         <View style={[styles.card, cardT]}>
@@ -425,7 +453,7 @@ export function SettingsScreen() {
             <View key={voice.identifier} style={styles.voiceRow}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Select voice ${voice.name}`}
+                accessibilityLabel={t('settings.selectVoice', { name: voice.name })}
                 onPress={() => updateActiveUser({ ttsVoiceId: voice.identifier })}
                 style={styles.voiceSelect}
               >
@@ -438,7 +466,7 @@ export function SettingsScreen() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={`Preview voice ${voice.name}`}
+                accessibilityLabel={t('settings.previewVoice', { name: voice.name })}
                 onPress={() =>
                   ttsService.speak(t('settings.previewText'), { voiceId: voice.identifier })
                 }

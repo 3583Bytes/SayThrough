@@ -208,6 +208,108 @@ const LANGUAGES = [
         '_Generado por `scripts/vocabulary/build-review-packet.mjs`: vuelva a generarlo después de cualquier cambio de vocabulario._',
     },
   },
+  {
+    code: 'pl',
+    vocab: 'src/data/coreWords.pl.json',
+    symbols: 'src/data/seedSymbolMap.pl.json',
+    out: 'slp-review-pl.md',
+    levels: { 1: 'Podstawowy', 2: 'Średni', 3: 'Pełny' },
+    intent: {
+      '3x4': 'osoby zaczynające komunikację, pierwsze słowa',
+      '5x6': 'tablica standardowa',
+      '6x10': 'rozszerzona, dla osób z większym słownictwem',
+    },
+    t: {
+      title: '# Przegląd słownictwa — SayThrough (polski)',
+      ask: [
+        '> **O co prosimy:** o potwierdzenie, że to słownictwo jest poprawne',
+        '> klinicznie dla użytkowników AAC, albo o wskazanie, co zmienić.',
+        '> Punkt §19.6 czyni z tego warunek wydania i **nie** został on',
+        '> spełniony — nic tutaj nie zostało sprawdzone przez specjalistę.',
+      ],
+      provenance: [
+        'Listy słów powstały na podstawie opublikowanych prac o polskim',
+        'słownictwie podstawowym, zgodnie z zasadą projektu *adaptuj, nie',
+        'wymyślaj*, a uzupełniła je osoba programująca, nie kliniczna. W tym',
+        'ostatnim tkwi ryzyko.',
+        '',
+        '**Te tablice nie są tłumaczeniem angielskich ani hiszpańskich.**',
+        'Polski odmienia rzeczowniki przez PRZYPADKI, a przypadek narzuca',
+        'czasownik lub przyimek, nie zgoda z innym słowem. Dlatego tablica',
+        'niesie mianownik, a pozostałe przypadki podaje okienko form słowa —',
+        'tak samo jak niesie bezokolicznik i podaje osoby. Prosimy oceniać je',
+        'jako tablice polskie, a nie przez porównanie z wersją angielską.',
+        '',
+        '**Szczególna prośba:** czas przeszły w języku polskim wskazuje rodzaj',
+        'osoby mówiącej („byłem” / „byłam”). Aplikacja pyta o rodzaj',
+        'gramatyczny w Ustawieniach i podaje pasującą formę jako pierwszą.',
+        'Prosimy o sprawdzenie, czy to rozwiązanie jest właściwe klinicznie —',
+        'to jedyne miejsce, w którym tablica mówi coś o samym użytkowniku.',
+      ],
+      boards: '## Tablice',
+      boardsHeader: '| Tablica | Strony | Słowa podstawowe | Razem | Dla kogo |',
+      coreMeans: [
+        '„Słowa podstawowe” to obszar stały plus strony ze słownictwem',
+        'podstawowym: słowa działające w każdym kontekście, w odróżnieniu od',
+        'rzeczowników tematycznych.',
+      ],
+      questions: '## Pytania, na które potrzebujemy odpowiedzi',
+      q1: '### 1. Czy obszar stały zawiera właściwe słowa?',
+      q1body: [
+        'Te słowa pojawiają się na **każdej stronie** w stałych miejscach i nie',
+        'da się ich osiągnąć mniejszą liczbą dotknięć. Pomyłka tutaj kosztuje',
+        'więcej niż cokolwiek innego w tym dokumencie.',
+      ],
+      q2: '### 2. Czy poziomy słownictwa są wyznaczone we właściwych miejscach?',
+      q2body: [
+        'Użytkownik na poziomie Podstawowym widzi tylko słowa poziomu 1. Słowa',
+        'nigdy nie zmieniają miejsca między poziomami — podniesienie poziomu',
+        'tylko odsłania więcej.',
+      ],
+      q3: '### 3. Słowa bez symbolu',
+      q3body: [
+        'Wyświetlają się jako sam tekst. To normalne w AAC dla słów',
+        'funkcyjnych, ale prosimy potwierdzić, że żadne z nich nie potrzebuje',
+        'symbolu — zwłaszcza dla osób jeszcze nieczytających.',
+      ],
+      q4: '### 4. Symbole, których nikt nie obejrzał',
+      q5: '### 5. Słowa zmieniające kolor między stronami',
+      q5body: [
+        'Kolor Fitzgeralda wynika z części mowy. Te słowa mają różne kolory na',
+        'różnych stronach, zwykle dlatego, że zmienia się znaczenie. Prosimy',
+        'potwierdzić, czy to poprawne, czy należy je ujednolicić.',
+      ],
+      q6: '### 6. Słowa pojawiające się na więcej niż jednej stronie',
+      q6body: [
+        'Powtórzenia są w AAC normalne — słowo może należeć do kilku miejsc.',
+        'Prosimy potwierdzić, że każde z nich zasługuje na drugie pole.',
+      ],
+      full: '## Pełne słownictwo',
+      persistentCore: '**Obszar stały** (na każdej stronie)',
+      tableHeader: '| Słowo | Część mowy | Wprowadzane na poziomie | Symbol |',
+      coreWords: 'słownictwo podstawowe',
+      topic: 'temat',
+      textOnly: '— sam tekst',
+      checklist: '## Lista kontrolna przed wydaniem (§19.6)',
+      checkItems: [
+        '- [ ] Z dowolnej strony da się utworzyć „pomoc”, „stop”, „jeszcze”,',
+        '      „chcę ___” i „jestem ___” w najwyżej dwóch wyborach',
+        '- [ ] Obszar stały jest identyczny co do treści i położenia na każdej',
+        '      stronie *(sprawdzane automatycznie w `tests/unit/vocabulary.test.ts`)*',
+        '- [ ] Dobór słów sprawdzony i zatwierdzony',
+        '- [ ] Granice poziomów sprawdzone i zatwierdzone',
+        '- [ ] Symbole obejrzane na ekranie, łącznie z punktem 4',
+        '- [ ] Formy podawane po długim przytrzymaniu są poprawne',
+        '      *(przypadki, osoby, rodzaj w czasie przeszłym — zob. §19.7)*',
+        '- [ ] Sposób obsługi rodzaju osoby mówiącej jest właściwy klinicznie',
+      ],
+      signoff: '**Osoba oceniająca:** _____________________  **Kwalifikacje:** _____________________',
+      dateLine:
+        '**Data:** _____________  **Wynik:** zatwierdzone / zatwierdzone z uwagami / niezatwierdzone',
+      footer:
+        '_Wygenerowane przez `scripts/vocabulary/build-review-packet.mjs` — wygeneruj ponownie po każdej zmianie słownictwa._',
+    },
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -290,6 +392,17 @@ async function buildPacket(config) {
     w()
     const pending = (overrides._pendingVisualCheck ?? '').split(':').pop().trim()
     w(pending.split(',').map((x) => '`' + x.trim() + '`').join(', '))
+  } else if (config.code === 'pl') {
+    w('Piktogramy ARASAAC są takie same we wszystkich językach, więc każde')
+    w('polskie słowo korzysta z identyfikatora wybranego wcześniej dla')
+    w('odpowiadającego mu pojęcia angielskiego. O tej odpowiedniości')
+    w('zdecydowała osoba programująca i **nie sprawdzono jej na ekranie**:')
+    w('symbol może być trafny dla słowa angielskiego i mylący dla polskiego.')
+    w()
+    w('Prosimy zwrócić szczególną uwagę na słowa, których pojęcia nie')
+    w('odpowiadają sobie jeden do jednego — na przykład `pomoc` (rzeczownik,')
+    w('a nie czasownik jak angielskie *help*), `się`, `jeszcze`, `stop` oraz')
+    w('formy czasownika `być`, które wszystkie dzielą jeden symbol.')
   } else {
     // Spanish reuses the ARASAAC id curated for the equivalent English
     // concept — the pictogram is language-neutral, but the equivalence was
@@ -316,7 +429,9 @@ async function buildPacket(config) {
       places[x[0]] ??= []
       places[x[0]].push({ pos: x[1], page })
     }
-    for (const x of v.core) add(x, config.code === 'es' ? 'el núcleo' : 'the core region')
+    const coreLabel =
+      config.code === 'es' ? 'el núcleo' : config.code === 'pl' ? 'obszar stały' : 'the core region'
+    for (const x of v.core) add(x, coreLabel)
     for (const [page, ws] of Object.entries(v.topics)) for (const x of ws) add(x, page)
     const conflicts = Object.entries(places).filter(
       ([, ps]) => new Set(ps.map((p) => p.pos)).size > 1,

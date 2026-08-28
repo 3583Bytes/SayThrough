@@ -1,11 +1,12 @@
 import { EN, type StringKey } from './en'
 import { ES } from './es'
+import { PL } from './pl'
 
 // §19.7 localisation. Pure module — no store imports, so services and the
 // seed generator can translate without pulling React state in. The hook that
 // binds this to the active profile lives in `src/hooks/useT.ts`.
 
-export type LanguageCode = 'en' | 'es'
+export type LanguageCode = 'en' | 'es' | 'pl'
 
 export interface LanguageOption {
   code: LanguageCode
@@ -18,11 +19,12 @@ export interface LanguageOption {
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'en', label: 'English', bcp47: 'en-US' },
   { code: 'es', label: 'Español', bcp47: 'es-ES' },
+  { code: 'pl', label: 'Polski', bcp47: 'pl-PL' },
 ]
 
 export const DEFAULT_LANGUAGE: LanguageCode = 'en'
 
-const TABLES: Record<LanguageCode, Record<StringKey, string>> = { en: EN, es: ES }
+const TABLES: Record<LanguageCode, Record<StringKey, string>> = { en: EN, es: ES, pl: PL }
 
 /**
  * BCP-47 tag → supported language code. Anything unrecognised falls back to
@@ -31,7 +33,8 @@ const TABLES: Record<LanguageCode, Record<StringKey, string>> = { en: EN, es: ES
  */
 export function langCode(language: string | undefined): LanguageCode {
   const prefix = (language ?? DEFAULT_LANGUAGE).slice(0, 2).toLowerCase()
-  return prefix === 'es' ? 'es' : DEFAULT_LANGUAGE
+  const known = SUPPORTED_LANGUAGES.find((l) => l.code === prefix)
+  return known ? known.code : DEFAULT_LANGUAGE
 }
 
 export function isSupportedLanguage(language: string | undefined): boolean {

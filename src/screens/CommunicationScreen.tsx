@@ -266,6 +266,7 @@ export function CommunicationScreen() {
     if (!isWord) return
     const forms = wordForms(button.label, button.partOfSpeech, activeUser?.language, {
       precedingWords: useMessageStore.getState().tokens.map((t) => t.text),
+      grammaticalGender: activeUser?.grammaticalGender,
     })
     if (forms.length > 1) {
       setFormsButton(button)

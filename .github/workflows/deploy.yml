@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: public/voices
-          key: voice-en_US-hfc_female-medium-es_ES-sharvard-medium-v1
+          key: voice-en-es-pl-v1
 
       - name: Fetch enhanced voice models
         if: steps.voice-cache.outputs.cache-hit != 'true'
@@ -67,6 +67,7 @@ jobs:
           # enhanced voice 404s exactly the way the English one used to.
           npm run voice
           npm run voice:es
+          npm run voice:pl
           echo "voice files: $(ls public/voices | wc -l)"
 
       # Served at the saythrough.com root (custom domain), so NO base-path

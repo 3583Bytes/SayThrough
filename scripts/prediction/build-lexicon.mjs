@@ -64,8 +64,10 @@ const dropRaw = new Set(langRules.dropRaw ?? [])
 // The letter class is per-language. Spanish needs the accented vowels, ñ and
 // ü, or the filter would silently drop `está`, `niño`, `qué` and `también` —
 // four of the commonest words in the language — and leave the lexicon looking
-// plausible while missing its most useful entries.
-const LETTERS = { en: 'a-z', es: 'a-záéíóúüñ' }
+// plausible while missing its most useful entries. Polish needs the full
+// ogonek/kreska/dot set (ą ć ę ł ń ó ś ź ż) for the same reason: without it
+// `się`, `już`, `jesteś` and `wszystko` all disappear.
+const LETTERS = { en: 'a-z', es: 'a-záéíóúüñ', pl: 'a-ząćęłńóśźż' }
 const letters = LETTERS[lang] ?? LETTERS.en
 const SHAPE = new RegExp(`^[${letters}]+(?:[-'][${letters}]+)*\\.?$`)
 

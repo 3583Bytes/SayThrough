@@ -405,5 +405,161 @@
       "jugar",
       "casa"
     ]
+  },
+  "pl": {
+    "ja": [
+      "chcę",
+      "jestem",
+      "mam",
+      "potrzebuję",
+      "lubię",
+      "mogę",
+      "muszę"
+    ],
+    "ty": [
+      "jesteś",
+      "masz",
+      "chcesz",
+      "możesz",
+      "lubisz"
+    ],
+    "chcę": [
+      "iść",
+      "jeść",
+      "pić",
+      "więcej",
+      "to",
+      "do",
+      "spać"
+    ],
+    "nie": [
+      "chcę",
+      "wiem",
+      "mogę",
+      "lubię",
+      "ma",
+      "teraz"
+    ],
+    "jestem": [
+      "głodny",
+      "głodna",
+      "zmęczony",
+      "zmęczona",
+      "smutny",
+      "chory",
+      "gotowy"
+    ],
+    "mam": [
+      "ochotę",
+      "dość",
+      "pytanie",
+      "to"
+    ],
+    "to": [
+      "jest",
+      "boli",
+      "moje",
+      "nie"
+    ],
+    "jest": [
+      "dobrze",
+      "źle",
+      "tam",
+      "moje",
+      "fajnie"
+    ],
+    "gdzie": [
+      "jest",
+      "jesteś",
+      "idziemy"
+    ],
+    "co": [
+      "to",
+      "robisz",
+      "jest",
+      "dalej"
+    ],
+    "muszę": [
+      "iść",
+      "do"
+    ],
+    "mogę": [
+      "prosić",
+      "iść",
+      "dostać"
+    ],
+    "boli": [
+      "mnie"
+    ],
+    "mnie": [
+      "boli",
+      "to"
+    ],
+    "moja": [
+      "kolej",
+      "mama",
+      "siostra"
+    ],
+    "mój": [
+      "tata",
+      "brat",
+      "kolega"
+    ],
+    "idę": [
+      "do"
+    ],
+    "daj": [
+      "mi",
+      "proszę"
+    ],
+    "proszę": [
+      "o",
+      "cię"
+    ],
+    "poproszę": [
+      "o"
+    ],
+    "potrzebuję": [
+      "pomocy",
+      "przerwy",
+      "wody"
+    ],
+    "lubię": [
+      "to",
+      "cię"
+    ],
+    "jeszcze": [
+      "raz",
+      "nie",
+      "trochę"
+    ],
+    "do": [
+      "domu",
+      "łazienki",
+      "szkoły"
+    ],
+    "w": [
+      "domu",
+      "szkole"
+    ],
+    "na": [
+      "dwór",
+      "razie"
+    ],
+    "bardzo": [
+      "dobrze",
+      "lubię"
+    ],
+    "dzień": [
+      "dobry"
+    ],
+    "już": [
+      "nie",
+      "koniec"
+    ],
+    "się": [
+      "bawić",
+      "nazywam"
+    ]
   }
 }

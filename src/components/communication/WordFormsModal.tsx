@@ -5,6 +5,7 @@ import { FONTS } from '../../constants/typography'
 import { useT } from '../../hooks/useT'
 import { useTheme } from '../../hooks/useTheme'
 import { useLanguage } from '../../hooks/useT'
+import { useUserStore } from '../../stores/userStore'
 import { wordForms } from '../../services/morphology'
 import { useMessageStore } from '../../stores/messageStore'
 
@@ -30,10 +31,15 @@ export function WordFormsModal({
   const theme = useTheme()
   const t = useT()
   const language = useLanguage()
+  const grammaticalGender = useUserStore((s) => s.activeUser?.grammaticalGender)
   const tokens = useMessageStore((s) => s.tokens)
   const forms = useMemo(
-    () => wordForms(word, pos, language, { precedingWords: tokens.map((tk) => tk.text) }),
-    [word, pos, language, tokens],
+    () =>
+      wordForms(word, pos, language, {
+        precedingWords: tokens.map((tk) => tk.text),
+        grammaticalGender,
+      }),
+    [word, pos, language, tokens, grammaticalGender],
   )
 
   return (

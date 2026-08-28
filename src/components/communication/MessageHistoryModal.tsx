@@ -57,7 +57,9 @@ export function MessageHistoryModal({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={starred ? `Unstar: ${text}` : `Star: ${text}`}
+          accessibilityLabel={
+            starred ? t('message.unstar', { text }) : t('message.star', { text })
+          }
           onPress={async () => setHistory(await toggleFavorite(userId, text))}
           style={({ pressed }) => [styles.starBtn, pressed && styles.pressed]}
         >

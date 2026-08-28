@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
+import { useT } from '../../hooks/useT'
 import { useTheme } from '../../hooks/useTheme'
 import type { Button } from '../../types/models'
 import { DraggableCell } from '../edit/DraggableCell'
@@ -47,6 +48,7 @@ export function SymbolGrid({
   onEmptyCellPress,
 }: SymbolGridProps) {
   const theme = useTheme()
+  const t = useT()
   const [gridSize, setGridSize] = useState({ width: 0, height: 0 })
 
   const split = coreColumns > 0 && coreColumns < columns
@@ -110,7 +112,7 @@ export function SymbolGrid({
         <Pressable
           key={`empty-${row}-${column}`}
           accessibilityRole="button"
-          accessibilityLabel={`Add button at row ${row + 1}, column ${column + 1}`}
+          accessibilityLabel={t('edit.addButtonAt', { row: row + 1, column: column + 1 })}
           onPress={() => onEmptyCellPress(row, column)}
           style={({ pressed }) => [styles.emptyCellEditable, pressed && styles.pressed]}
         />

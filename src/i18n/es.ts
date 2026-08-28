@@ -358,6 +358,19 @@ export const ES: Record<StringKey, string> = {
   'page.delete': 'Eliminar la página (los botones que la abren pasan a ser palabras)',
   'page.homeUndeletable': 'La página de inicio no se puede eliminar.',
 
+  'settings.grammaticalGender': 'Género gramatical',
+  'settings.genderHint':
+    'El polaco marca el género de quien habla en el pasado: «byłem» para un hombre, «byłam» para una mujer. Si lo configuras, esa forma se ofrece primero, para que el tablero no se equivoque de género con su usuario. Si lo dejas sin definir, se ofrecen las dos formas, etiquetadas.',
+  'settings.genderMasculine': 'Masculino',
+  'settings.genderFeminine': 'Femenino',
+  'settings.genderUnset': 'Preguntar cada vez',
+
+  'edit.editingPage': 'Editando: {name}',
+  'edit.tapForList': 'Toca las palabras de la lista: {name}',
+  'edit.addButtonAt': 'Añadir un botón en la fila {row}, columna {column}',
+  'message.star': 'Marcar como favorita: {text}',
+  'message.unstar': 'Quitar de favoritas: {text}',
+
   // ---- tracking report ---------------------------------------------------
   'report.title': 'Datos de comunicación',
   'report.backToSettings': 'Volver a los ajustes',

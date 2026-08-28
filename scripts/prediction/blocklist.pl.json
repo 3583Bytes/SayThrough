@@ -1,0 +1,77 @@
+{
+  "_comment": [
+    "Polish counterpart of blocklist.json. Same rules: exact match only, and",
+    "the same deliberate refusal to strip clinical or protective vocabulary.",
+    "",
+    "Polish needs care that English and Spanish did not:",
+    "",
+    "  1. Polish inflects everything, so a blocked lemma leaves its case forms",
+    "     untouched. Blocking is therefore per FORM, not per lemma, and the",
+    "     lists below carry the common inflections rather than a citation form",
+    "     that would catch nothing.",
+    "  2. `pierdolić` and relatives are vulgar, but `pierdzieć` is a normal",
+    "     child's word for a normal bodily function and belongs on an AAC",
+    "     device. It is not blocked.",
+    "  3. `kurczę` and `cholera` are mild enough to be ordinary speech; they",
+    "     are left in rather than policed."
+  ],
+  "_keptDeliberately": {
+    "_why": [
+      "AAC users experience abuse at far higher rates than the general",
+      "population, and lacking the vocabulary to describe bodies, sex, and",
+      "assault is a documented barrier to disclosure. Stripping clinical and",
+      "protective vocabulary out of prediction would make the app worse at the",
+      "moment it matters most. These words stay, and build-lexicon.mjs asserts",
+      "that no future blocklist edit removes them."
+    ],
+    "anatomy": [
+      "penis", "pochwa", "srom", "pierś", "piersi", "sutek", "odbyt",
+      "pośladki", "genitalia", "jądra", "łonowy", "erekcja", "krocze"
+    ],
+    "health": [
+      "okres", "miesiączka", "menstruacja", "ciąża", "ciężarna",
+      "prezerwatywa", "tampon", "podpaska", "dojrzewanie", "seks",
+      "seksualny", "seksualność", "nagi", "naga", "cewnik", "pielucha",
+      "pieluchy", "pierdzieć"
+    ],
+    "protective": [
+      "gwałt", "gwałcić", "zgwałcił", "zgwałcona", "molestowanie",
+      "przemoc", "krzywda", "krzywdzić", "boli", "ból", "dotykać",
+      "dotknął", "dotyka", "prywatny", "intymny", "tajemnica", "sekret",
+      "przestraszony", "strach", "boję", "przestań", "nie", "pomocy",
+      "ratunku", "bezpieczny"
+    ]
+  },
+  "profanity": [
+    "kurwa", "kurwy", "kurwie", "kurwą", "kurew", "kurwami",
+    "chuj", "chuja", "chujem", "chuju", "chuje", "chujowy", "chujowa",
+    "pierdolić", "pierdole", "pierdolę", "pierdoli", "pierdolony",
+    "pierdolona", "pierdolnąć", "spierdalaj", "wypierdalaj", "odpierdol",
+    "jebać", "jebał", "jebany", "jebana", "jebane", "jebie", "wyjebane",
+    "zajebisty", "zajebiste", "dojebać", "pojebany", "pojebana",
+    "pizda", "pizdy", "pizdę", "pizdzie",
+    "skurwysyn", "skurwysyna", "skurwiel", "kutas", "kutasa", "kutasie",
+    "dupa", "dupy", "dupie", "dupę", "dupek", "dupka", "dupku",
+    "gówno", "gówna", "gównie", "gówniany", "srać", "sram", "sranie",
+    "zasrany", "obesrany", "cipa", "cipy", "cipę",
+    "huj", "huja", "hujem", "spierdolić", "wkurwiony", "wkurwiać",
+    "wkurwia", "popierdolony", "przypierdolić", "jebnąć", "jebnął"
+  ],
+  "sexual": [
+    "porno", "pornografia", "pornograficzny", "masturbacja",
+    "masturbować", "orgazm", "prostytutka", "prostytucja", "burdel",
+    "erotyczny", "erotyka", "fetysz", "penetracja", "wytrysk",
+    "sperma", "wibrator", "dildo", "striptiz", "orgia", "sadomasochizm",
+    "kazirodztwo", "zoofilia", "onanizm"
+  ],
+  "slurs": [
+    "pedał", "pedała", "pedały", "ciota", "cioty", "lesba", "lesby",
+    "czarnuch", "czarnucha", "ciapaty", "brudas", "brudasy",
+    "żydek", "parch", "cygan", "cyganem",
+    "debil", "debila", "debile", "kretyn", "kretyna", "kretyni",
+    "idiota", "idioty", "idiotka", "imbecyl", "downiak", "mongoł",
+    "opóźniony", "upośledzony", "kaleka", "kaleki", "wariat", "wariatka",
+    "świr", "świrus", "psychol", "psychola", "gruby", "grubas",
+    "karzeł", "karła", "ułomny", "niedorozwinięty", "niedorozwój"
+  ]
+}

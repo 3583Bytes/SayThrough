@@ -1,6 +1,7 @@
 import type { PartOfSpeech } from '../constants/colors'
 import { langCode } from '../i18n'
 import { spanishWordForms } from './morphology.es'
+import { polishWordForms } from './morphology.pl'
 import type { MorphContext, WordForm } from './morphologyTypes'
 
 // English word-forms / grammar (§Tier-1). Rule-based inflection plus an
@@ -193,7 +194,12 @@ export function wordForms(
   language?: string,
   context?: MorphContext,
 ): WordForm[] {
-  return langCode(language) === 'es'
-    ? spanishWordForms(word, pos, context)
-    : englishWordForms(word, pos)
+  switch (langCode(language)) {
+    case 'es':
+      return spanishWordForms(word, pos, context)
+    case 'pl':
+      return polishWordForms(word, pos, context)
+    default:
+      return englishWordForms(word, pos)
+  }
 }

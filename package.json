@@ -49,14 +49,16 @@
     "test": "jest",
     "e2e": "npm run build && playwright test",
     "og-image": "node scripts/gen-og-image.mjs",
-    "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en && node scripts/prediction/download-lexicon.mjs es && node scripts/prediction/build-lexicon.mjs es",
+    "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en && node scripts/prediction/download-lexicon.mjs es && node scripts/prediction/build-lexicon.mjs es && node scripts/prediction/download-lexicon.mjs pl && node scripts/prediction/build-lexicon.mjs pl",
     "voice": "node scripts/voice/download-voice.mjs",
     "voice:es": "node scripts/voice/download-voice.mjs es_ES-sharvard-medium",
     "lint": "tsc --noEmit",
     "check-symbols": "node scripts/symbols/check-seed-coverage.mjs",
     "check-deploy": "node scripts/check-deploy.mjs",
     "review-packet": "node scripts/vocabulary/build-review-packet.mjs",
-    "spanish-core": "node scripts/vocabulary/build-spanish-core.mjs && node scripts/vocabulary/build-spanish-symbols.mjs"
+    "spanish-core": "node scripts/vocabulary/build-spanish-core.mjs && node scripts/vocabulary/build-spanish-symbols.mjs",
+    "voice:pl": "node scripts/voice/download-voice.mjs pl_PL-gosia-medium",
+    "polish-core": "node scripts/vocabulary/build-polish-core.mjs && node scripts/vocabulary/build-polish-symbols.mjs"
   },
   "private": true
 }

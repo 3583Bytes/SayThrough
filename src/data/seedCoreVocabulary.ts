@@ -3,8 +3,10 @@ import { type LanguageCode, SUPPORTED_LANGUAGES, langCode } from '../i18n'
 import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
 import coreWordsEsJson from './coreWords.es.json'
+import coreWordsPlJson from './coreWords.pl.json'
 import coreWordsJson from './coreWords.json'
 import seedSymbolMapEsJson from './seedSymbolMap.es.json'
+import seedSymbolMapPlJson from './seedSymbolMap.pl.json'
 import seedSymbolMapJson from './seedSymbolMap.json'
 
 // Built-in content uses STABLE, deterministic ids (not random uuids) so
@@ -48,11 +50,13 @@ interface SizeLayout {
 const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
   en: coreWordsJson.sizes as unknown as Record<string, SizeLayout>,
   es: coreWordsEsJson.sizes as unknown as Record<string, SizeLayout>,
+  pl: coreWordsPlJson.sizes as unknown as Record<string, SizeLayout>,
 }
 
 const SYMBOL_MAPS: Record<LanguageCode, Record<string, string>> = {
   en: seedSymbolMapJson as Record<string, string>,
   es: seedSymbolMapEsJson as Record<string, string>,
+  pl: seedSymbolMapPlJson as Record<string, string>,
 }
 
 // Seeded labels that are STRUCTURE rather than vocabulary. These are stored
@@ -72,6 +76,11 @@ const CHROME: Record<
     back: 'Atrás', more: 'Más', home: 'Inicio',
     quickPhrases: 'Frases rápidas',
     quickDescription: 'Frases guardadas que se dicen con un solo toque (§19.5)',
+  },
+  pl: {
+    back: 'Wstecz', more: 'Więcej', home: 'Start',
+    quickPhrases: 'Szybkie zdania',
+    quickDescription: 'Gotowe zdania wypowiadane jednym dotknięciem (§19.5)',
   },
 }
 
@@ -624,6 +633,29 @@ const QUICK_PHRASES: Record<LanguageCode, Array<[string, PartOfSpeech]>> = {
     ['Otra cosa.', 'descriptor'],
     ['¡Ven aquí, por favor!', 'social'],
     ['¡Algo va mal!', 'question'],
+  ],
+  // Polish stock phrases deliberately avoid the past tense: it is marked for
+  // the speaker's gender, so a single fixed set would misgender half its
+  // users. Everything here is present tense or nominal.
+  pl: [
+    ['Cześć!', 'social'],
+    ['Do widzenia!', 'social'],
+    ['Jak się masz?', 'question'],
+    ['Dziękuję!', 'social'],
+    ['Proszę!', 'social'],
+    ['Podoba mi się!', 'social'],
+    ['Potrzebuję pomocy.', 'little'],
+    ['Potrzebuję przerwy.', 'little'],
+    ['Mogę prosić więcej?', 'question'],
+    ['Muszę do łazienki.', 'little'],
+    ['Śmieszne!', 'social'],
+    ['Super!', 'social'],
+    ['Nie podoba mi się.', 'descriptor'],
+    ['Zobacz to!', 'social'],
+    ['Nie o to mi chodzi.', 'descriptor'],
+    ['Coś innego.', 'descriptor'],
+    ['Chodź tu, proszę!', 'social'],
+    ['Coś jest nie tak!', 'question'],
   ],
 }
 

@@ -23,6 +23,7 @@ const BASE = process.env.EXPO_PUBLIC_BASE_URL ?? ''
 const VOICES: Record<LanguageCode, { model: string; espeak: string }> = {
   en: { model: 'en_US-hfc_female-medium', espeak: 'en-us' },
   es: { model: 'es_ES-sharvard-medium', espeak: 'es' },
+  pl: { model: 'pl_PL-gosia-medium', espeak: 'pl' },
 }
 
 // 0.8x speed — the setting this voice was validated at. The shipped model

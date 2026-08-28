@@ -354,6 +354,19 @@ export const EN = {
   'page.delete': 'Delete page (buttons that open it become plain words)',
   'page.homeUndeletable': 'The home page cannot be deleted.',
 
+  'settings.grammaticalGender': 'Grammatical gender',
+  'settings.genderHint':
+    'Polish marks the speaker’s own gender in the past tense — “byłem” for a man, “byłam” for a woman. Set this and the matching form is offered first, so the board does not misgender its user. Leave it unset and both forms are offered, labelled.',
+  'settings.genderMasculine': 'Masculine',
+  'settings.genderFeminine': 'Feminine',
+  'settings.genderUnset': 'Ask each time',
+
+  'edit.editingPage': 'Editing: {name}',
+  'edit.tapForList': 'Tap words for list: {name}',
+  'edit.addButtonAt': 'Add button at row {row}, column {column}',
+  'message.star': 'Star: {text}',
+  'message.unstar': 'Unstar: {text}',
+
   // ---- tracking report ---------------------------------------------------
   'report.title': 'Communication Data',
   'report.backToSettings': 'Back to settings',

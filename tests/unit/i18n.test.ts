@@ -1,5 +1,6 @@
 import { EN } from '../../src/i18n/en'
 import { ES } from '../../src/i18n/es'
+import { PL } from '../../src/i18n/pl'
 import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
@@ -23,6 +24,8 @@ describe('language codes', () => {
     expect(langCode('es-ES')).toBe('es')
     expect(langCode('es-MX')).toBe('es')
     expect(langCode('en-GB')).toBe('en')
+    expect(langCode('pl-PL')).toBe('pl')
+    expect(langCode('pl')).toBe('pl')
   })
 
   it('falls back to English rather than throwing on anything unknown', () => {
@@ -36,22 +39,32 @@ describe('language codes', () => {
 
   it('offers each language under its own name', () => {
     // A picker that says "Spanish" is no use to someone who reads Spanish.
-    expect(SUPPORTED_LANGUAGES.map((l) => l.label)).toEqual(['English', 'Español'])
+    expect(SUPPORTED_LANGUAGES.map((l) => l.label)).toEqual(['English', 'Español', 'Polski'])
   })
 })
 
+const TRANSLATIONS: Array<[string, Record<string, string>]> = [
+  ['es', ES],
+  ['pl', PL],
+]
+
 describe('string tables', () => {
-  it('translates every key', () => {
-    expect(Object.keys(ES).sort()).toEqual(KEYS.slice().sort())
+  it.each(TRANSLATIONS)('%s translates every key', (_code, table) => {
+    expect(Object.keys(table).sort()).toEqual(KEYS.slice().sort())
   })
 
-  it('uses the same placeholders in both languages', () => {
+  it.each(TRANSLATIONS)('%s uses the same placeholders as English', (code, table) => {
     for (const key of KEYS) {
-      expect({ key, params: placeholders(ES[key]) }).toEqual({
+      expect({ code, key, params: placeholders(table[key]) }).toEqual({
+        code,
         key,
         params: placeholders(EN[key]),
       })
     }
+  })
+
+  it.each(TRANSLATIONS)('%s has no empty strings', (_code, table) => {
+    for (const key of KEYS) expect(table[key].trim()).not.toBe('')
   })
 
   it('leaves no Spanish string identical to its English source', () => {
@@ -69,11 +82,21 @@ describe('string tables', () => {
     expect(untranslated).toEqual([])
   })
 
-  it('has no empty strings', () => {
-    for (const key of KEYS) {
-      expect(EN[key].trim()).not.toBe('')
-      expect(ES[key].trim()).not.toBe('')
-    }
+  it('leaves no Polish string identical to its English source', () => {
+    // Polish shares far less with English than Spanish does, so the list of
+    // legitimate matches is shorter: a product name, a file extension, and
+    // the two international words.
+    // `symbol` is the Polish word too.
+    const shared = new Set([
+      'app.name', 'settings.importObz', 'preset.normal', 'pin.newPlaceholder',
+      'edit.symbol', 'edit.symbolResult',
+    ])
+    const untranslated = KEYS.filter((key) => !shared.has(key) && PL[key] === EN[key])
+    expect(untranslated).toEqual([])
+  })
+
+  it('has no empty English strings', () => {
+    for (const key of KEYS) expect(EN[key].trim()).not.toBe('')
   })
 })
 
@@ -81,12 +104,16 @@ describe('translate', () => {
   it('returns the requested language', () => {
     expect(translate('common.done', 'en-US')).toBe('Done')
     expect(translate('common.done', 'es-ES')).toBe('Listo')
+    expect(translate('common.done', 'pl-PL')).toBe('Gotowe')
   })
 
   it('substitutes placeholders', () => {
     expect(translate('forms.title', 'en-US', { word: 'run' })).toBe('Forms of “run”')
     expect(translate('forms.title', 'es-ES', { word: 'correr' })).toBe(
       'Formas de «correr»',
+    )
+    expect(translate('forms.title', 'pl-PL', { word: 'biegać' })).toBe(
+      'Formy słowa „biegać”',
     )
   })
 

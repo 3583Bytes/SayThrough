@@ -17,6 +17,34 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Polish — the case language (§19.7)** — chosen over the easy ports
+  (Portuguese/Italian, where the Spanish engine would have transferred almost
+  unchanged) because the maintainer speaks it, which finally puts a verifying
+  native speaker behind one of the boards. It also forced the machinery the
+  first two languages did not need:
+  **(1) CASE, and it is GOVERNED, not agreed.** `chcę wodę` but `nie chcę
+  wody` — the noun's form depends on the verb or preposition in front of it,
+  and negation alone changes it. Nothing upstream can predict that, so the
+  engine offers the seven cases labelled with the question that selects each
+  (`kogo? czego?`) rather than guessing.
+  **(2) The board can misgender its own user.** Polish marks the speaker's
+  gender in the past tense (`byłem` / `byłam`). A single fixed set would be
+  wrong for half of its users every time they talked about yesterday, in their
+  own voice. `UserProfile.grammaticalGender` now exists, shows in Settings
+  **only for languages that mark it**, and orders the forms without ever
+  removing the other one. Polish Quick Phrases avoid the past tense entirely.
+  **(3) A test that reads the whole board.** Hand-written examples passed
+  while `kolegaa`, `butya`, `babciie` and `ptacy` shipped. A sweep that runs
+  every board word through the engine and rejects malformed output caught
+  **nine distinct rule failures** on its first run — plural-only nouns,
+  masculine nouns in -a, soft-stem respelling, the personal/animal plural
+  split, -ki/-gi neuters, numerals, and three lexical locatives. That guard is
+  now the pattern for any future inflected language.
+  Also shipped: 30k Polish lexicon (`się` at rank 3), Polish blocklist that
+  keeps `pierdzieć` and does not police `kurczę`, Polish frames, Zosia-first
+  voice ranking, and the `pl_PL-gosia` Piper model at deploy.
+  **Remaining: the §19.6 sign-off — now three, one per language.**
+
 - [x] **Spanish — the whole stack, not a translation layer (§19.7)** — the
   gap where *every* competitor, free ones included, beat us. Shipped as: an
   i18n layer (`src/i18n`, English canonical and other tables typed so a
@@ -161,9 +189,10 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 **Already ahead / at parity:** zero-friction guest mode (no competitor
 lets you talk in 5s with no signup), persistent core region + Fitzgerald
 color coding, in-grid navigation, dwell + switch scanning, OBF/OBZ
-interoperability, offline PWA, multi-profile, and — new — **English +
-Spanish**, the row where every competitor including the free ones used to
-beat us.
+interoperability, offline PWA, multi-profile, and — new — **English, Spanish and Polish**, the row where
+every competitor including the free ones used to beat us. Three languages is
+also three *morphology* engines, which is the part competitors do not have:
+TD Snap and Proloquo localise their strings and symbols, not their grammar.
 
 **The gaps that make us look incomplete** (Tier 1 below) and **the bets
 that make us clearly better** (Tier 2) are where the backlog focuses.
@@ -187,7 +216,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 | Item | Why it wins | Effort | Status |
 |---|---|---|---|
 | **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets, one model per language. Deploy packaging done; remaining work is cache pre-warming, storage management and real-device QA | L (~1–2 wk) | [~] |
-| **Spanish core set → multilingual** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. Huge underserved reach. **Shipped** — see §0; the remaining work is the §19.6 SLP sign-off for the Spanish boards | M+L | [x] |
+| **Multilingual (Spanish + Polish)** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. **Shipped** — three languages, three morphology engines; see §0. Remaining: §19.6 SLP sign-off per language | M+L | [x] |
 | **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique | M | [ ] |
 | **Recorded button audio** ("Mom's voice" / own voice) | TD Snap's *paid* My-Own-Voice. Model fields `audioUri`/`audioCueUri` already exist — just needs an `expo-audio` record UI | S–M | [~] |
 
@@ -236,10 +265,12 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
    leverage — permanently ends the robot-voice problem *and* becomes a
    free-premium-voice headline no competitor matches. De-risked (already
    validated); first step is a pluggable TTS backend + graceful fallback.
-3. ~~**Reach expander:** Spanish core set~~ — **shipped** (§0). The thesis
-   holds: the i18n machinery is now language-agnostic, so a third language is
-   authoring work (board, lexicon, strings, Piper voice) plus a morphology
-   engine only if the language inflects in ways English and Spanish do not.
+3. ~~**Reach expander:** Spanish, then Polish~~ — **shipped** (§0). The
+   machinery is language-agnostic; the cost of a fourth language is authoring
+   (board, lexicon, strings, Piper voice) plus a morphology engine sized by how
+   far the grammar sits from the three already built. Portuguese and Italian
+   would now be cheap — the Spanish engine ports. German and the other Slavic
+   languages get most of Polish's case machinery for free.
 4. **Then:** VSD → recorded audio / pronunciation → cloud sync / SLP tools.
 
 ---

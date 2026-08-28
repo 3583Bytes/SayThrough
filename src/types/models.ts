@@ -52,6 +52,12 @@ export interface UserProfile {
   // Enhanced neural voice (§10.5). Undefined = the platform voice, so no
   // existing profile changes behaviour and nobody downloads 60 MB unasked.
   ttsEngine?: 'platform' | 'enhanced'
+  // §19.7 — the user's own grammatical gender. Only meaningful in languages
+  // that mark the speaker's gender in ordinary sentences: Polish inflects the
+  // past tense for it in the 1st and 2nd person (`byłem` / `byłam`), so
+  // without this the board would misgender its user every time they talk
+  // about yesterday. Undefined = ask rather than assume (both forms offered).
+  grammaticalGender?: 'masculine' | 'feminine'
   // Vocabulary level (§19) — which words are introduced yet. 1 Basic,
   // 2 Intermediate, 3 Full. UNDEFINED MEANS 3: profiles created before
   // levels existed must not silently lose words. Levels reveal words in

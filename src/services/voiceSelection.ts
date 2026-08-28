@@ -39,6 +39,12 @@ const KNOWN_GOOD: Record<string, string[]> = {
     'mónica', 'monica', 'paulina', 'marisol', 'juan', 'google español',
     'google español de estados unidos', 'helena', 'laura', 'jorge', 'diego',
   ],
+  // Zosia is Apple's Polish voice; Zofia/Marek are the Microsoft pair and
+  // Agnieszka/Ewa/Jacek the older SAPI set.
+  pl: [
+    'zosia', 'google polski', 'zofia', 'paulina', 'marek', 'agnieszka',
+    'ewa', 'maja', 'jacek', 'jan', 'krzysztof',
+  ],
 }
 
 export function isNoveltyVoice(voice: RankableVoice): boolean {

@@ -46,8 +46,8 @@ export function EditBar({
       </Pressable>
       <Text style={styles.title}>
         {wordListName
-          ? `Tap words for list: ${wordListName}`
-          : `Editing: ${pageName}`}
+          ? t('edit.tapForList', { name: wordListName })
+          : t('edit.editingPage', { name: pageName })}
       </Text>
       <View style={styles.rightGroup}>
         <Pressable

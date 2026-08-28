@@ -16,4 +16,11 @@ export interface WordForm {
 export interface MorphContext {
   /** Words already in the message bar, in order, most recent last. */
   precedingWords?: string[]
+  /**
+   * The SPEAKER's grammatical gender, from their profile. Polish marks it in
+   * the past tense in the first and second person — `byłem` vs `byłam` — so a
+   * board that offered only one would misgender the user in their own voice.
+   * Unset means neither form leads and both are labelled.
+   */
+  grammaticalGender?: 'masculine' | 'feminine'
 }
