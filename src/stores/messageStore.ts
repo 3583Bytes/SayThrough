@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { contract } from '../services/contractions'
 import { recordSpoken } from '../services/messageHistory'
 import { learnFromMessage } from '../services/predictionModel'
 import { logMessageSpoken } from '../services/TrackingService'
@@ -43,9 +44,28 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   speakingTokenId: null,
 
   appendToken: (text, symbol) => {
-    set((state) => ({
-      tokens: [...state.tokens, { id: String(nextTokenId++), text, ...symbol }],
-    }))
+    const language = useUserStore.getState().activeUser?.language
+    set((state) => {
+      // §19.7: some languages fuse two adjacent words obligatorily —
+      // Portuguese `de` + `o` is `do`, and `a o parque` is simply wrong. The
+      // fused form replaces BOTH tokens rather than being rendered on top of
+      // them, because it genuinely is one word: that keeps the highlight,
+      // delete-last-word and history correct with no special cases.
+      const previous = state.tokens[state.tokens.length - 1]
+      const fused = previous ? contract(previous.text, text, language) : null
+      if (previous && fused) {
+        return {
+          tokens: [
+            ...state.tokens.slice(0, -1),
+            // The preposition carries the meaning, so it keeps its symbol.
+            { ...previous, text: fused },
+          ],
+        }
+      }
+      return {
+        tokens: [...state.tokens, { id: String(nextTokenId++), text, ...symbol }],
+      }
+    })
     if (useUserStore.getState().activeUser?.speakOnSelect) {
       ttsService.speak(text)
     }

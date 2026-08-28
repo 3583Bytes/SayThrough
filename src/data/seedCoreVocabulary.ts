@@ -4,9 +4,11 @@ import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
 import coreWordsEsJson from './coreWords.es.json'
 import coreWordsPlJson from './coreWords.pl.json'
+import coreWordsPtJson from './coreWords.pt.json'
 import coreWordsJson from './coreWords.json'
 import seedSymbolMapEsJson from './seedSymbolMap.es.json'
 import seedSymbolMapPlJson from './seedSymbolMap.pl.json'
+import seedSymbolMapPtJson from './seedSymbolMap.pt.json'
 import seedSymbolMapJson from './seedSymbolMap.json'
 
 // Built-in content uses STABLE, deterministic ids (not random uuids) so
@@ -51,12 +53,14 @@ const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
   en: coreWordsJson.sizes as unknown as Record<string, SizeLayout>,
   es: coreWordsEsJson.sizes as unknown as Record<string, SizeLayout>,
   pl: coreWordsPlJson.sizes as unknown as Record<string, SizeLayout>,
+  pt: coreWordsPtJson.sizes as unknown as Record<string, SizeLayout>,
 }
 
 const SYMBOL_MAPS: Record<LanguageCode, Record<string, string>> = {
   en: seedSymbolMapJson as Record<string, string>,
   es: seedSymbolMapEsJson as Record<string, string>,
   pl: seedSymbolMapPlJson as Record<string, string>,
+  pt: seedSymbolMapPtJson as Record<string, string>,
 }
 
 // Seeded labels that are STRUCTURE rather than vocabulary. These are stored
@@ -81,6 +85,11 @@ const CHROME: Record<
     back: 'Wstecz', more: 'Więcej', home: 'Start',
     quickPhrases: 'Szybkie zdania',
     quickDescription: 'Gotowe zdania wypowiadane jednym dotknięciem (§19.5)',
+  },
+  pt: {
+    back: 'Voltar', more: 'Mais', home: 'Início',
+    quickPhrases: 'Frases rápidas',
+    quickDescription: 'Frases prontas ditas com um toque só (§19.5)',
   },
 }
 
@@ -656,6 +665,26 @@ const QUICK_PHRASES: Record<LanguageCode, Array<[string, PartOfSpeech]>> = {
     ['Coś innego.', 'descriptor'],
     ['Chodź tu, proszę!', 'social'],
     ['Coś jest nie tak!', 'question'],
+  ],
+  pt: [
+    ['Oi!', 'social'],
+    ['Tchau!', 'social'],
+    ['Como vai?', 'question'],
+    ['Obrigado!', 'social'],
+    ['Por favor!', 'social'],
+    ['Eu gostei!', 'social'],
+    ['Preciso de ajuda.', 'little'],
+    ['Preciso de uma pausa.', 'little'],
+    ['Posso querer mais?', 'question'],
+    ['Preciso ir ao banheiro.', 'little'],
+    ['Que engraçado!', 'social'],
+    ['Que legal!', 'social'],
+    ['Eu não gostei.', 'descriptor'],
+    ['Olha isso!', 'social'],
+    ['Não foi isso que eu quis dizer.', 'descriptor'],
+    ['Outra coisa.', 'descriptor'],
+    ['Vem cá, por favor!', 'social'],
+    ['Tem alguma coisa errada!', 'question'],
   ],
 }
 

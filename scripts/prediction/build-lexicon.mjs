@@ -67,7 +67,7 @@ const dropRaw = new Set(langRules.dropRaw ?? [])
 // plausible while missing its most useful entries. Polish needs the full
 // ogonek/kreska/dot set (ą ć ę ł ń ó ś ź ż) for the same reason: without it
 // `się`, `już`, `jesteś` and `wszystko` all disappear.
-const LETTERS = { en: 'a-z', es: 'a-záéíóúüñ', pl: 'a-ząćęłńóśźż' }
+const LETTERS = { en: 'a-z', es: 'a-záéíóúüñ', pl: 'a-ząćęłńóśźż', pt: 'a-záéíóúâêôãõàç' }
 const letters = LETTERS[lang] ?? LETTERS.en
 const SHAPE = new RegExp(`^[${letters}]+(?:[-'][${letters}]+)*\\.?$`)
 

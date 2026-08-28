@@ -17,6 +17,26 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 
 ## 0. Shipped recently (so the backlog reflects reality)
 
+- [x] **Brazilian Portuguese — the contraction language (§19.7)** — the
+  reach pick: ~215M speakers in a market where commercial AAC is priced in USD
+  and effectively unaffordable. Structurally the closest board to Spanish, so
+  the engine ported in an afternoon; the new work was the thing that is **not
+  morphology at all**.
+  **Obligatory contractions.** `de` + `o` is `do`, `em` + `a` is `na`, `a` + `o`
+  is `ao`. `eu vou a o parque` is ungrammatical, not clumsy, and a user tapping
+  two buttons has no way to repair it. So `contractions.ts` fuses the pair **at
+  append time** in `messageStore` rather than at render time: the fused form
+  becomes one token, which is both what the grammar says and what keeps the
+  bar, the word-by-word highlight, delete-last-word and history correct with
+  zero special cases. `de` and `em` earn persistent-core cells as a result.
+  Also: nasal plurals (pão→pães, mão→mãos, coração→corações — no rule predicts
+  the split), `-l`→`-is` and `-m`→`-ns`, and the reduced Brazilian person set
+  (`você` takes the third person, so four forms not five). Shipped with a 30k
+  lexicon, a pt-BR blocklist that leaves `preto` and `negro` alone, Luciana-
+  first voice ranking, and `pt_BR-faber` at deploy. The board-word sweep
+  borrowed from Polish caught one rule failure (`alemão` → `alemãa`) before it
+  shipped.
+
 - [x] **Polish — the case language (§19.7)** — chosen over the easy ports
   (Portuguese/Italian, where the Spanish engine would have transferred almost
   unchanged) because the maintainer speaks it, which finally puts a verifying
@@ -189,10 +209,11 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 **Already ahead / at parity:** zero-friction guest mode (no competitor
 lets you talk in 5s with no signup), persistent core region + Fitzgerald
 color coding, in-grid navigation, dwell + switch scanning, OBF/OBZ
-interoperability, offline PWA, multi-profile, and — new — **English, Spanish and Polish**, the row where
-every competitor including the free ones used to beat us. Three languages is
-also three *morphology* engines, which is the part competitors do not have:
-TD Snap and Proloquo localise their strings and symbols, not their grammar.
+interoperability, offline PWA, multi-profile, and — new — **English, Spanish, Polish and Brazilian
+Portuguese**, the row where every competitor including the free ones used to
+beat us. Four languages is also three *morphology* engines plus a contraction
+pass, which is the part competitors do not have: TD Snap and Proloquo localise
+their strings and symbols, not their grammar.
 
 **The gaps that make us look incomplete** (Tier 1 below) and **the bets
 that make us clearly better** (Tier 2) are where the backlog focuses.
@@ -216,7 +237,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 | Item | Why it wins | Effort | Status |
 |---|---|---|---|
 | **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets, one model per language. Deploy packaging done; remaining work is cache pre-warming, storage management and real-device QA | L (~1–2 wk) | [~] |
-| **Multilingual (Spanish + Polish)** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. **Shipped** — three languages, three morphology engines; see §0. Remaining: §19.6 SLP sign-off per language | M+L | [x] |
+| **Multilingual (Spanish, Polish, Portuguese)** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. **Shipped** — four languages, three morphology engines; see §0. Remaining: §19.6 SLP sign-off per language | M+L | [x] |
 | **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique | M | [ ] |
 | **Recorded button audio** ("Mom's voice" / own voice) | TD Snap's *paid* My-Own-Voice. Model fields `audioUri`/`audioCueUri` already exist — just needs an `expo-audio` record UI | S–M | [~] |
 
@@ -269,8 +290,10 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
    machinery is language-agnostic; the cost of a fourth language is authoring
    (board, lexicon, strings, Piper voice) plus a morphology engine sized by how
    far the grammar sits from the three already built. Portuguese and Italian
-   would now be cheap — the Spanish engine ports. German and the other Slavic
-   languages get most of Polish's case machinery for free.
+   ~~would now be cheap — the Spanish engine ports~~ (Portuguese done). Italian
+   and Catalan remain cheap on the Romance side; German and the other Slavic
+   languages get most of Polish's case machinery for free. Ukrainian is the
+   biggest remaining reach-per-effort, gated on Cyrillic keyboard work.
 4. **Then:** VSD → recorded audio / pronunciation → cloud sync / SLP tools.
 
 ---

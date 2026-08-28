@@ -561,5 +561,169 @@
       "bawić",
       "nazywam"
     ]
+  },
+  "pt": {
+    "eu": [
+      "quero",
+      "preciso",
+      "gosto",
+      "tenho",
+      "vou",
+      "sou",
+      "estou"
+    ],
+    "você": [
+      "quer",
+      "gosta",
+      "tem",
+      "vai",
+      "pode"
+    ],
+    "quero": [
+      "ir",
+      "comer",
+      "beber",
+      "brincar",
+      "mais",
+      "isso",
+      "água"
+    ],
+    "preciso": [
+      "de",
+      "ir"
+    ],
+    "gosto": [
+      "de"
+    ],
+    "de": [
+      "novo",
+      "manhã",
+      "noite",
+      "casa",
+      "água"
+    ],
+    "tenho": [
+      "fome",
+      "sede",
+      "sono",
+      "medo",
+      "que"
+    ],
+    "é": [
+      "bom",
+      "meu",
+      "isso",
+      "legal"
+    ],
+    "está": [
+      "bom",
+      "quente",
+      "frio",
+      "aqui",
+      "quebrado"
+    ],
+    "estou": [
+      "com",
+      "bem",
+      "cansado",
+      "feliz",
+      "triste"
+    ],
+    "com": [
+      "fome",
+      "sede",
+      "sono",
+      "você"
+    ],
+    "não": [
+      "quero",
+      "gosto",
+      "sei",
+      "posso",
+      "tem"
+    ],
+    "mais": [
+      "um",
+      "uma",
+      "tarde",
+      "devagar"
+    ],
+    "meu": [
+      "pai",
+      "irmão",
+      "amigo",
+      "nome"
+    ],
+    "minha": [
+      "mãe",
+      "irmã",
+      "vez",
+      "casa"
+    ],
+    "vou": [
+      "ir",
+      "para",
+      "comer"
+    ],
+    "posso": [
+      "ir",
+      "pegar",
+      "brincar"
+    ],
+    "onde": [
+      "está",
+      "você",
+      "fica"
+    ],
+    "o que": [
+      "é",
+      "houve",
+      "você"
+    ],
+    "por": [
+      "favor",
+      "que"
+    ],
+    "vamos": [
+      "comer",
+      "brincar",
+      "embora"
+    ],
+    "ajuda": [
+      "por favor"
+    ],
+    "dói": [
+      "muito",
+      "aqui"
+    ],
+    "em": [
+      "casa",
+      "cima",
+      "baixo"
+    ],
+    "a": [
+      "gente",
+      "escola",
+      "casa"
+    ],
+    "um": [
+      "pouco",
+      "pouquinho"
+    ],
+    "uma": [
+      "vez",
+      "coisa"
+    ],
+    "bom": [
+      "dia"
+    ],
+    "boa": [
+      "noite",
+      "tarde"
+    ],
+    "tudo": [
+      "bem",
+      "certo"
+    ]
   }
 }

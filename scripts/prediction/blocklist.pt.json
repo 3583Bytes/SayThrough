@@ -1,0 +1,73 @@
+{
+  "_comment": [
+    "Brazilian Portuguese counterpart of blocklist.json. Same rules: exact",
+    "match only, and the same deliberate refusal to strip clinical or",
+    "protective vocabulary.",
+    "",
+    "Portuguese needs judgement English and Spanish did not:",
+    "",
+    "  1. `puto` and `pica` are vulgar in Brazil but ordinary words in",
+    "     Portugal (`puto` = kid, `pica` = it stings). The boards are pt-BR, so",
+    "     the Brazilian reading governs — but the milder ones stay.",
+    "  2. `caralho`, `porra` and `merda` are genuinely coarse; `droga`,",
+    "     `bosta` and `saco` are the everyday mild ones and are NOT blocked.",
+    "  3. `preto` is the ordinary colour word and is ON the board. It is not",
+    "     blocked. Neither is `negro`, which is used as a self-descriptor in",
+    "     Brazil. Blocking either would break real vocabulary to catch a use a",
+    "     word list cannot detect."
+  ],
+  "_keptDeliberately": {
+    "_why": [
+      "AAC users experience abuse at far higher rates than the general",
+      "population, and lacking the vocabulary to describe bodies, sex, and",
+      "assault is a documented barrier to disclosure. Stripping clinical and",
+      "protective vocabulary out of prediction would make the app worse at the",
+      "moment it matters most. These words stay, and build-lexicon.mjs asserts",
+      "that no future blocklist edit removes them."
+    ],
+    "anatomy": [
+      "pênis", "vagina", "vulva", "seio", "seios", "peito", "mamilo",
+      "ânus", "nádegas", "bumbum", "genitais", "testículos", "púbico",
+      "ereção", "virilha"
+    ],
+    "health": [
+      "menstruação", "menstruada", "regra", "grávida", "gravidez",
+      "camisinha", "preservativo", "absorvente", "puberdade", "sexo",
+      "sexual", "sexualidade", "nu", "nua", "pelado", "sonda", "fralda",
+      "fraldas"
+    ],
+    "protective": [
+      "estupro", "estuprar", "estuprado", "estuprada", "abuso", "abusar",
+      "assédio", "violência", "machucar", "machucado", "dói", "dor",
+      "tocar", "tocou", "tocando", "privado", "íntimo", "segredo",
+      "assustado", "assustada", "medo", "para", "pare", "não", "socorro",
+      "ajuda", "seguro"
+    ]
+  },
+  "profanity": [
+    "caralho", "caralhos", "porra", "merda", "merdas", "cacete",
+    "foder", "fodido", "fodida", "fode", "fodeu", "foda", "fodase",
+    "buceta", "bucetas", "cu", "cuzão", "cuzinho", "puta", "putas",
+    "puto", "putos", "putaria", "piroca", "pinto", "rola", "pica",
+    "punheta", "punheteiro", "corno", "cornos", "arrombado", "arrombada",
+    "desgraçado", "desgraçada", "filho da puta", "fdp", "vagabunda",
+    "piranha", "safado", "safada", "otário", "otária", "babaca",
+    "escroto", "escrota", "viadagem", "pqp", "caralhada", "putz",
+    "mijar", "mijo", "peidar", "peido", "cagar", "cagado", "cagão"
+  ],
+  "sexual": [
+    "pornô", "pornografia", "pornográfico", "masturbação", "masturbar",
+    "orgasmo", "prostituta", "prostituto", "prostituição", "bordel",
+    "erótico", "erótica", "fetiche", "penetração", "ejaculação",
+    "esperma", "vibrador", "consolo", "striptease", "orgia",
+    "sadomasoquismo", "voyeur", "incesto", "zoofilia", "siririca"
+  ],
+  "slurs": [
+    "viado", "viados", "bicha", "bichas", "boiola", "sapatão",
+    "traveco", "macaco", "macacos", "crioulo", "neguinho", "japa",
+    "baiano", "retardado", "retardada", "mongoloide", "mongol",
+    "débil mental", "deficiente", "aleijado", "aleijada", "manco",
+    "surdo-mudo", "mudinho", "doido", "louco", "maluco", "esquizo",
+    "gordo", "gorda", "baleia", "anão", "nanico", "aidético"
+  ]
+}

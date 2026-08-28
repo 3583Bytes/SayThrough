@@ -24,6 +24,7 @@ const VOICES: Record<LanguageCode, { model: string; espeak: string }> = {
   en: { model: 'en_US-hfc_female-medium', espeak: 'en-us' },
   es: { model: 'es_ES-sharvard-medium', espeak: 'es' },
   pl: { model: 'pl_PL-gosia-medium', espeak: 'pl' },
+  pt: { model: 'pt_BR-faber-medium', espeak: 'pt-br' },
 }
 
 // 0.8x speed — the setting this voice was validated at. The shipped model

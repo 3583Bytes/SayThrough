@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: public/voices
-          key: voice-en-es-pl-v1
+          key: voice-en-es-pl-pt-v1
 
       - name: Fetch enhanced voice models
         if: steps.voice-cache.outputs.cache-hit != 'true'
@@ -68,6 +68,7 @@ jobs:
           npm run voice
           npm run voice:es
           npm run voice:pl
+          npm run voice:pt
           echo "voice files: $(ls public/voices | wc -l)"
 
       # Served at the saythrough.com root (custom domain), so NO base-path

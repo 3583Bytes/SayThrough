@@ -1,6 +1,7 @@
 import { EN } from '../../src/i18n/en'
 import { ES } from '../../src/i18n/es'
 import { PL } from '../../src/i18n/pl'
+import { PT } from '../../src/i18n/pt'
 import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
@@ -26,6 +27,8 @@ describe('language codes', () => {
     expect(langCode('en-GB')).toBe('en')
     expect(langCode('pl-PL')).toBe('pl')
     expect(langCode('pl')).toBe('pl')
+    expect(langCode('pt-BR')).toBe('pt')
+    expect(langCode('pt-PT')).toBe('pt')
   })
 
   it('falls back to English rather than throwing on anything unknown', () => {
@@ -39,13 +42,16 @@ describe('language codes', () => {
 
   it('offers each language under its own name', () => {
     // A picker that says "Spanish" is no use to someone who reads Spanish.
-    expect(SUPPORTED_LANGUAGES.map((l) => l.label)).toEqual(['English', 'Español', 'Polski'])
+    expect(SUPPORTED_LANGUAGES.map((l) => l.label)).toEqual([
+      'English', 'Español', 'Polski', 'Português',
+    ])
   })
 })
 
 const TRANSLATIONS: Array<[string, Record<string, string>]> = [
   ['es', ES],
   ['pl', PL],
+  ['pt', PT],
 ]
 
 describe('string tables', () => {
@@ -95,6 +101,18 @@ describe('string tables', () => {
     expect(untranslated).toEqual([])
   })
 
+  it('leaves no Portuguese string identical to its English source', () => {
+    // Portuguese shares Latin roots with English, so the cognate list is the
+    // longest of the three — but each of these really is the Portuguese word.
+    const shared = new Set([
+      'app.name', 'settings.importObz', 'preset.normal', 'edit.symbol',
+      'edit.symbolResult', 'edit.color', 'edit.colorSwatch', 'nav.section',
+      'nav.sectionCurrent', 'settings.gapNormal',
+    ])
+    const untranslated = KEYS.filter((key) => !shared.has(key) && PT[key] === EN[key])
+    expect(untranslated).toEqual([])
+  })
+
   it('has no empty English strings', () => {
     for (const key of KEYS) expect(EN[key].trim()).not.toBe('')
   })
@@ -105,6 +123,7 @@ describe('translate', () => {
     expect(translate('common.done', 'en-US')).toBe('Done')
     expect(translate('common.done', 'es-ES')).toBe('Listo')
     expect(translate('common.done', 'pl-PL')).toBe('Gotowe')
+    expect(translate('common.done', 'pt-BR')).toBe('Pronto')
   })
 
   it('substitutes placeholders', () => {

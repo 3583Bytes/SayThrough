@@ -32,6 +32,7 @@ const CHECKS = [
   { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon (en)' },
   { path: '/app/prediction/es.txt', required: true, label: 'prediction lexicon (es)' },
   { path: '/app/prediction/pl.txt', required: true, label: 'prediction lexicon (pl)' },
+  { path: '/app/prediction/pt.txt', required: true, label: 'prediction lexicon (pt)' },
   { path: '/app/ort/ort.wasm.min.js', required: true, label: 'ONNX runtime' },
   { path: '/app/voice/piper_phonemize.js', required: true, label: 'phonemizer' },
   // Optional: the app falls back to the platform voice and says so. One per
@@ -41,6 +42,7 @@ const CHECKS = [
     ['en', 'en_US-hfc_female-medium'],
     ['es', 'es_ES-sharvard-medium'],
     ['pl', 'pl_PL-gosia-medium'],
+    ['pt', 'pt_BR-faber-medium'],
   ].map(([lang, model]) => ({
     path: `/app/voices/${model}.onnx.json`,
     required: false,

@@ -45,6 +45,12 @@ const KNOWN_GOOD: Record<string, string[]> = {
     'zosia', 'google polski', 'zofia', 'paulina', 'marek', 'agnieszka',
     'ewa', 'maja', 'jacek', 'jan', 'krzysztof',
   ],
+  // Luciana is Apple's pt-BR voice; Joana is pt-PT and ranks below it because
+  // the bundled boards are Brazilian.
+  pt: [
+    'luciana', 'google português do brasil', 'google português',
+    'francisca', 'felipe', 'joana', 'catarina', 'raquel', 'daniel',
+  ],
 }
 
 export function isNoveltyVoice(voice: RankableVoice): boolean {

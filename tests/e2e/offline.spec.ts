@@ -38,14 +38,20 @@ test('the app boots and speaks with no network', async ({ page, context }) => {
   // instead of letting the service worker answer it — a race between
   // setOffline and the reload, in the harness rather than the app. Retry that
   // one case; anything else is a real failure and rethrows.
+  //
+  // The budget is generous on purpose. It was 4 attempts at a flat 500 ms,
+  // which passed alone and failed only under a full parallel run — the race
+  // widens with load, so a budget tuned against an idle machine reports a
+  // harness timing artefact as a product failure. Backoff, not more retries at
+  // the same spacing, is what actually clears it.
   for (let attempt = 0; ; attempt++) {
     try {
       await page.reload({ waitUntil: 'domcontentloaded' })
       break
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      if (attempt >= 3 || !message.includes('ERR_INTERNET_DISCONNECTED')) throw error
-      await page.waitForTimeout(500)
+      if (attempt >= 7 || !message.includes('ERR_INTERNET_DISCONNECTED')) throw error
+      await page.waitForTimeout(500 * (attempt + 1))
     }
   }
 

@@ -310,6 +310,107 @@ const LANGUAGES = [
         '_Wygenerowane przez `scripts/vocabulary/build-review-packet.mjs` — wygeneruj ponownie po każdej zmianie słownictwa._',
     },
   },
+  {
+    code: 'pt',
+    vocab: 'src/data/coreWords.pt.json',
+    symbols: 'src/data/seedSymbolMap.pt.json',
+    out: 'slp-review-pt.md',
+    levels: { 1: 'Básico', 2: 'Intermediário', 3: 'Completo' },
+    intent: {
+      '3x4': 'comunicadores iniciantes, primeiras palavras',
+      '5x6': 'a prancha padrão',
+      '6x10': 'ampliada, para quem tem mais vocabulário',
+    },
+    t: {
+      title: '# Revisão do vocabulário — SayThrough (português)',
+      ask: [
+        '> **O que estamos pedindo:** confirmar que este vocabulário é',
+        '> clinicamente adequado para usuários de CAA, ou dizer o que mudar.',
+        '> O item §19.6 faz disso um requisito de lançamento e ele **não** foi',
+        '> cumprido — nada aqui foi revisado por um profissional.',
+      ],
+      provenance: [
+        'As listas foram adaptadas de trabalhos publicados sobre vocabulário',
+        'nuclear em português, seguindo a regra do projeto *adaptar, não',
+        'inventar*, e completadas por uma pessoa desenvolvedora, não clínica.',
+        'É aí que está o risco.',
+        '',
+        '**Estas pranchas não são uma tradução das espanholas nem das inglesas.**',
+        'As preposições `de` e `em` ocupam células do núcleo permanente porque',
+        'CONTRAEM obrigatoriamente com o artigo seguinte (de+o=do, em+a=na) — o',
+        'aplicativo funde as duas palavras automaticamente na barra de mensagem',
+        '— e porque `gostar` não significa nada sem `de` ao lado.',
+        '',
+        'É pt-BR, não pt-PT: `você` em vez de `tu`, gerúndio em vez de `a` +',
+        'infinitivo, `ônibus` e `celular` em vez das palavras europeias.',
+        '',
+        '**Pedido específico:** confira as contrações. O aplicativo funde `de` +',
+        '`o` em `do` no momento em que a segunda palavra é tocada, e a palavra',
+        'fundida passa a ser um único item da barra — apagar remove as duas.',
+        'Isso está correto do ponto de vista clínico e de aprendizagem?',
+      ],
+      boards: '## As pranchas',
+      boardsHeader: '| Prancha | Páginas | Palavras nucleares | Total | Para quem |',
+      coreMeans: [
+        '«Palavras nucleares» são a região permanente mais as páginas de',
+        'vocabulário nuclear: as palavras que servem em qualquer contexto, ao',
+        'contrário dos substantivos temáticos.',
+      ],
+      questions: '## Perguntas que precisamos responder',
+      q1: '### 1. O núcleo permanente tem as palavras certas?',
+      q1body: [
+        'Elas aparecem em **todas as páginas** em posições fixas e não podem ser',
+        'alcançadas com menos toques. Errar aqui custa mais do que qualquer',
+        'outra coisa neste documento.',
+      ],
+      q2: '### 2. Os níveis de vocabulário estão traçados nos lugares certos?',
+      q2body: [
+        'Quem está no nível Básico vê só as palavras de nível 1. As palavras',
+        'nunca mudam de lugar entre níveis — subir o nível apenas revela mais.',
+      ],
+      q3: '### 3. Palavras sem símbolo',
+      q3body: [
+        'Aparecem só como texto. É o normal em CAA para palavras funcionais,',
+        'mas confirme que nenhuma delas precisa de símbolo — principalmente',
+        'para quem ainda não lê.',
+      ],
+      q4: '### 4. Símbolos que ninguém olhou',
+      q5: '### 5. Palavras que mudam de cor entre páginas',
+      q5body: [
+        'A cor Fitzgerald segue a classe gramatical. Estas palavras estão',
+        'codificadas de forma diferente em páginas diferentes, geralmente',
+        'porque o sentido muda. Confirme se está certo ou se devemos unificar.',
+      ],
+      q6: '### 6. Palavras que aparecem em mais de uma página',
+      q6body: [
+        'Repetição é normal em CAA — uma palavra pode pertencer a vários',
+        'lugares. Confirme que cada uma merece a segunda célula.',
+      ],
+      full: '## Vocabulário completo',
+      persistentCore: '**Núcleo permanente** (em todas as páginas)',
+      tableHeader: '| Palavra | Classe | Introduzida no nível | Símbolo |',
+      coreWords: 'vocabulário nuclear',
+      topic: 'tema',
+      textOnly: '— só texto',
+      checklist: '## Checklist de lançamento (§19.6)',
+      checkItems: [
+        '- [ ] De qualquer página dá para produzir «ajuda», «parar», «mais»,',
+        '      «eu quero ___» e «eu estou ___» em dois toques ou menos',
+        '- [ ] O núcleo permanente é idêntico em conteúdo e posição em todas as',
+        '      páginas *(verificado automaticamente em `tests/unit/vocabulary.test.ts`)*',
+        '- [ ] Seleção de palavras revisada e aprovada',
+        '- [ ] Limites de nível revisados e aprovados',
+        '- [ ] Símbolos revisados na tela, incluindo o item 4',
+        '- [ ] As contrações automáticas (de+o=do, em+a=na) estão corretas',
+        '      *(veja §19.7)*',
+      ],
+      signoff: '**Revisor(a):** _____________________  **Formação:** _____________________',
+      dateLine:
+        '**Data:** _____________  **Resultado:** aprovado / aprovado com mudanças / não aprovado',
+      footer:
+        '_Gerado por `scripts/vocabulary/build-review-packet.mjs` — gere de novo depois de qualquer mudança de vocabulário._',
+    },
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -392,6 +493,16 @@ async function buildPacket(config) {
     w()
     const pending = (overrides._pendingVisualCheck ?? '').split(':').pop().trim()
     w(pending.split(',').map((x) => '`' + x.trim() + '`').join(', '))
+  } else if (config.code === 'pt') {
+    w('Os pictogramas do ARASAAC são os mesmos em todos os idiomas, então cada')
+    w('palavra em português reutiliza o identificador já escolhido para o')
+    w('conceito equivalente em inglês. Essa equivalência foi decidida por uma')
+    w('pessoa desenvolvedora e **não foi conferida na tela**: um símbolo pode')
+    w('ser certo para a palavra inglesa e enganoso para a portuguesa.')
+    w()
+    w('Confira principalmente as palavras cujos conceitos não são um para um —')
+    w('por exemplo `de`, `em`, `gosto`, `tem` e as formas de `ser` e `estar`,')
+    w('que dividem um único símbolo.')
   } else if (config.code === 'pl') {
     w('Piktogramy ARASAAC są takie same we wszystkich językach, więc każde')
     w('polskie słowo korzysta z identyfikatora wybranego wcześniej dla')
@@ -430,7 +541,13 @@ async function buildPacket(config) {
       places[x[0]].push({ pos: x[1], page })
     }
     const coreLabel =
-      config.code === 'es' ? 'el núcleo' : config.code === 'pl' ? 'obszar stały' : 'the core region'
+      config.code === 'es'
+        ? 'el núcleo'
+        : config.code === 'pl'
+          ? 'obszar stały'
+          : config.code === 'pt'
+            ? 'o núcleo'
+            : 'the core region'
     for (const x of v.core) add(x, coreLabel)
     for (const [page, ws] of Object.entries(v.topics)) for (const x of ws) add(x, page)
     const conflicts = Object.entries(places).filter(
