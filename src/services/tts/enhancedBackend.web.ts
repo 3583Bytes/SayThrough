@@ -1,3 +1,4 @@
+import { type LanguageCode, langCode } from '../../i18n'
 import type { SpeakRequest, TtsBackend } from './types'
 
 // §10.5 enhanced neural voice (Piper) — web implementation.
@@ -15,8 +16,14 @@ import type { SpeakRequest, TtsBackend } from './types'
 //      --input must be a JSON ARRAY. A bare object aborts with no message.
 
 const BASE = process.env.EXPO_PUBLIC_BASE_URL ?? ''
-const VOICE_ID = 'en_US-hfc_female-medium'
-const ESPEAK_VOICE = 'en-us'
+
+// One Piper model and one espeak-ng phoneme voice per language (§19.7). Both
+// are ~60 MB, so only the active language's model is ever fetched — a Spanish
+// user never downloads the English one.
+const VOICES: Record<LanguageCode, { model: string; espeak: string }> = {
+  en: { model: 'en_US-hfc_female-medium', espeak: 'en-us' },
+  es: { model: 'es_ES-sharvard-medium', espeak: 'es' },
+}
 
 // 0.8x speed — the setting this voice was validated at. The shipped model
 // config says 1.0, which is noticeably too fast for AAC listeners.
@@ -66,9 +73,20 @@ class EnhancedBackend implements TtsBackend {
   private audio: AudioContext | null = null
   private playing: AudioBufferSourceNode | null = null
   private cache = new Map<string, Float32Array>()
+  // Which language the loaded session speaks. A session is built for one
+  // model, so switching language means tearing it down and building another.
+  private loaded: LanguageCode | null = null
+  // espeak-ng voice for the loaded model; phonemes are language-specific, so
+  // running Spanish text through the English phonemizer produces nonsense.
+  private espeak = VOICES.en.espeak
 
   isAvailable(): boolean {
     return this.ready
+  }
+
+  /** The language the current session speaks, or null if none is loaded. */
+  loadedLanguage(): LanguageCode | null {
+    return this.loaded
   }
 
   downloadProgress(): { loaded: number; total: number } | null {
@@ -81,10 +99,11 @@ class EnhancedBackend implements TtsBackend {
     return this.error
   }
 
-  async isDownloaded(): Promise<boolean> {
+  async isDownloaded(language?: string): Promise<boolean> {
     try {
       const cache = await caches.open('saythrough-v1')
-      return Boolean(await cache.match(`${BASE}/voices/${VOICE_ID}.onnx`))
+      const voice = VOICES[langCode(language)]
+      return Boolean(await cache.match(`${BASE}/voices/${voice.model}.onnx`))
     } catch {
       return false
     }
@@ -95,11 +114,18 @@ class EnhancedBackend implements TtsBackend {
    * in-flight promise is shared, so tapping "Download" twice does not start
    * two 60 MB downloads.
    */
-  init(onProgress?: (loaded: number, total: number) => void): Promise<boolean> {
-    if (this.ready) return Promise.resolve(true)
+  init(
+    onProgress?: (loaded: number, total: number) => void,
+    language?: string,
+  ): Promise<boolean> {
+    const wanted = langCode(language)
+    // Already speaking this language — nothing to do. Already speaking a
+    // DIFFERENT one — drop the session and build the new model's.
+    if (this.ready && this.loaded === wanted) return Promise.resolve(true)
+    if (this.ready && this.loaded !== wanted) this.reset()
     if (this.initPromise) return this.initPromise
     this.error = null
-    this.initPromise = this.load(onProgress).catch((cause) => {
+    this.initPromise = this.load(onProgress, wanted).catch((cause) => {
       this.error = cause instanceof Error ? cause.message : String(cause)
       // Leave the app on the platform voice; Settings surfaces the failure.
       this.initPromise = null
@@ -108,9 +134,22 @@ class EnhancedBackend implements TtsBackend {
     return this.initPromise
   }
 
+  /** Drop the session so a different language's model can replace it. */
+  private reset(): void {
+    this.stop()
+    this.session = null
+    this.config = null
+    this.ready = false
+    this.loaded = null
+    this.progress = null
+    this.cache.clear() // clips are language-specific
+  }
+
   private async load(
     onProgress?: (loaded: number, total: number) => void,
+    language: LanguageCode = 'en',
   ): Promise<boolean> {
+    const voice = VOICES[language]
     await Promise.all([
       loadScript(`${BASE}/ort/ort.wasm.min.js`),
       loadScript(`${BASE}/voice/piper_phonemize.js`),
@@ -133,7 +172,7 @@ class EnhancedBackend implements TtsBackend {
     // A 404 is the obvious signal, but hosts that serve an SPA fallback answer
     // 200 with HTML instead — so the body is checked too, rather than letting
     // JSON.parse fail with something unreadable.
-    const configResponse = await fetch(`${BASE}/voices/${VOICE_ID}.onnx.json`)
+    const configResponse = await fetch(`${BASE}/voices/${voice.model}.onnx.json`)
     const missing = new Error('The enhanced voice is not available on this site yet.')
     if (configResponse.status === 404) throw missing
     if (!configResponse.ok) throw new Error('Could not load the voice settings.')
@@ -145,10 +184,12 @@ class EnhancedBackend implements TtsBackend {
       throw missing
     }
 
-    const model = await this.fetchModel(onProgress)
-    this.session = await ort.InferenceSession.create(model, {
+    const modelBytes = await this.fetchModel(voice.model, onProgress)
+    this.session = await ort.InferenceSession.create(modelBytes, {
       executionProviders: ['wasm'],
     })
+    this.espeak = voice.espeak
+    this.loaded = language
     this.ready = true
     this.progress = null
     return true
@@ -156,9 +197,10 @@ class EnhancedBackend implements TtsBackend {
 
   /** Streamed so the 60 MB download can show real progress, not a spinner. */
   private async fetchModel(
+    model: string,
     onProgress?: (loaded: number, total: number) => void,
   ): Promise<Uint8Array> {
-    const response = await fetch(`${BASE}/voices/${VOICE_ID}.onnx`)
+    const response = await fetch(`${BASE}/voices/${model}.onnx`)
     if (response.status === 404) {
       throw new Error('The enhanced voice is not available on this site yet.')
     }
@@ -198,7 +240,7 @@ class EnhancedBackend implements TtsBackend {
     // The input MUST be a JSON array — a bare object aborts silently.
     module.callMain([
       '-l',
-      ESPEAK_VOICE,
+      this.espeak,
       '--input',
       JSON.stringify([{ text }]),
       '--espeak_data',
@@ -256,6 +298,16 @@ class EnhancedBackend implements TtsBackend {
     const text = request.text.trim()
     if (!text) {
       request.onDone?.()
+      return
+    }
+    // A session speaks exactly one language. Asked for another, report the
+    // error rather than synthesising: the router then falls back to the
+    // platform voice for this utterance, which is right — a Spanish sentence
+    // read by the English model is worse than a plain Spanish system voice.
+    if (request.language && langCode(request.language) !== this.loaded) {
+      request.onError?.(
+        new Error('The enhanced voice is not loaded for this language.'),
+      )
       return
     }
     // rate is the platform 0.1–2.0 scale; Piper's length_scale is inverse.

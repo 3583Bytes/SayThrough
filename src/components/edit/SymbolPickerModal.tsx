@@ -1,5 +1,6 @@
 import { Image } from 'expo-image'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import { useEffect, useState } from 'react'
 import {
   Modal,
@@ -30,6 +31,7 @@ export function SymbolPickerModal({
   onClose,
 }: SymbolPickerModalProps) {
   const theme = useTheme()
+  const t = useT()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SymbolResult[]>([])
 
@@ -55,14 +57,14 @@ export function SymbolPickerModal({
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search symbols…"
+              placeholder={t('edit.searchSymbols')}
               autoFocus
               style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
-              accessibilityLabel="Search symbols"
+              accessibilityLabel={t('edit.searchSymbolsLabel')}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close symbol picker"
+              accessibilityLabel={t('edit.closePicker')}
               onPress={onClose}
               style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
             >
@@ -74,7 +76,7 @@ export function SymbolPickerModal({
               <Pressable
                 key={result.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Symbol ${result.label}`}
+                accessibilityLabel={t('edit.symbolResult', { label: result.label })}
                 onPress={() => onSelect(result.id)}
                 style={({ pressed }) => [styles.cell, pressed && styles.pressed]}
               >

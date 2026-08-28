@@ -14,6 +14,7 @@ See `docs/aac-requirements.txt` for the full feature requirements document deriv
 - **Local-first**: All data in SQLite (expo-sqlite; IndexedDB-backed on web); cloud sync is optional and never required
 - **Symbols**: Web (Phase 1) lazy-loads ARASAAC + Mulberry (~16,500 symbols, namespaced refs like `arasaac:2788`) from self-hosted same-origin static assets (school-filter safe, no third-party requests) with Cache API caching, pre-caches the active page set, and offers an optional full offline pack (~180 MB); native builds (Phase 2) bundle `symbols.zip`, extracted on first launch to `FileSystem.documentDirectory/symbols/`
 - **Open standards**: Native Open Board Format (.obf/.obz) import/export for interoperability
+- **Multilingual**: English + Spanish. One authored page set per (language, size) — a board is never machine-translated or reflowed. UI strings in `src/i18n` (`en.ts` canonical; other tables are typed so a missing key fails the build). Prediction lexicon, next-word frames, voice ranking and the Piper model all follow the profile's language. See technical-specification.md §19.7
 - **Symbol libraries**: ARASAAC (CC BY-NC-SA) + Mulberry (CC BY-SA) — no proprietary PCS/Boardmaker dependency
 - **TTS**: `expo-speech` (AVSpeechSynthesizer on iOS, Android TTS engine)
 
@@ -47,6 +48,9 @@ npm run build      # production web export → dist/ (+ PWA postbuild)
 npm run typecheck  # tsc --noEmit (app only; tests excluded)
 npm test           # jest unit tests (pure logic; tests/unit)
 npm run e2e        # build + Playwright E2E against the web build (tests/e2e)
+npm run lexicon    # rebuild prediction lexicons (en + es) from OpenSubtitles
+npm run spanish-core  # regenerate the Spanish boards + symbol map
+npm run voice      # fetch the English Piper model (voice:es for Spanish)
 ```
 
 Tests: unit via jest + ts-jest (`tests/unit`); end-to-end via Playwright

@@ -29,22 +29,28 @@ const CHECKS = [
       return `${list.length} symbols`
     },
   },
-  { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon' },
+  { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon (en)' },
+  { path: '/app/prediction/es.txt', required: true, label: 'prediction lexicon (es)' },
   { path: '/app/ort/ort.wasm.min.js', required: true, label: 'ONNX runtime' },
   { path: '/app/voice/piper_phonemize.js', required: true, label: 'phonemizer' },
-  {
-    // Optional: the app falls back to the platform voice and says so.
-    path: '/app/voices/en_US-hfc_female-medium.onnx.json',
+  // Optional: the app falls back to the platform voice and says so. One per
+  // language — a missing Spanish model is invisible to an English tester, so
+  // it has to be checked explicitly rather than inferred from the English one.
+  ...[
+    ['en', 'en_US-hfc_female-medium'],
+    ['es', 'es_ES-sharvard-medium'],
+  ].map(([lang, model]) => ({
+    path: `/app/voices/${model}.onnx.json`,
     required: false,
-    label: 'enhanced voice model',
+    label: `enhanced voice model (${lang})`,
     hint:
-      'the deploy fetches this itself (npm run voice) — a warning here means ' +
-      'that download failed, not that a manual step was missed',
+      'the deploy fetches this itself (npm run voice / voice:es) — a warning ' +
+      'here means that download failed, not that a manual step was missed',
     verify: async (res) => {
       const config = await res.json()
       return `${config.audio?.sample_rate} Hz`
     },
-  },
+  })),
 ]
 
 // GitHub Pages serves the SPA shell for unknown /app/* paths, so a 200 with

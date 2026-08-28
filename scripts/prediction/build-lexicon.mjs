@@ -27,7 +27,11 @@ const root = join(here, '..', '..')
 const outDir = join(root, 'public', 'prediction')
 
 const raw = await readFile(join(here, 'data', `${lang}_50k.txt`), 'utf8')
-const blocklist = JSON.parse(await readFile(join(here, 'blocklist.json'), 'utf8'))
+// Per-language blocklist: English keeps the original filename, every other
+// language gets a suffixed file. Both must exist — silently falling back to
+// the English list would let Spanish profanity straight through.
+const blocklistFile = lang === 'en' ? 'blocklist.json' : `blocklist.${lang}.json`
+const blocklist = JSON.parse(await readFile(join(here, blocklistFile), 'utf8'))
 const contractions = JSON.parse(await readFile(join(here, 'contractions.json'), 'utf8'))
 
 // Every non-underscore key is a category of blocked words; underscore keys are
@@ -56,7 +60,14 @@ const dropRaw = new Set(langRules.dropRaw ?? [])
 // Letters, optionally joined by hyphens or apostrophes, with an optional
 // trailing period for abbreviations (mr., st., no.). Everything else in the
 // corpus is tokenizer debris: bare clitics ('s, 't), digits, stray dashes.
-const SHAPE = /^[a-z]+(?:[-'][a-z]+)*\.?$/
+//
+// The letter class is per-language. Spanish needs the accented vowels, ñ and
+// ü, or the filter would silently drop `está`, `niño`, `qué` and `también` —
+// four of the commonest words in the language — and leave the lexicon looking
+// plausible while missing its most useful entries.
+const LETTERS = { en: 'a-z', es: 'a-záéíóúüñ' }
+const letters = LETTERS[lang] ?? LETTERS.en
+const SHAPE = new RegExp(`^[${letters}]+(?:[-'][${letters}]+)*\\.?$`)
 
 function isJunk(word) {
   if (!SHAPE.test(word)) return true

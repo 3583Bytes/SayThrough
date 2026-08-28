@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { useTheme } from '../hooks/useTheme'
+import { useT } from '../hooks/useT'
 import { useEffect, useState } from 'react'
 import {
   Pressable,
@@ -26,6 +27,7 @@ interface Report {
 // the fuller SLP tooling.
 export function TrackingReportScreen() {
   const theme = useTheme()
+  const t = useT()
   const navigation = useNavigation()
   const activeUser = useUserStore((s) => s.activeUser)
   const [report, setReport] = useState<Report | null>(null)
@@ -59,13 +61,13 @@ export function TrackingReportScreen() {
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to settings"
+          accessibilityLabel={t('report.backToSettings')}
           onPress={() => navigation.goBack()}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={[styles.backText, { color: theme.text }]}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.text }]}>{t('common.back')}</Text>
         </Pressable>
-        <Text style={[styles.title, { color: theme.text }]}>Communication Data</Text>
+        <Text style={[styles.title, { color: theme.text }]}>{t('report.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -73,13 +75,13 @@ export function TrackingReportScreen() {
         {report && (
           <>
             <View style={styles.statsRow}>
-              <Stat label="Buttons today" value={report.pressesToday} />
-              <Stat label="Messages today" value={report.messagesToday} />
-              <Stat label="Buttons (7 days)" value={report.presses7d} />
-              <Stat label="Messages (7 days)" value={report.messages7d} />
+              <Stat label={t('report.pressesToday')} value={report.pressesToday} />
+              <Stat label={t('report.messagesToday')} value={report.messagesToday} />
+              <Stat label={t('report.presses7d')} value={report.presses7d} />
+              <Stat label={t('report.messages7d')} value={report.messages7d} />
             </View>
 
-            <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Most used words (7 days)</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>{t('report.mostUsed')}</Text>
             <View style={[styles.card, { backgroundColor: theme.surface }]} testID="report-words">
               {report.topWords.length === 0 && (
                 <Text style={[styles.hint, { color: theme.textMuted }]}>
@@ -109,6 +111,7 @@ export function TrackingReportScreen() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   const theme = useTheme()
+  const t = useT()
   return (
     <View style={[styles.stat, { backgroundColor: theme.surface }]}>
       <Text style={[styles.statValue, { color: theme.accent }]}>{value}</Text>

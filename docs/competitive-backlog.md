@@ -5,7 +5,7 @@ comparison against the major AAC apps. Companion to
 `aac-requirements.txt` (the requirements) and `technical-specification.md`
 (the build spec). Update the checkboxes as items ship.
 
-**Last reviewed:** 2026-08-24
+**Last reviewed:** 2026-08-28
 **Benchmarked against:** TD Snap (Tobii Dynavox), Proloquo2Go / Proloquo
 (AssistiveWare), LAMP Words for Life & TouchChat (PRC-Saltillo), Speak for
 Yourself, CoughDrop, and the open-source field (Cboard, AsTeRICS Grid).
@@ -16,6 +16,33 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 ---
 
 ## 0. Shipped recently (so the backlog reflects reality)
+
+- [x] **Spanish — the whole stack, not a translation layer (§19.7)** — the
+  gap where *every* competitor, free ones included, beat us. Shipped as: an
+  i18n layer (`src/i18n`, English canonical and other tables typed so a
+  missing key fails the build); **three authored Spanish boards** at the same
+  sizes as the English ones (26 / 197 / 513 words, 14 / 106 / 310 core);
+  a **Spanish morphology engine**; a 30k Spanish prediction lexicon with its
+  own blocklist; Spanish next-word frames; Spanish voice ranking; and a
+  Spanish Piper model fetched at deploy alongside the English one.
+  Three things are worth calling out because they are why this could not be a
+  translation pass:
+  **(1) Two copulas.** `ser` and `estar` are both core and not
+  interchangeable, so both are in the persistent core and *Palabras de apoyo*
+  carries their person forms — the same hole the English "to be" audit found,
+  doubled.
+  **(2) Pro-drop.** Person lives on the verb, so the word-forms popup offers
+  `como / comes / come / comemos / comen`, not tense alone. The frame words
+  (`quiero`, `tengo`, `necesito`, `gusta`) ship already conjugated.
+  **(3) Agreement.** A Spanish adjective's correct form depends on the noun
+  already in the message bar, so `wordForms()` now takes the bar as context
+  and offers the agreeing form first — inflection stopped being a property of
+  one button and became a property of the sentence. Gender is inferred from
+  the ending with an exceptions table (`la mano`, `el día`, `el agua`).
+  Switching language keeps the user's **grid size**, pages, word lists and
+  history. **Remaining: the §19.6 SLP sign-off, which is now needed per
+  language** — a Spanish board reviewed by an English-speaking clinician is
+  not a review.
 
 - [x] **Clinical review pass on the vocabulary (§19.4)** — applied core
   vocabulary research (Banajee et al. 2003 toddler core) rather than waiting
@@ -67,8 +94,10 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
   persistent session is ~13x better. Optional ~60 MB download, standard voice
   stays the default, and the router falls back per-utterance so a failed model
   can never leave someone without a voice.
-  **Remaining:** model as a release asset at deploy, cache pre-warming, storage
-  management, and real-device QA (iOS needs a user gesture for AudioContext).
+  Deploy packaging **is done** — `deploy.yml` caches and fetches the models
+  and fails the build if they are unavailable, now one per language (§19.7).
+  **Remaining:** cache pre-warming, storage management, and real-device QA
+  (iOS needs a user gesture for AudioContext).
 - [~] **Vocabulary sizes + levels — the structural spine (§19.2/§19.3).**
   The seed generator is now size-driven: each grid size is an independently
   authored page set (§19.2 — a motor-plan layout cannot be reflowed), with
@@ -132,7 +161,9 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 **Already ahead / at parity:** zero-friction guest mode (no competitor
 lets you talk in 5s with no signup), persistent core region + Fitzgerald
 color coding, in-grid navigation, dwell + switch scanning, OBF/OBZ
-interoperability, offline PWA, multi-profile.
+interoperability, offline PWA, multi-profile, and — new — **English +
+Spanish**, the row where every competitor including the free ones used to
+beat us.
 
 **The gaps that make us look incomplete** (Tier 1 below) and **the bets
 that make us clearly better** (Tier 2) are where the backlog focuses.
@@ -147,7 +178,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 |---|---|---|---|
 | **Word prediction** (offline n-gram) in the keyboard | Every major app; makes the text/literacy path usable | M | [x] |
 | **Word forms / grammar** (long-press → plural, tense, possessive) | Proloquo, Grid 3; separates "toddler board" from real language | M–L | [x] |
-| **Grid size + vocabulary level** at setup | All of them. Three authored sizes (3×4 / 5×6 / 6×10), levels that reveal in place, Settings controls, size choice in the onboarding page-set chooser. Remaining: a level picker at onboarding, and SLP review of the word lists (§19.6 release gate) | M | [~] |
+| **Grid size + vocabulary level** at setup | All of them. Three authored sizes (3×4 / 5×6 / 6×10), levels that reveal in place, Settings controls, size choice in the onboarding page-set chooser. Remaining: a level picker at onboarding, and SLP review of the word lists (§19.6 release gate, now once per language) | M | [~] |
 | **Message history / favorites** | Proloquo2Go, TD Snap | S | [x] |
 | **Word-by-word highlight while speaking** | TD Snap/Proloquo; literacy support | M | [x] |
 
@@ -155,8 +186,8 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 | Item | Why it wins | Effort | Status |
 |---|---|---|---|
-| **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets; remaining work is deploy packaging and real-device QA | L (~1–2 wk) | [~] |
-| **Spanish core set → multilingual** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. Huge underserved reach | M | [ ] |
+| **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets, one model per language. Deploy packaging done; remaining work is cache pre-warming, storage management and real-device QA | L (~1–2 wk) | [~] |
+| **Spanish core set → multilingual** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. Huge underserved reach. **Shipped** — see §0; the remaining work is the §19.6 SLP sign-off for the Spanish boards | M+L | [x] |
 | **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique | M | [ ] |
 | **Recorded button audio** ("Mom's voice" / own voice) | TD Snap's *paid* My-Own-Voice. Model fields `audioUri`/`audioCueUri` already exist — just needs an `expo-audio` record UI | S–M | [~] |
 
@@ -205,9 +236,11 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
    leverage — permanently ends the robot-voice problem *and* becomes a
    free-premium-voice headline no competitor matches. De-risked (already
    validated); first step is a pluggable TTS backend + graceful fallback.
-3. **Reach expander:** **Spanish core set** — biggest new-user unlock for
-   the effort; proves the "free, multilingual, open" thesis.
-4. **Then:** VSD → cloud sync / SLP tools.
+3. ~~**Reach expander:** Spanish core set~~ — **shipped** (§0). The thesis
+   holds: the i18n machinery is now language-agnostic, so a third language is
+   authoring work (board, lexicon, strings, Piper voice) plus a morphology
+   engine only if the language inflects in ways English and Spanish do not.
+4. **Then:** VSD → recorded audio / pronunciation → cloud sync / SLP tools.
 
 ---
 

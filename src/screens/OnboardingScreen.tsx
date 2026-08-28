@@ -11,6 +11,12 @@ import {
 import { UI_COLORS } from '../constants/colors'
 import { FONTS } from '../constants/typography'
 import { useTheme } from '../hooks/useTheme'
+import {
+  type LanguageOption,
+  SUPPORTED_LANGUAGES,
+  langCode,
+  translate,
+} from '../i18n'
 import { storage } from '../storage'
 import { useNavigationStore } from '../stores/navigationStore'
 import { useUserStore } from '../stores/userStore'
@@ -29,6 +35,12 @@ export function OnboardingScreen() {
     borderColor: theme.border,
     color: theme.text,
   }
+  // No profile exists yet, so there is nothing to read a language off —
+  // onboarding translates against the locally chosen option instead of
+  // `useT()`, and the whole screen re-renders when it changes.
+  const [language, setLanguageChoice] = useState<LanguageOption>(SUPPORTED_LANGUAGES[0])
+  const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) =>
+    translate(key, language.bcp47, params)
   const [step, setStep] = useState<'welcome' | 'setup'>('welcome')
   const [name, setName] = useState('')
   const [pageSets, setPageSets] = useState<PageSet[]>([])
@@ -38,39 +50,56 @@ export function OnboardingScreen() {
   const [error, setError] = useState<string | undefined>()
   const [busy, setBusy] = useState(false)
 
-  const openSetup = async () => {
-    const sets = (await storage.getPageSets()).filter((s) => s.isBuiltIn)
+  // Only the chosen language's boards are offered: a page set is authored in
+  // one language and cannot be reflowed into another (§19.2), so mixing them
+  // in one list would let someone pick a Spanish board for an English profile.
+  const loadSetsFor = async (option: LanguageOption) => {
+    const sets = (await storage.getPageSets()).filter(
+      (s) => s.isBuiltIn && langCode(s.language) === option.code,
+    )
     setPageSets(sets)
-    setChosenSetId(sets.find((s) => s.name === 'Core Vocabulary')?.id ?? sets[0]?.id ?? null)
+    const { coreSetIdForLanguage } = await import('../data/seedCoreVocabulary')
+    const preferred = coreSetIdForLanguage(option.bcp47)
+    setChosenSetId(sets.find((s) => s.id === preferred)?.id ?? sets[0]?.id ?? null)
+  }
+
+  const openSetup = async () => {
+    await loadSetsFor(language)
     setStep('setup')
   }
 
+  const chooseLanguage = async (option: LanguageOption) => {
+    setLanguageChoice(option)
+    setError(undefined)
+    await loadSetsFor(option)
+  }
+
   const tryGuest = async () => {
-    const coreId = await storage.getMeta('coreVocabularySeeded')
-    const pageSet = coreId ? await storage.getPageSet(coreId) : null
+    const { coreSetIdForLanguage } = await import('../data/seedCoreVocabulary')
+    const pageSet = await storage.getPageSet(coreSetIdForLanguage(language.bcp47))
     if (!pageSet) return
     useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
-    useUserStore.getState().startGuest(pageSet.id)
+    useUserStore.getState().startGuest(pageSet.id, language.bcp47)
   }
 
   const finish = async () => {
     const trimmed = name.trim()
     if (!trimmed) {
-      setError('Please enter a name — it can be changed later.')
+      setError(t('onboarding.errorName'))
       return
     }
     if (!chosenSetId) return
     if (pin && !/^\d{4,8}$/.test(pin)) {
-      setError('The PIN must be 4–8 digits (or leave it empty).')
+      setError(t('onboarding.errorPinDigits'))
       return
     }
     if (pin && pin !== pinConfirm) {
-      setError('The PINs do not match.')
+      setError(t('onboarding.errorPinMatch'))
       return
     }
     setBusy(true)
     try {
-      await useUserStore.getState().createUser(trimmed, chosenSetId)
+      await useUserStore.getState().createUser(trimmed, chosenSetId, language.bcp47)
       if (pin) {
         const salt = generatePinSalt()
         await useUserStore.getState().updateActiveUser({
@@ -95,34 +124,27 @@ export function OnboardingScreen() {
           <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
             SayThrough
           </Text>
-          <Text style={[styles.subtitle, textT]}>
-            Tap symbols and words — SayThrough speaks them out loud.
-          </Text>
-          <Text style={[styles.tagline, mutedT]}>
-            A free, open communication app (AAC) for people who are nonspeaking
-            or have limited speech. No account, no subscription — it works
-            offline and your words stay on this device.
-          </Text>
+          <Text style={[styles.subtitle, textT]}>{t('onboarding.subtitle')}</Text>
+          <Text style={[styles.tagline, mutedT]}>{t('onboarding.tagline')}</Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Set up SayThrough"
+            accessibilityLabel={t('onboarding.setUpLabel')}
             onPress={openSetup}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
           >
-            <Text style={styles.primaryText}>Let's set up a voice</Text>
+            <Text style={styles.primaryText}>{t('onboarding.setUp')}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Try SayThrough"
+            accessibilityLabel={t('onboarding.tryItLabel')}
             onPress={tryGuest}
             style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
           >
-            <Text style={[styles.secondaryText, { color: theme.accent }]}>Try it first — nothing is saved</Text>
+            <Text style={[styles.secondaryText, { color: theme.accent }]}>
+              {t('onboarding.tryIt')}
+            </Text>
           </Pressable>
-          <Text style={[styles.audience, mutedT]}>
-            Made for AAC users and the families, teachers, and speech-language
-            pathologists who support them.
-          </Text>
+          <Text style={[styles.audience, mutedT]}>{t('onboarding.audience')}</Text>
         </View>
       </SafeAreaView>
     )
@@ -133,32 +155,61 @@ export function OnboardingScreen() {
       <ScrollView contentContainerStyle={styles.form}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to welcome"
+          accessibilityLabel={t('onboarding.backToWelcome')}
           onPress={() => {
             setError(undefined)
             setStep('welcome')
           }}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={[styles.backText, { color: theme.accent }]}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.accent }]}>{t('common.back')}</Text>
         </Pressable>
-        <Text style={[styles.heading, textT]}>Who is this voice for?</Text>
+        <Text style={[styles.heading, textT]}>{t('onboarding.language')}</Text>
+        <View style={styles.chipRow}>
+          {SUPPORTED_LANGUAGES.map((option) => (
+            <Pressable
+              key={option.code}
+              accessibilityRole="button"
+              accessibilityLabel={option.label}
+              onPress={() => chooseLanguage(option)}
+              style={({ pressed }) => [
+                styles.chip,
+                { backgroundColor: theme.surfaceAlt, borderColor: theme.border },
+                option.code === language.code && styles.chipSelected,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  textT,
+                  option.code === language.code && styles.chipTextSelected,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={[styles.hint, mutedT]}>{t('onboarding.languageHint')}</Text>
+
+        <Text style={[styles.heading, textT]}>{t('onboarding.whoFor')}</Text>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Name (e.g. Maya)"
+          placeholder={t('onboarding.namePlaceholder')}
           style={[styles.input, inputT]}
-          accessibilityLabel="User name"
+          accessibilityLabel={t('onboarding.nameLabel')}
           autoFocus
         />
 
-        <Text style={[styles.heading, textT]}>Starting vocabulary</Text>
+        <Text style={[styles.heading, textT]}>{t('onboarding.startingVocabulary')}</Text>
         <View style={styles.chipRow}>
           {pageSets.map((set) => (
             <Pressable
               key={set.id}
               accessibilityRole="button"
-              accessibilityLabel={`Start with ${set.name}`}
+              accessibilityLabel={t('onboarding.startWith', { name: set.name })}
               onPress={() => setChosenSetId(set.id)}
               style={({ pressed }) => [
                 styles.chip,
@@ -179,25 +230,19 @@ export function OnboardingScreen() {
             </Pressable>
           ))}
         </View>
-        <Text style={[styles.hint, mutedT]}>
-          Core Vocabulary is recommended for most users — it's built around
-          the words that make up most of daily speech.
-        </Text>
+        <Text style={[styles.hint, mutedT]}>{t('onboarding.vocabHint')}</Text>
 
-        <Text style={[styles.heading, textT]}>Caregiver PIN (recommended)</Text>
-        <Text style={[styles.hint, mutedT]}>
-          Protects edit mode and settings. Without a PIN, a long-press on
-          any button opens editing. You can set one later in Settings.
-        </Text>
+        <Text style={[styles.heading, textT]}>{t('onboarding.pinHeading')}</Text>
+        <Text style={[styles.hint, mutedT]}>{t('onboarding.pinHint')}</Text>
         <TextInput
           value={pin}
           onChangeText={setPin}
           keyboardType="number-pad"
           secureTextEntry
           maxLength={8}
-          placeholder="PIN (4–8 digits, optional)"
+          placeholder={t('onboarding.pinPlaceholder')}
           style={[styles.input, inputT]}
-          accessibilityLabel="Caregiver PIN"
+          accessibilityLabel={t('onboarding.pinLabel')}
         />
         {pin !== '' && (
           <TextInput
@@ -206,9 +251,9 @@ export function OnboardingScreen() {
             keyboardType="number-pad"
             secureTextEntry
             maxLength={8}
-            placeholder="Confirm PIN"
+            placeholder={t('onboarding.pinConfirmPlaceholder')}
             style={[styles.input, inputT]}
-            accessibilityLabel="Confirm caregiver PIN"
+            accessibilityLabel={t('onboarding.pinConfirmLabel')}
           />
         )}
 
@@ -216,12 +261,14 @@ export function OnboardingScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Finish setup"
+          accessibilityLabel={t('onboarding.finish')}
           onPress={finish}
           disabled={busy}
           style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}
         >
-          <Text style={styles.primaryText}>{busy ? 'Setting up…' : 'Start talking'}</Text>
+          <Text style={styles.primaryText}>
+            {busy ? t('onboarding.settingUp') : t('onboarding.startTalking')}
+          </Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import { executeButtonActions } from '../../services/actionExecutor'
 import { ttsService } from '../../services/TTSService'
 import { storage } from '../../storage'
@@ -30,6 +31,7 @@ interface SearchModalProps {
 // Speak a result outright with the speaker button, which does not add it.
 export function SearchModal({ visible, onClose }: SearchModalProps) {
   const theme = useTheme()
+  const t = useT()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Array<{ button: Button; pageName: string }>>([])
 
@@ -70,18 +72,18 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Find a word…"
+              placeholder={t('search.placeholder')}
               placeholderTextColor={theme.textMuted}
               autoFocus
               style={[
                 styles.input,
                 { backgroundColor: theme.surfaceAlt, borderColor: theme.border, color: theme.text },
               ]}
-              accessibilityLabel="Search vocabulary"
+              accessibilityLabel={t('nav.search')}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close search"
+              accessibilityLabel={t('search.close')}
               onPress={() => {
                 setQuery('')
                 onClose()
@@ -96,7 +98,7 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
               <View key={result.button.id} style={styles.resultRow}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`Add ${result.button.label}, from ${result.pageName}`}
+                  accessibilityLabel={t('search.addResult', { word: result.button.label, page: result.pageName })}
                   onPress={() => useWord(result)}
                   style={styles.resultMain}
                 >
@@ -109,7 +111,7 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`Speak ${result.button.label}`}
+                  accessibilityLabel={t('search.speakResult', { word: result.button.label })}
                   onPress={() => ttsService.speak(result.button.label)}
                   style={({ pressed }) => [styles.speakButton, pressed && styles.pressed]}
                 >

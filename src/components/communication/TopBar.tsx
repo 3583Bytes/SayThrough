@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import { useNavigationStore } from '../../stores/navigationStore'
 
 interface TopBarProps {
@@ -28,6 +29,7 @@ export function TopBar({
   filter,
 }: TopBarProps) {
   const theme = useTheme()
+  const t = useT()
   const navigateHome = useNavigationStore((s) => s.navigateHome)
 
   return (
@@ -40,7 +42,7 @@ export function TopBar({
       <View style={styles.side}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Home"
+          accessibilityLabel={t('nav.home')}
           onPress={navigateHome}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
@@ -48,7 +50,7 @@ export function TopBar({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Search vocabulary"
+          accessibilityLabel={t('nav.search')}
           onPress={onSearchPress}
           style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
         >
@@ -80,7 +82,7 @@ export function TopBar({
         {!editHidden && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Edit mode"
+            accessibilityLabel={t('nav.editMode')}
             onPress={onEditPress}
             style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
           >

@@ -24,24 +24,35 @@ const NOVELTY_NAMES = new Set(
   ],
 )
 
-// Known high-quality voices, best first (checked as name prefixes)
-const KNOWN_GOOD = [
-  'samantha', 'ava', 'allison', 'susan', 'zoe', 'alex', 'karen',
-  'daniel', 'moira', 'serena', 'tessa', 'google us english',
-  'google uk english',
-]
+// Known high-quality voices, best first (checked as name prefixes). Keyed by
+// language: the English list scores nothing on a Spanish device, which would
+// leave a Spanish user with an arbitrary pick from whatever the OS reports.
+const KNOWN_GOOD: Record<string, string[]> = {
+  en: [
+    'samantha', 'ava', 'allison', 'susan', 'zoe', 'alex', 'karen',
+    'daniel', 'moira', 'serena', 'tessa', 'google us english',
+    'google uk english',
+  ],
+  // Apple's Mónica/Paulina and Google's español voices are the good ones;
+  // Jorge and Diego are the older, more robotic Apple pair.
+  es: [
+    'mónica', 'monica', 'paulina', 'marisol', 'juan', 'google español',
+    'google español de estados unidos', 'helena', 'laura', 'jorge', 'diego',
+  ],
+}
 
 export function isNoveltyVoice(voice: RankableVoice): boolean {
   const name = voice.name.toLowerCase().replace(/\s*\(.*\)$/, '').trim()
   return NOVELTY_NAMES.has(name)
 }
 
-function score(voice: RankableVoice): number {
+function score(voice: RankableVoice, lang: string): number {
   const name = voice.name.toLowerCase()
   let points = 0
   // Neural/natural voices (Edge exposes "... Online (Natural)") are best
   if (name.includes('natural') || name.includes('neural')) points += 40
-  const goodIndex = KNOWN_GOOD.findIndex((good) => name.startsWith(good))
+  const known = KNOWN_GOOD[lang] ?? KNOWN_GOOD.en
+  const goodIndex = known.findIndex((good) => name.startsWith(good))
   if (goodIndex >= 0) points += 30 - goodIndex // earlier in list = better
   if (voice.quality?.toLowerCase() === 'enhanced') points += 8
   // §10.2: local voices work offline and have no network latency —
@@ -58,7 +69,11 @@ export function rankVoices<T extends RankableVoice>(
   return voices
     .filter((voice) => voice.language?.toLowerCase().startsWith(langPrefix))
     .filter((voice) => !isNoveltyVoice(voice))
-    .sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name))
+    .sort(
+      (a, b) =>
+        score(b, langPrefix) - score(a, langPrefix) ||
+        a.name.localeCompare(b.name),
+    )
 }
 
 export function pickDefaultVoice<T extends RankableVoice>(

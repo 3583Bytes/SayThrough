@@ -5,6 +5,7 @@ import { FONTS } from '../../constants/typography'
 import { usePredictions } from '../../hooks/usePredictions'
 import { useScanning, type ScanItem } from '../../hooks/useScanning'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import { applyCaseOf } from '../../services/prediction'
 import { useMessageStore } from '../../stores/messageStore'
 import { useUserStore } from '../../stores/userStore'
@@ -24,6 +25,7 @@ const SYMBOL_ROWS = ['1234567890', '-/:;()$&@"', ',!%+=#*']
 
 export function KeyboardView({ onClose }: { onClose: () => void }) {
   const theme = useTheme()
+  const t = useT()
   const [buffer, setBuffer] = useState('')
   const [shift, setShift] = useState(false)
   const [symbols, setSymbols] = useState(false)
@@ -193,7 +195,7 @@ export function KeyboardView({ onClose }: { onClose: () => void }) {
           wide
         />
         <Key
-          label="space"
+          label={t('keyboard.space')}
           scanId="key-space"
           highlightedIds={highlightedIds}
           onPress={commit}
@@ -212,14 +214,14 @@ export function KeyboardView({ onClose }: { onClose: () => void }) {
           onPress={() => punctuate('?')}
         />
         <Key
-          label="▶ Speak"
+          label={t('keyboard.speak')}
           scanId="key-speak"
           highlightedIds={highlightedIds}
           onPress={speak}
           speak
         />
         <Key
-          label="Done"
+          label={t('keyboard.done')}
           scanId="key-close"
           highlightedIds={highlightedIds}
           onPress={onClose}
@@ -250,6 +252,7 @@ function Key({
   active?: boolean
 }) {
   const theme = useTheme()
+  const t = useT()
   const highlighted = scanId ? (highlightedIds?.has(scanId) ?? false) : false
   return (
     <Pressable

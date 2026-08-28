@@ -31,7 +31,9 @@ import { EditBar } from '../components/edit/EditBar'
 import { UI_COLORS } from '../constants/colors'
 import { usePageButtons } from '../hooks/usePageButtons'
 import { useScanning, type ScanItem } from '../hooks/useScanning'
+import { useT } from '../hooks/useT'
 import { useTheme } from '../hooks/useTheme'
+import { langCode } from '../i18n'
 import { executeButtonActions } from '../services/actionExecutor'
 import { useMessageStore } from '../stores/messageStore'
 import { wordForms } from '../services/morphology'
@@ -43,6 +45,7 @@ import { useNavigationStore } from '../stores/navigationStore'
 import { GUEST_USER_ID, useUserStore } from '../stores/userStore'
 import {
   coreColumnsForPageSet,
+  quickPhrasesMetaKey,
   levelOfButton,
 } from '../data/seedCoreVocabulary'
 import type { Button } from '../types/models'
@@ -79,6 +82,7 @@ export function CommunicationScreen() {
   const activeUser = useUserStore((s) => s.activeUser)
   const isGuest = activeUser?.id === GUEST_USER_ID
   const theme = useTheme()
+  const t = useT()
   const filterListId =
     wordListEditingId ??
     (activeUser?.filterEnabled ? activeUser.activeWordListId : undefined)
@@ -109,10 +113,11 @@ export function CommunicationScreen() {
   // its pages (incl. user-created ones, which share the set id) — not Quick
   // Phrases or blank sets. Width comes from the size's authored layout, since
   // each grid size has its own core region.
+  const quickMetaKey = quickPhrasesMetaKey(langCode(activeUser?.language))
   useEffect(() => {
     storage.getMeta('coreVocabularySeeded').then(setCoreSetId)
-    storage.getMeta('quickPhrasesPageSetId').then(setQuickSetId)
-  }, [])
+    storage.getMeta(quickMetaKey).then(setQuickSetId)
+  }, [quickMetaKey])
   const coreColumns = page ? coreColumnsForPageSet(page.pageSetId) : 0
 
   // §19 vocabulary level: hide words the user has not been introduced to yet,
@@ -259,7 +264,10 @@ export function CommunicationScreen() {
     if (scanningEnabled) return
     const isWord = button.actions.some((a) => a.type === 'append_to_message')
     if (!isWord) return
-    if (wordForms(button.label, button.partOfSpeech).length > 1) {
+    const forms = wordForms(button.label, button.partOfSpeech, activeUser?.language, {
+      precedingWords: useMessageStore.getState().tokens.map((t) => t.text),
+    })
+    if (forms.length > 1) {
       setFormsButton(button)
     }
   }
@@ -482,35 +490,35 @@ export function CommunicationScreen() {
         {isGuest && (
           <View style={[styles.guestBanner, { backgroundColor: theme.accentSurface }]}>
             <Text style={[styles.guestText, { color: theme.accent }]}>
-              Demo mode — nothing is saved.
+              {t('guest.banner')}
             </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Set up SayThrough"
+              accessibilityLabel={t('guest.setUp')}
               onPress={() => useUserStore.getState().endGuest()}
             >
-              <Text style={[styles.guestAction, { color: theme.accent }]}>Set up SayThrough</Text>
+              <Text style={[styles.guestAction, { color: theme.accent }]}>
+                {t('guest.setUp')}
+              </Text>
             </Pressable>
           </View>
         )}
         {isEditMode && showBackupNudge && (
           <View style={styles.nudge}>
-            <Text style={styles.nudgeText}>
-              Your vocabulary has unsaved changes — back up now?
-            </Text>
+            <Text style={styles.nudgeText}>{t('nudge.text')}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Back up now"
+              accessibilityLabel={t('nudge.action')}
               onPress={() => {
                 setShowBackupNudge(false)
                 navigation.navigate('Settings')
               }}
             >
-              <Text style={styles.nudgeAction}>Back up now</Text>
+              <Text style={styles.nudgeAction}>{t('nudge.action')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Dismiss backup reminder"
+              accessibilityLabel={t('nudge.dismiss')}
               onPress={() => setShowBackupNudge(false)}
             >
               <Text style={styles.nudgeDismiss}>✕</Text>
@@ -563,7 +571,7 @@ export function CommunicationScreen() {
           <Toolbar
             activeSection={activeSection}
             onCore={() => jumpToActivePageSet()}
-            onQuick={() => jumpToPageSet('quickPhrasesPageSetId')}
+            onQuick={() => jumpToPageSet(quickMetaKey)}
             onKeyboard={() => setKeyboardOpen((open) => !open)}
           />
         )}
@@ -604,26 +612,28 @@ export function CommunicationScreen() {
             style={[styles.menuCard, { backgroundColor: theme.surface }]}
             onPress={() => {}}
           >
-            <Text style={[styles.menuTitle, { color: theme.text }]}>Page: {page.name}</Text>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>
+              {t('page.title', { name: page.name })}
+            </Text>
             <TextInput
               value={pageRenameText}
               onChangeText={setPageRenameText}
               style={[styles.menuInput, { color: theme.text }]}
-              accessibilityLabel="Page name"
+              accessibilityLabel={t('page.nameLabel')}
               onSubmitEditing={handlePageRename}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Rename page"
+              accessibilityLabel={t('page.renameLabel')}
               onPress={handlePageRename}
               style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
             >
-              <Text style={[styles.menuButtonText, { color: theme.text }]}>Rename</Text>
+              <Text style={[styles.menuButtonText, { color: theme.text }]}>{t('page.rename')}</Text>
             </Pressable>
             {!isRootPage && (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Delete page"
+                accessibilityLabel={t('page.deleteLabel')}
                 onPress={handlePageDelete}
                 style={({ pressed }) => [
                   styles.menuButton,
@@ -633,12 +643,14 @@ export function CommunicationScreen() {
                 ]}
               >
                 <Text style={[styles.menuDeleteText, { color: theme.danger }]}>
-                  Delete page (buttons that open it become plain words)
+                  {t('page.delete')}
                 </Text>
               </Pressable>
             )}
             {isRootPage && (
-              <Text style={[styles.menuHint, { color: theme.textMuted }]}>The home page cannot be deleted.</Text>
+              <Text style={[styles.menuHint, { color: theme.textMuted }]}>
+                {t('page.homeUndeletable')}
+              </Text>
             )}
           </Pressable>
         </Pressable>

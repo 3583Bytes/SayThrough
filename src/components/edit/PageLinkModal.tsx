@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import {
   Modal,
   Pressable,
@@ -38,6 +39,7 @@ export function PageLinkModal({
   onClose,
 }: PageLinkModalProps) {
   const theme = useTheme()
+  const t = useT()
   const [pages, setPages] = useState<Page[]>([])
   const [newPageName, setNewPageName] = useState('')
   const [includeCore, setIncludeCore] = useState(true)
@@ -71,14 +73,14 @@ export function PageLinkModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.title, { color: theme.text }]}>This button opens…</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{t('edit.opensTitle')}</Text>
 
           <ScrollView style={styles.pageList}>
             {pages.map((page) => (
               <Pressable
                 key={page.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Link to page ${page.name}`}
+                accessibilityLabel={t('edit.linkToNamedPage', { name: page.name })}
                 onPress={() => onSelect(page.id)}
                 style={({ pressed }) => [styles.pageRow, pressed && styles.pressed]}
               >
@@ -87,13 +89,13 @@ export function PageLinkModal({
             ))}
           </ScrollView>
 
-          <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>…or a new page</Text>
+          <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>{t('edit.orNewPage')}</Text>
           <TextInput
             value={newPageName}
             onChangeText={setNewPageName}
-            placeholder="New page name (e.g. Minecraft)"
+            placeholder={t('edit.newPagePlaceholder')}
             style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
-            accessibilityLabel="New page name"
+            accessibilityLabel={t('edit.newPageLabel')}
             onSubmitEditing={createAndLink}
           />
           <View style={styles.switchRow}>
@@ -103,12 +105,12 @@ export function PageLinkModal({
             <Switch
               value={includeCore}
               onValueChange={setIncludeCore}
-              accessibilityLabel="Include core words on new page"
+              accessibilityLabel={t('edit.includeCore')}
             />
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Create page and link"
+            accessibilityLabel={t('edit.createAndLink')}
             onPress={createAndLink}
             style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}
           >
@@ -121,20 +123,20 @@ export function PageLinkModal({
             {hasLink && (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Remove link"
+                accessibilityLabel={t('edit.removeLink')}
                 onPress={onRemoveLink}
                 style={({ pressed }) => [styles.footerButton, pressed && styles.pressed]}
               >
-                <Text style={[styles.removeText, { color: theme.danger }]}>Remove link</Text>
+                <Text style={[styles.removeText, { color: theme.danger }]}>{t('edit.removeLink')}</Text>
               </Pressable>
             )}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cancel page link"
+              accessibilityLabel={t('edit.cancelLink')}
               onPress={onClose}
               style={({ pressed }) => [styles.footerButton, pressed && styles.pressed]}
             >
-              <Text style={[styles.cancelText, { color: theme.textMuted }]}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: theme.textMuted }]}>{t('common.cancel')}</Text>
             </Pressable>
           </View>
         </View>

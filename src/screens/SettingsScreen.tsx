@@ -41,7 +41,9 @@ import {
 } from '../services/pwa'
 import { enhancedBackend, ttsService } from '../services/TTSService'
 import { rankVoices } from '../services/voiceSelection'
+import { useT } from '../hooks/useT'
 import { useTheme } from '../hooks/useTheme'
+import { SUPPORTED_LANGUAGES, langCode, type StringKey } from '../i18n'
 import { storage } from '../storage'
 import { useEditStore } from '../stores/editStore'
 import { useNavigationStore } from '../stores/navigationStore'
@@ -50,40 +52,41 @@ import type { PageSet, WordList } from '../types/models'
 import { generatePinSalt, hashPin } from '../utils/pin'
 import { uuid } from '../utils/uuid'
 
-const PREVIEW_TEXT = 'Hi! This is what I sound like.'
 
-const RATE_PRESETS: Array<[string, number]> = [
-  ['Slow', 0.7],
-  ['Normal', 0.9],
-  ['Fast', 1.1],
+// Presets carry a string KEY, not a label — they are rendered through the
+// active profile's language like everything else on this screen.
+const RATE_PRESETS: Array<[StringKey, number]> = [
+  ['preset.slow', 0.7],
+  ['preset.normal', 0.9],
+  ['preset.fast', 1.1],
 ]
-const PITCH_PRESETS: Array<[string, number]> = [
-  ['Low', 0.8],
-  ['Normal', 1.0],
-  ['High', 1.2],
+const PITCH_PRESETS: Array<[StringKey, number]> = [
+  ['preset.low', 0.8],
+  ['preset.normal', 1.0],
+  ['preset.high', 1.2],
 ]
-const DWELL_PRESETS: Array<[string, number]> = [
-  ['0.5s', 500],
-  ['1s', 1000],
-  ['1.5s', 1500],
-  ['2.5s', 2500],
+const DWELL_PRESETS: Array<[StringKey, number]> = [
+  ['preset.d500', 500],
+  ['preset.d1000', 1000],
+  ['preset.d1500', 1500],
+  ['preset.d2500', 2500],
 ]
-const SCAN_SPEEDS: Array<[string, number]> = [
-  ['Slow (2.5s)', 2500],
-  ['Medium (1.5s)', 1500],
-  ['Fast (1s)', 1000],
+const SCAN_SPEEDS: Array<[StringKey, number]> = [
+  ['preset.scanSlow', 2500],
+  ['preset.scanMedium', 1500],
+  ['preset.scanFast', 1000],
 ]
-const HOLD_PRESETS: Array<[string, number]> = [
-  ['Off', 0],
-  ['0.3s', 300],
-  ['0.6s', 600],
-  ['1s', 1000],
+const HOLD_PRESETS: Array<[StringKey, number]> = [
+  ['preset.off', 0],
+  ['preset.d300', 300],
+  ['preset.d600', 600],
+  ['preset.d1000', 1000],
 ]
 // §19 — 3 (Full) is the default so existing profiles keep every word.
-const VOCABULARY_LEVELS: Array<[string, 1 | 2 | 3]> = [
-  ['Basic', 1],
-  ['Intermediate', 2],
-  ['Full', 3],
+const VOCABULARY_LEVELS: Array<[StringKey, 1 | 2 | 3]> = [
+  ['settings.levelBasic', 1],
+  ['settings.levelIntermediate', 2],
+  ['settings.levelFull', 3],
 ]
 const TEXT_SCALES: Array<[string, number]> = [
   ['A−', 0.85],
@@ -97,6 +100,7 @@ const TEXT_SCALES: Array<[string, number]> = [
 export function SettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const theme = useTheme()
+  const t = useT()
   // themed style tokens applied across the repeated cards/labels/inputs
   const cardT = { backgroundColor: theme.surface, borderColor: theme.border }
   const textT = { color: theme.text }
@@ -109,6 +113,7 @@ export function SettingsScreen() {
   const activeUser = useUserStore((s) => s.activeUser)
   const users = useUserStore((s) => s.users)
   const updateActiveUser = useUserStore((s) => s.updateActiveUser)
+  const setLanguage = useUserStore((s) => s.setLanguage)
 
   const [voices, setVoices] = useState<Speech.Voice[]>([])
   const [pageSets, setPageSets] = useState<PageSet[]>([])
@@ -169,7 +174,7 @@ export function SettingsScreen() {
 
   const exportActive = async () => {
     if (Platform.OS !== 'web') return
-    setBackupStatus('Exporting…')
+    setBackupStatus(t('status.exporting'))
     await storage.setMeta('lastObzExportAt', String(Date.now())) // §12.5
     const blob = await exportPageSet(activeUser.activePageSetId)
     const url = URL.createObjectURL(blob)
@@ -178,7 +183,7 @@ export function SettingsScreen() {
     anchor.download = 'saythrough-pageset.obz'
     anchor.click()
     URL.revokeObjectURL(url)
-    setBackupStatus('Exported.')
+    setBackupStatus(t('status.exported'))
   }
 
   // §10.5 enhanced neural voice. The download is ~60 MB, so it is explicit,
@@ -188,20 +193,27 @@ export function SettingsScreen() {
 
   const enableEnhancedVoice = async () => {
     setVoiceBusy(true)
-    setVoiceStatus('Downloading voice… 0%')
-    const ok = await enhancedBackend.init((loaded, total) => {
-      const pct = total ? Math.round((loaded / total) * 100) : 0
-      setVoiceStatus(`Downloading voice… ${pct}%`)
-    })
+    setVoiceStatus(t('status.voiceDownloading', { percent: 0 }))
+    const ok = await enhancedBackend.init(
+      (loaded, total) => {
+        const pct = total ? Math.round((loaded / total) * 100) : 0
+        setVoiceStatus(t('status.voiceDownloading', { percent: pct }))
+      },
+      // Each language has its own ~60 MB model; only the active one is
+      // fetched, so a Spanish profile never downloads the English voice.
+      activeUser.language,
+    )
     setVoiceBusy(false)
     if (ok) {
       await updateActiveUser({ ttsEngine: 'enhanced' })
-      setVoiceStatus('Enhanced voice ready.')
-      ttsService.speak(PREVIEW_TEXT)
+      setVoiceStatus(t('status.voiceReady'))
+      ttsService.speak(t('settings.previewText'))
     } else {
       const reason = ttsService.fallbackReason() ?? enhancedBackend.lastError()
       setVoiceStatus(
-        `${reason ?? 'Could not load the enhanced voice.'} Still using the standard voice.`,
+        t('status.voiceFailed', {
+          reason: reason ?? t('status.voiceFailedDefault'),
+        }),
       )
     }
   }
@@ -219,7 +231,7 @@ export function SettingsScreen() {
 
   const exportEverything = async () => {
     if (Platform.OS !== 'web') return
-    setBackupStatus('Exporting…')
+    setBackupStatus(t('status.exporting'))
     const backup = await createBackup(storage)
     const blob = new Blob([serializeBackup(backup)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -229,7 +241,7 @@ export function SettingsScreen() {
     anchor.download = `saythrough-backup-${stamp}.json`
     anchor.click()
     URL.revokeObjectURL(url)
-    setBackupStatus('Full backup saved. Keep it somewhere safe — it contains this device\u2019s profiles and history.')
+    setBackupStatus(t('status.backupSaved'))
   }
 
   // Two steps on purpose: restoring REPLACES everything on this device, so
@@ -247,8 +259,11 @@ export function SettingsScreen() {
       const names = backup.data.users.map((u) => u.name).join(', ')
       setRestoreFile(text)
       setBackupStatus(
-        `Backup from ${when} — ${backup.data.users.length} profile(s): ${names}. ` +
-          'Restoring REPLACES everything currently on this device. Tap "Confirm restore" to continue.',
+        t('status.backupDescribed', {
+          when,
+          count: backup.data.users.length,
+          names,
+        }),
       )
     } catch (error) {
       setRestoreFile(null)
@@ -258,7 +273,7 @@ export function SettingsScreen() {
 
   const confirmRestore = async () => {
     if (!restoreFile) return
-    setBackupStatus('Restoring…')
+    setBackupStatus(t('status.restoring'))
     try {
       await restoreBackup(storage, parseBackup(restoreFile))
       setRestoreFile(null)
@@ -270,9 +285,9 @@ export function SettingsScreen() {
       }
       setPageSets(await storage.getPageSets())
       setWordLists(user ? await storage.getWordLists(user.id) : [])
-      setBackupStatus('Restored.')
+      setBackupStatus(t('status.restored'))
     } catch (error) {
-      setBackupStatus(`Restore failed: ${String(error)}`)
+      setBackupStatus(t('status.restoreFailed', { error: String(error) }))
     }
   }
 
@@ -291,14 +306,11 @@ export function SettingsScreen() {
   const restoreBuiltIns = async () => {
     if (!restoreArmed) {
       setRestoreArmed(true)
-      setBackupStatus(
-        'This rebuilds Core Vocabulary and Quick Phrases from scratch — ' +
-          'your own pages and profiles are kept. Tap again to confirm.',
-      )
+      setBackupStatus(t('status.rebuildArmed'))
       return
     }
     setRestoreArmed(false)
-    setBackupStatus('Restoring…')
+    setBackupStatus(t('status.restoring'))
     const coreId = await restoreBuiltInPageSets(storage)
     await useUserStore.getState().load()
     const user = useUserStore.getState().activeUser
@@ -307,7 +319,7 @@ export function SettingsScreen() {
       useNavigationStore.getState().setActivePageSet(pageSet.id, pageSet.rootPageId)
     }
     setPageSets(await storage.getPageSets())
-    setBackupStatus('Built-in page sets restored.')
+    setBackupStatus(t('status.builtInRestored'))
   }
 
   const importObz = async () => {
@@ -315,14 +327,14 @@ export function SettingsScreen() {
       copyToCacheDirectory: false,
     })
     if (result.canceled || !result.assets?.[0]) return
-    setBackupStatus('Importing…')
+    setBackupStatus(t('status.importing'))
     try {
       const response = await fetch(result.assets[0].uri)
       const imported = await importPageSet(await response.arrayBuffer())
       setPageSets(await storage.getPageSets())
-      setBackupStatus(`Imported "${imported.name}" — select it under Vocabulary.`)
+      setBackupStatus(t('status.imported', { name: imported.name }))
     } catch (error) {
-      setBackupStatus(`Import failed: ${String(error)}`)
+      setBackupStatus(t('status.importFailed', { error: String(error) }))
     }
   }
 
@@ -336,30 +348,30 @@ export function SettingsScreen() {
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to communication"
+          accessibilityLabel={t('settings.backToCommunication')}
           onPress={() => navigation.goBack()}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={[styles.backText, { color: theme.accent }]}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.accent }]}>{t('common.back')}</Text>
         </Pressable>
-        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
+        <Text style={[styles.title, { color: theme.text }]}>{t('settings.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView contentContainerStyle={styles.body}>
         {/* 1. Profile */}
-        <Text style={[styles.sectionTitle, mutedT]}>Profile</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.profile')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.fieldLabel, mutedT]}>Name</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.name')}</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             onEndEditing={() => name.trim() && updateActiveUser({ name: name.trim() })}
             onBlur={() => name.trim() && updateActiveUser({ name: name.trim() })}
             style={[styles.input, inputT]}
-            accessibilityLabel="Profile name"
+            accessibilityLabel={t('settings.nameLabel')}
           />
-          <Text style={[styles.fieldLabel, mutedT]}>Switch profile</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.switchProfile')}</Text>
           <View style={styles.chipRow}>
             {users.map((user) => (
               <Chip
@@ -374,25 +386,41 @@ export function SettingsScreen() {
             <TextInput
               value={newUserName}
               onChangeText={setNewUserName}
-              placeholder="New profile name"
+              placeholder={t('settings.newProfilePlaceholder')}
               style={[styles.input, styles.addInput, inputT]}
-              accessibilityLabel="New profile name"
+              accessibilityLabel={t('settings.newProfileLabel')}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Add profile"
+              accessibilityLabel={t('settings.addProfile')}
               onPress={addUser}
               style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
             >
-              <Text style={styles.addButtonText}>+ Add</Text>
+              <Text style={styles.addButtonText}>{t('common.add')}</Text>
             </Pressable>
           </View>
         </View>
 
-        {/* 2. Speech */}
-        <Text style={[styles.sectionTitle, mutedT]}>Speech</Text>
+        {/* 1b. Language (§19.7) */}
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.language')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.fieldLabel, mutedT]}>Voice</Text>
+          <View style={styles.chipRow}>
+            {SUPPORTED_LANGUAGES.map((option) => (
+              <Chip
+                key={option.code}
+                label={option.label}
+                selected={langCode(activeUser.language) === option.code}
+                onPress={() => setLanguage(option.bcp47)}
+              />
+            ))}
+          </View>
+          <Text style={[styles.hint, mutedT]}>{t('settings.languageHint')}</Text>
+        </View>
+
+        {/* 2. Speech */}
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.speech')}</Text>
+        <View style={[styles.card, cardT]}>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.voice')}</Text>
           {voices.map((voice) => (
             <View key={voice.identifier} style={styles.voiceRow}>
               <Pressable
@@ -412,7 +440,7 @@ export function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={`Preview voice ${voice.name}`}
                 onPress={() =>
-                  ttsService.speak(PREVIEW_TEXT, { voiceId: voice.identifier })
+                  ttsService.speak(t('settings.previewText'), { voiceId: voice.identifier })
                 }
                 style={({ pressed }) => [styles.previewButton, pressed && styles.pressed]}
               >
@@ -421,27 +449,27 @@ export function SettingsScreen() {
             </View>
           ))}
           {voices.length === 0 && (
-            <Text style={[styles.hint, mutedT]}>No voices reported by this device yet.</Text>
+            <Text style={[styles.hint, mutedT]}>{t('settings.noVoices')}</Text>
           )}
 
-          <Text style={[styles.fieldLabel, mutedT]}>Speed</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.speed')}</Text>
           <View style={styles.chipRow}>
             {RATE_PRESETS.map(([label, value]) => (
               <Chip
                 key={label}
-                label={label}
+                label={t(label)}
                 selected={Math.abs(activeUser.ttsRate - value) < 0.01}
                 onPress={() => updateActiveUser({ ttsRate: value })}
               />
             ))}
           </View>
 
-          <Text style={[styles.fieldLabel, mutedT]}>Pitch</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.pitch')}</Text>
           <View style={styles.chipRow}>
             {PITCH_PRESETS.map(([label, value]) => (
               <Chip
                 key={label}
-                label={label}
+                label={t(label)}
                 selected={Math.abs(activeUser.ttsPitch - value) < 0.01}
                 onPress={() => updateActiveUser({ ttsPitch: value })}
               />
@@ -449,40 +477,40 @@ export function SettingsScreen() {
           </View>
 
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Speak each word when tapped</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.speakOnSelect')}</Text>
             <Switch
               value={activeUser.speakOnSelect}
               onValueChange={(value) => updateActiveUser({ speakOnSelect: value })}
-              accessibilityLabel="Speak on select"
+              accessibilityLabel={t('settings.speakOnSelect')}
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Return to home after speaking</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.returnHome')}</Text>
             <Switch
               value={activeUser.returnHomeAfterSpeak ?? false}
               onValueChange={(value) => updateActiveUser({ returnHomeAfterSpeak: value })}
-              accessibilityLabel="Return to home after speaking"
+              accessibilityLabel={t('settings.returnHome')}
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Clear message after speaking</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.clearAfter')}</Text>
             <Switch
               value={activeUser.clearAfterSpeak ?? false}
               onValueChange={(value) => updateActiveUser({ clearAfterSpeak: value })}
-              accessibilityLabel="Clear message after speaking"
+              accessibilityLabel={t('settings.clearAfter')}
             />
           </View>
         </View>
 
         {/* Quick-fire message-bar buttons */}
-        <Text style={[styles.sectionTitle, mutedT]}>Quick Buttons</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.quickButtons')}</Text>
         <View style={[styles.card, cardT]}>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Attention bell</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.attentionBell')}</Text>
             <Switch
               value={activeUser.attentionButton ?? true}
               onValueChange={(value) => updateActiveUser({ attentionButton: value })}
-              accessibilityLabel="Attention bell"
+              accessibilityLabel={t('settings.attentionBell')}
             />
           </View>
           <Text style={[styles.fieldLabel, mutedT]}>
@@ -492,26 +520,26 @@ export function SettingsScreen() {
             value={activeUser.emergencyPhrase ?? 'I need help.'}
             onChangeText={(text) => updateActiveUser({ emergencyPhrase: text })}
             style={[styles.input, inputT]}
-            accessibilityLabel="Emergency phrase"
-            placeholder="I need help."
+            accessibilityLabel={t('settings.emergencyPhrase')}
+            placeholder={t('settings.emergencyPlaceholder')}
           />
         </View>
 
         {/* 3. Access Method (§4.6) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Access Method</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.accessMethod')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.fieldLabel, mutedT]}>How this user selects</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.howSelects')}</Text>
           <View style={styles.chipRow}>
             {(
               [
-                ['touch', 'Touch'],
-                ['dwell', 'Dwell (hover)'],
-                ['scanning', 'Switch scanning'],
+                ['touch', 'settings.touch'],
+                ['dwell', 'settings.dwell'],
+                ['scanning', 'settings.scanning'],
               ] as const
             ).map(([value, label]) => (
               <Chip
                 key={value}
-                label={label}
+                label={t(label)}
                 selected={(activeUser.accessMethod ?? 'touch') === value}
                 onPress={() => updateActiveUser({ accessMethod: value })}
               />
@@ -520,23 +548,23 @@ export function SettingsScreen() {
 
           {(activeUser.accessMethod ?? 'touch') === 'touch' && (
             <>
-              <Text style={[styles.fieldLabel, mutedT]}>Hold to activate</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>{t('settings.holdToActivate')}</Text>
               <View style={styles.chipRow}>
                 {HOLD_PRESETS.map(([label, value]) => (
                   <Chip
                     key={label}
-                    label={label}
+                    label={t(label)}
                     selected={(activeUser.touchHoldDuration ?? 0) === value}
                     onPress={() => updateActiveUser({ touchHoldDuration: value })}
                   />
                 ))}
               </View>
-              <Text style={[styles.fieldLabel, mutedT]}>Ignore repeat taps for</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>{t('settings.ignoreRepeat')}</Text>
               <View style={styles.chipRow}>
                 {HOLD_PRESETS.map(([label, value]) => (
                   <Chip
                     key={label}
-                    label={label}
+                    label={t(label)}
                     selected={(activeUser.touchDebounce ?? 0) === value}
                     onPress={() => updateActiveUser({ touchDebounce: value })}
                   />
@@ -549,7 +577,7 @@ export function SettingsScreen() {
                 <Switch
                   value={activeUser.ignoreSecondTouch ?? false}
                   onValueChange={(v) => updateActiveUser({ ignoreSecondTouch: v })}
-                  accessibilityLabel="Ignore second touch"
+                  accessibilityLabel={t('settings.ignoreSecondTouch')}
                 />
               </View>
             </>
@@ -557,12 +585,12 @@ export function SettingsScreen() {
 
           {activeUser.accessMethod === 'dwell' && (
             <>
-              <Text style={[styles.fieldLabel, mutedT]}>Hover time to select</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>{t('settings.hoverTime')}</Text>
               <View style={styles.chipRow}>
                 {DWELL_PRESETS.map(([label, value]) => (
                   <Chip
                     key={label}
-                    label={label}
+                    label={t(label)}
                     selected={(activeUser.dwellTime ?? 1000) === value}
                     onPress={() => updateActiveUser({ dwellTime: value })}
                   />
@@ -578,40 +606,40 @@ export function SettingsScreen() {
 
           {activeUser.accessMethod === 'scanning' && (
             <>
-              <Text style={[styles.fieldLabel, mutedT]}>Scan style</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>{t('settings.scanStyle')}</Text>
               <View style={styles.chipRow}>
                 <Chip
-                  label="Auto (1 switch)"
+                  label={t('settings.scanAuto')}
                   selected={(activeUser.scanMode ?? 'auto') === 'auto'}
                   onPress={() => updateActiveUser({ scanMode: 'auto' })}
                 />
                 <Chip
-                  label="Step (2 switches)"
+                  label={t('settings.scanStep')}
                   selected={activeUser.scanMode === 'step'}
                   onPress={() => updateActiveUser({ scanMode: 'step' })}
                 />
               </View>
-              <Text style={[styles.fieldLabel, mutedT]}>Pattern</Text>
+              <Text style={[styles.fieldLabel, mutedT]}>{t('settings.pattern')}</Text>
               <View style={styles.chipRow}>
                 <Chip
-                  label="Row then column"
+                  label={t('settings.rowColumn')}
                   selected={(activeUser.scanPattern ?? 'row-column') === 'row-column'}
                   onPress={() => updateActiveUser({ scanPattern: 'row-column' })}
                 />
                 <Chip
-                  label="One at a time"
+                  label={t('settings.linear')}
                   selected={activeUser.scanPattern === 'linear'}
                   onPress={() => updateActiveUser({ scanPattern: 'linear' })}
                 />
               </View>
               {(activeUser.scanMode ?? 'auto') === 'auto' && (
                 <>
-                  <Text style={[styles.fieldLabel, mutedT]}>Scan speed</Text>
+                  <Text style={[styles.fieldLabel, mutedT]}>{t('settings.scanSpeed')}</Text>
                   <View style={styles.chipRow}>
                     {SCAN_SPEEDS.map(([label, value]) => (
                       <Chip
                         key={label}
-                        label={label}
+                        label={t(label)}
                         selected={(activeUser.scanSpeed ?? 1500) === value}
                         onPress={() => updateActiveUser({ scanSpeed: value })}
                       />
@@ -620,11 +648,11 @@ export function SettingsScreen() {
                 </>
               )}
               <View style={styles.switchRow}>
-                <Text style={[styles.switchLabel, textT]}>Speak each item as it highlights</Text>
+                <Text style={[styles.switchLabel, textT]}>{t('settings.scanAuditory')}</Text>
                 <Switch
                   value={activeUser.scanAuditory ?? false}
                   onValueChange={(v) => updateActiveUser({ scanAuditory: v })}
-                  accessibilityLabel="Scan auditory cue"
+                  accessibilityLabel={t('settings.scanAuditoryLabel')}
                 />
               </View>
               <Text style={[styles.hint, mutedT]}>
@@ -637,50 +665,56 @@ export function SettingsScreen() {
         </View>
 
         {/* 3b. Display (§6.1 layout preferences) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Display</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.display')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.fieldLabel, mutedT]}>Appearance</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.appearance')}</Text>
           <View style={styles.chipRow}>
             {(
               [
-                ['light', 'Light'],
-                ['dark', 'Dark'],
-                ['system', 'System'],
+                ['light', 'settings.themeLight'],
+                ['dark', 'settings.themeDark'],
+                ['system', 'settings.themeSystem'],
               ] as const
             ).map(([value, label]) => (
               <Chip
                 key={value}
-                label={label}
+                label={t(label)}
                 selected={(activeUser.theme ?? 'system') === value}
                 onPress={() => updateActiveUser({ theme: value })}
               />
             ))}
           </View>
-          <Text style={[styles.fieldLabel, mutedT]}>Message bar position</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.barPosition')}</Text>
           <View style={styles.chipRow}>
             <Chip
-              label="Top"
+              label={t('settings.barTop')}
               selected={(activeUser.messageBarPosition ?? 'top') === 'top'}
               onPress={() => updateActiveUser({ messageBarPosition: 'top' })}
             />
             <Chip
-              label="Bottom (easier reach)"
+              label={t('settings.barBottom')}
               selected={activeUser.messageBarPosition === 'bottom'}
               onPress={() => updateActiveUser({ messageBarPosition: 'bottom' })}
             />
           </View>
-          <Text style={[styles.fieldLabel, mutedT]}>Space between buttons</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.buttonGap')}</Text>
           <View style={styles.chipRow}>
-            {(['compact', 'normal', 'wide'] as const).map((gap) => (
+            {(
+              [
+                ['compact', 'settings.gapCompact'],
+                ['normal', 'settings.gapNormal'],
+                ['wide', 'settings.gapWide'],
+              ] as const
+            ).map(([gap, label]) => (
               <Chip
                 key={gap}
-                label={gap[0].toUpperCase() + gap.slice(1)}
+                label={t(label)}
                 selected={(activeUser.buttonGap ?? 'normal') === gap}
                 onPress={() => updateActiveUser({ buttonGap: gap })}
               />
             ))}
           </View>
-          <Text style={[styles.fieldLabel, mutedT]}>Button text size</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.textSize')}</Text>
           <View style={styles.chipRow}>
             {TEXT_SCALES.map(([label, value]) => (
               <Chip
@@ -694,29 +728,35 @@ export function SettingsScreen() {
         </View>
 
         {/* 4. Vocabulary */}
-        <Text style={[styles.sectionTitle, mutedT]}>Vocabulary</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.vocabulary')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.fieldLabel, mutedT]}>Active page set</Text>
+          <Text style={[styles.fieldLabel, mutedT]}>{t('settings.activePageSet')}</Text>
           <View style={styles.chipRow}>
-            {pageSets.map((pageSet) => (
-              <Chip
-                key={pageSet.id}
-                label={pageSet.name}
-                selected={pageSet.id === activeUser.activePageSetId}
-                onPress={() => selectPageSet(pageSet)}
-              />
-            ))}
+            {pageSets
+              .filter(
+                (pageSet) =>
+                  !pageSet.isBuiltIn ||
+                  langCode(pageSet.language) === langCode(activeUser.language),
+              )
+              .map((pageSet) => (
+                <Chip
+                  key={pageSet.id}
+                  label={pageSet.name}
+                  selected={pageSet.id === activeUser.activePageSetId}
+                  onPress={() => selectPageSet(pageSet)}
+                />
+              ))}
           </View>
         </View>
 
         {/* 4b. Vocabulary Filter (§4.8) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Vocabulary Filter</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.vocabularyFilter')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             Limit which words are active during therapy. Words not in the
             list stay visible (so a partner can model) but don't respond.
           </Text>
-          {wordLists.length > 0 && <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Word lists</Text>}
+          {wordLists.length > 0 && <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{t('settings.wordLists')}</Text>}
           <View style={styles.chipRow}>
             {wordLists.map((list) => (
               <Chip
@@ -730,7 +770,7 @@ export function SettingsScreen() {
           {activeUser.activeWordListId && (
             <View style={styles.chipRow}>
               <Chip
-                label="Select words (tap them in the grid)"
+                label={t('settings.selectWords')}
                 selected={false}
                 onPress={() => {
                   useEditStore.getState().enterEditMode()
@@ -741,7 +781,7 @@ export function SettingsScreen() {
                 }}
               />
               <Chip
-                label="Delete list"
+                label={t('settings.deleteList')}
                 selected={false}
                 onPress={async () => {
                   await storage.deleteWordList(activeUser.activeWordListId!)
@@ -758,13 +798,13 @@ export function SettingsScreen() {
             <TextInput
               value={newListName}
               onChangeText={setNewListName}
-              placeholder="New list name (e.g. Week 1 Words)"
+              placeholder={t('settings.newListPlaceholder')}
               style={[styles.input, styles.addInput, inputT]}
-              accessibilityLabel="New word list name"
+              accessibilityLabel={t('settings.newListLabel')}
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Add word list"
+              accessibilityLabel={t('settings.addList')}
               onPress={async () => {
                 const trimmed = newListName.trim()
                 if (!trimmed) return
@@ -783,21 +823,21 @@ export function SettingsScreen() {
               }}
               style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
             >
-              <Text style={styles.addButtonText}>+ Add</Text>
+              <Text style={styles.addButtonText}>{t('common.add')}</Text>
             </Pressable>
           </View>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Filter on (also in top bar: ⊘)</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.filterOn')}</Text>
             <Switch
               value={activeUser.filterEnabled ?? false}
               onValueChange={(value) => updateActiveUser({ filterEnabled: value })}
-              accessibilityLabel="Vocabulary filter enabled"
+              accessibilityLabel={t('settings.filterEnabled')}
             />
           </View>
         </View>
 
         {/* 5. Security */}
-        <Text style={[styles.sectionTitle, mutedT]}>Security</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.security')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             The caregiver PIN protects edit mode and settings. It is
@@ -805,13 +845,13 @@ export function SettingsScreen() {
           </Text>
           <View style={styles.chipRow}>
             <Chip
-              label={activeUser.editPinHash ? 'Change PIN' : 'Set PIN'}
+              label={activeUser.editPinHash ? t('pin.change') : t('pin.set')}
               selected={false}
               onPress={() => setPinModalVisible(true)}
             />
             {activeUser.editPinHash && (
               <Chip
-                label="Remove PIN"
+                label={t('pin.remove')}
                 selected={false}
                 onPress={() =>
                   updateActiveUser({ editPinHash: undefined, editPinSalt: undefined })
@@ -822,7 +862,7 @@ export function SettingsScreen() {
         </View>
 
         {/* 4c. Enhanced voice (§10.5) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Enhanced Voice</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.enhancedVoice')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             A natural-sounding voice that runs entirely ON THIS DEVICE — nothing
@@ -833,14 +873,14 @@ export function SettingsScreen() {
             <Chip
               label={
                 (activeUser.ttsEngine ?? 'platform') === 'platform'
-                  ? 'Standard voice'
-                  : 'Use standard voice'
+                  ? t('settings.standardVoice')
+                  : t('settings.useStandardVoice')
               }
               selected={(activeUser.ttsEngine ?? 'platform') === 'platform'}
               onPress={useStandardVoice}
             />
             <Chip
-              label={voiceBusy ? 'Downloading…' : 'Enhanced voice'}
+              label={voiceBusy ? t('settings.enhancedVoiceDownloading') : t('settings.enhancedVoiceToggle')}
               selected={activeUser.ttsEngine === 'enhanced'}
               onPress={voiceBusy ? () => {} : enableEnhancedVoice}
             />
@@ -851,7 +891,7 @@ export function SettingsScreen() {
         {/* 5. Vocabulary level (§19) — only where the board defines levels */}
         {levelCountForPageSet(activeUser.activePageSetId) > 1 && (
           <>
-            <Text style={[styles.sectionTitle, mutedT]}>Vocabulary Level</Text>
+            <Text style={[styles.sectionTitle, mutedT]}>{t('settings.vocabularyLevel')}</Text>
             <View style={[styles.card, cardT]}>
               <Text style={[styles.hint, mutedT]}>
                 Show fewer words while someone is learning the board. Words
@@ -863,7 +903,7 @@ export function SettingsScreen() {
                 {VOCABULARY_LEVELS.map(([label, value]) => (
                   <Chip
                     key={value}
-                    label={label}
+                    label={t(label)}
                     selected={(activeUser.vocabularyLevel ?? 3) === value}
                     onPress={() => updateActiveUser({ vocabularyLevel: value })}
                   />
@@ -874,7 +914,7 @@ export function SettingsScreen() {
         )}
 
         {/* 5a. Word Prediction (§18) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Word Prediction</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.wordPrediction')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             Suggests words above the keyboard as you type. It learns from
@@ -884,16 +924,16 @@ export function SettingsScreen() {
             tracking below.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Suggest words while typing</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.predictionToggle')}</Text>
             <Switch
               value={activeUser.predictionEnabled ?? true}
               onValueChange={(value) => updateActiveUser({ predictionEnabled: value })}
-              accessibilityLabel="Word prediction enabled"
+              accessibilityLabel={t('settings.predictionLabel')}
             />
           </View>
           <View style={styles.chipRow}>
             <Chip
-              label={learnedCleared ? 'Learned words cleared' : 'Clear learned words'}
+              label={learnedCleared ? t('settings.learnedCleared') : t('settings.clearLearned')}
               selected={false}
               onPress={clearLearnedWords}
             />
@@ -901,7 +941,7 @@ export function SettingsScreen() {
         </View>
 
         {/* 5b. Data Tracking (§4.13 — consent-gated, DT-05) */}
-        <Text style={[styles.sectionTitle, mutedT]}>Data Tracking</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.dataTracking')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             Off by default. When a caregiver turns it on, button presses and
@@ -909,16 +949,16 @@ export function SettingsScreen() {
             sent anywhere. SLPs use this to document progress.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Track communication data</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.trackingToggle')}</Text>
             <Switch
               value={activeUser.trackingEnabled ?? false}
               onValueChange={(value) => updateActiveUser({ trackingEnabled: value })}
-              accessibilityLabel="Data tracking enabled"
+              accessibilityLabel={t('settings.trackingLabel')}
             />
           </View>
           <View style={styles.chipRow}>
             <Chip
-              label="View report"
+              label={t('settings.viewReport')}
               selected={false}
               onPress={() => navigation.navigate('TrackingReport')}
             />
@@ -926,7 +966,7 @@ export function SettingsScreen() {
         </View>
 
         {/* 5c. Privacy — the one thing that does leave the device */}
-        <Text style={[styles.sectionTitle, mutedT]}>Privacy</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.privacy')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
             While the app is open it checks in, so the project can tell
@@ -936,60 +976,50 @@ export function SettingsScreen() {
             leaves this device: words, messages, pages and recordings never do.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={[styles.switchLabel, { color: theme.text }]}>Report that the app is in use</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>{t('settings.usageToggle')}</Text>
             <Switch
               value={countingOn}
               onValueChange={(value) => {
                 setUsageCountingEnabled(value)
                 setCountingOn(value)
               }}
-              accessibilityLabel="Report app usage"
+              accessibilityLabel={t('settings.usageLabel')}
             />
           </View>
         </View>
 
         {/* 6. Backup & Restore */}
-        <Text style={[styles.sectionTitle, mutedT]}>Backup & Restore</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.backup')}</Text>
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.hint, mutedT]}>
-            A full backup saves EVERYTHING on this device — profiles, voice and
-            access settings, your pages, word lists, history and tracking — to
-            one file. Use it to move to a new device or recover if browser
-            storage is cleared. It contains personal data, so store it
-            somewhere private.
-          </Text>
+          <Text style={[styles.hint, mutedT]}>{t('settings.backupHint')}</Text>
           <View style={styles.chipRow}>
             <Chip
-              label="Save full backup"
+              label={t('settings.saveBackup')}
               selected={false}
               onPress={exportEverything}
             />
             <Chip
-              label={restoreFile ? 'Choose a different file' : 'Restore from backup'}
+              label={restoreFile ? t('settings.chooseDifferent') : t('settings.restoreBackup')}
               selected={false}
               onPress={chooseRestoreFile}
             />
             {restoreFile ? (
-              <Chip label="Confirm restore" selected onPress={confirmRestore} />
+              <Chip label={t('settings.confirmRestore')} selected onPress={confirmRestore} />
             ) : null}
           </View>
         </View>
 
         <View style={[styles.card, cardT]}>
-          <Text style={[styles.hint, mutedT]}>
-            Open Board Format (.obz) moves VOCABULARY ONLY between apps — it
-            works with CoughDrop, TD Snap and others, but does not carry
-            profiles or settings. Use a full backup above for those.
-          </Text>
+          <Text style={[styles.hint, mutedT]}>{t('settings.obfHint')}</Text>
           <View style={styles.chipRow}>
             <Chip
-              label="Export active page set (.obz)"
+              label={t('settings.exportObz')}
               selected={false}
               onPress={exportActive}
             />
-            <Chip label="Import .obz" selected={false} onPress={importObz} />
+            <Chip label={t('settings.importObz')} selected={false} onPress={importObz} />
             <Chip
-              label={restoreArmed ? 'Tap again to restore' : 'Restore built-in page sets'}
+              label={restoreArmed ? t('settings.restoreArmed') : t('settings.restoreBuiltIn')}
               selected={false}
               onPress={restoreBuiltIns}
             />
@@ -1000,23 +1030,17 @@ export function SettingsScreen() {
         {/* 6b. Install (§12.6) */}
         {installState !== 'unavailable' && (
           <>
-            <Text style={[styles.sectionTitle, mutedT]}>Install</Text>
+            <Text style={[styles.sectionTitle, mutedT]}>{t('settings.install')}</Text>
             <View style={[styles.card, cardT]}>
               {installState === 'installed' && (
-                <Text style={[styles.hint, mutedT]}>
-                  Installed ✓ — SayThrough opens full-screen and works offline.
-                </Text>
+                <Text style={[styles.hint, mutedT]}>{t('settings.installed')}</Text>
               )}
               {installState === 'installable' && (
                 <>
-                  <Text style={[styles.hint, mutedT]}>
-                    Install SayThrough to the home screen: it opens like a
-                    regular app, works offline, and the browser protects its
-                    storage better.
-                  </Text>
+                  <Text style={[styles.hint, mutedT]}>{t('settings.installHint')}</Text>
                   <View style={styles.chipRow}>
                     <Chip
-                      label="Install app"
+                      label={t('settings.installButton')}
                       selected={false}
                       onPress={async () => {
                         await promptInstall()
@@ -1027,26 +1051,21 @@ export function SettingsScreen() {
                 </>
               )}
               {installState === 'ios-instructions' && (
-                <Text style={[styles.hint, mutedT]}>
-                  To install on iPad/iPhone: in Safari, tap Share (□↑) →
-                  "Add to Home Screen". SayThrough will open full-screen and
-                  work offline.
-                </Text>
+                <Text style={[styles.hint, mutedT]}>{t('settings.installIosHint')}</Text>
               )}
             </View>
           </>
         )}
 
         {/* 7. About */}
-        <Text style={[styles.sectionTitle, mutedT]}>About</Text>
+        <Text style={[styles.sectionTitle, mutedT]}>{t('settings.about')}</Text>
         <View style={[styles.card, cardT]}>
           <Text style={[styles.hint, mutedT]}>
-            SayThrough — free, open-source AAC. Application code is MIT
-            licensed.{'\n\n'}
-            Pictographic symbols © Government of Aragón (Spain), created by
-            Sergio Palao for ARASAAC (https://arasaac.org), distributed under
-            Creative Commons BY-NC-SA 4.0.{'\n'}
-            Mulberry Symbols © Steve Lee, CC BY-SA 4.0.
+            {t('settings.aboutBody')}
+            {'\n\n'}
+            {t('settings.aboutSymbols')}
+            {'\n'}
+            {t('settings.aboutMulberry')}
           </Text>
         </View>
       </ScrollView>
@@ -1075,6 +1094,7 @@ function Chip({
   onPress: () => void
 }) {
   const theme = useTheme()
+  const t = useT()
   return (
     <Pressable
       accessibilityRole="button"
@@ -1110,6 +1130,7 @@ function PinSetupModal({
   onSave: (pin: string) => void
 }) {
   const theme = useTheme()
+  const t = useT()
   const inputT = {
     backgroundColor: theme.surfaceAlt,
     borderColor: theme.border,
@@ -1147,9 +1168,9 @@ function PinSetupModal({
             keyboardType="number-pad"
             secureTextEntry
             maxLength={8}
-            placeholder="New PIN"
+            placeholder={t('pin.newPlaceholder')}
             style={[styles.input, inputT]}
-            accessibilityLabel="New PIN"
+            accessibilityLabel={t('pin.newPlaceholder')}
           />
           <TextInput
             value={confirm}
@@ -1157,14 +1178,14 @@ function PinSetupModal({
             keyboardType="number-pad"
             secureTextEntry
             maxLength={8}
-            placeholder="Confirm PIN"
+            placeholder={t('pin.confirmPlaceholder')}
             style={[styles.input, inputT]}
-            accessibilityLabel="Confirm PIN"
+            accessibilityLabel={t('pin.confirmPlaceholder')}
           />
           {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
           <View style={styles.chipRow}>
-            <Chip label="Cancel" selected={false} onPress={onClose} />
-            <Chip label="Save PIN" selected onPress={save} />
+            <Chip label={t('common.cancel')} selected={false} onPress={onClose} />
+            <Chip label={t('pin.save')} selected onPress={save} />
           </View>
         </View>
       </View>

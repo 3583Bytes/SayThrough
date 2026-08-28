@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import { useT } from '../../hooks/useT'
 import { useTheme } from '../../hooks/useTheme'
 import * as ImageManipulator from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
@@ -45,6 +46,7 @@ export function ButtonEditorPanel({
   onClose,
 }: ButtonEditorPanelProps) {
   const theme = useTheme()
+  const t = useT()
   const [label, setLabel] = useState(button.label)
   const [backgroundColor, setBackgroundColor] = useState(button.backgroundColor)
   const [symbolId, setSymbolId] = useState(button.symbolId)
@@ -128,17 +130,17 @@ export function ButtonEditorPanel({
     <View style={[styles.panel, { backgroundColor: theme.surface }]}>
       <View style={styles.topRow}>
         <View style={styles.labelColumn}>
-          <Text style={[styles.heading, { color: theme.textMuted }]}>Label</Text>
+          <Text style={[styles.heading, { color: theme.textMuted }]}>{t('edit.label')}</Text>
           <TextInput
             value={label}
             onChangeText={setLabel}
             style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
-            accessibilityLabel="Button label"
-            placeholder="What should this button say?"
+            accessibilityLabel={t('edit.labelAccessibility')}
+            placeholder={t('edit.labelPlaceholder')}
           />
         </View>
         <View style={styles.symbolColumn}>
-          <Text style={[styles.heading, { color: theme.textMuted }]}>Symbol</Text>
+          <Text style={[styles.heading, { color: theme.textMuted }]}>{t('edit.symbol')}</Text>
           <View style={styles.symbolRow}>
             <View style={styles.symbolPreview}>
               {previewUri ? (
@@ -148,24 +150,24 @@ export function ButtonEditorPanel({
                   contentFit="contain"
                 />
               ) : (
-                <Text style={[styles.noSymbol, { color: theme.textMuted }]}>none</Text>
+                <Text style={[styles.noSymbol, { color: theme.textMuted }]}>{t('common.none')}</Text>
               )}
             </View>
             <View style={styles.symbolActions}>
               <SmallAction
-                label="Change…"
-                accessibilityLabel="Change symbol"
+                label={t('edit.changeSymbol')}
+                accessibilityLabel={t('edit.changeSymbolLabel')}
                 onPress={() => setPickerVisible(true)}
               />
               <SmallAction
-                label="Photo…"
-                accessibilityLabel="Use a photo as symbol"
+                label={t('edit.photo')}
+                accessibilityLabel={t('edit.photoLabel')}
                 onPress={pickPhoto}
               />
               {previewUri && (
                 <SmallAction
-                  label="Remove"
-                  accessibilityLabel="Remove symbol"
+                  label={t('common.remove')}
+                  accessibilityLabel={t('edit.removeSymbol')}
                   onPress={() => {
                     setSymbolId(undefined)
                     setCustomSymbolUri(undefined)
@@ -177,32 +179,32 @@ export function ButtonEditorPanel({
         </View>
       </View>
 
-      <Text style={[styles.heading, { color: theme.textMuted }]}>This button opens</Text>
+      <Text style={[styles.heading, { color: theme.textMuted }]}>{t('edit.opens')}</Text>
       <View style={styles.linkRow}>
         <Text style={[styles.linkValue, { color: theme.textMuted }]}>
           {linkedPageId ? (linkedPageName ?? '…') : 'nothing — it speaks its word'}
         </Text>
         <SmallAction
           label={linkedPageId ? 'Change…' : 'Link to a page…'}
-          accessibilityLabel="Link button to a page"
+          accessibilityLabel={t('edit.linkToPage')}
           onPress={() => setLinkModalVisible(true)}
         />
         {linkedPageId && (
           <SmallAction
-            label="Go to page"
-            accessibilityLabel="Go to linked page"
+            label={t('edit.goToPage')}
+            accessibilityLabel={t('edit.goToLinkedPage')}
             onPress={openLinkedPage}
           />
         )}
       </View>
 
-      <Text style={[styles.heading, { color: theme.textMuted }]}>Color</Text>
+      <Text style={[styles.heading, { color: theme.textMuted }]}>{t('edit.color')}</Text>
       <View style={styles.swatches}>
         {COLOR_CHOICES.map((color) => (
           <Pressable
             key={color}
             accessibilityRole="button"
-            accessibilityLabel={`Color ${color}`}
+            accessibilityLabel={t('edit.colorSwatch', { color })}
             onPress={() => setBackgroundColor(color)}
             style={[
               styles.swatch,
@@ -216,19 +218,19 @@ export function ButtonEditorPanel({
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Delete button"
+          accessibilityLabel={t('edit.deleteButtonLabel')}
           onPress={onDelete}
           style={({ pressed }) => [styles.deleteButton, { borderColor: theme.danger }, pressed && styles.pressed]}
         >
-          <Text style={[styles.deleteText, { color: theme.danger }]}>Delete Button</Text>
+          <Text style={[styles.deleteText, { color: theme.danger }]}>{t('edit.deleteButton')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Save button"
+          accessibilityLabel={t('edit.saveButton')}
           onPress={save}
           style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
         >
-          <Text style={styles.saveText}>Done</Text>
+          <Text style={styles.saveText}>{t('common.done')}</Text>
         </Pressable>
       </View>
 

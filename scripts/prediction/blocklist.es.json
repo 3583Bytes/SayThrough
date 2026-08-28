@@ -1,0 +1,74 @@
+{
+  "_comment": [
+    "Spanish counterpart of blocklist.json. Same rules: exact match only, and",
+    "the same deliberate refusal to strip clinical or protective vocabulary.",
+    "",
+    "Spanish needs more care than English on two counts:",
+    "",
+    "  1. `negro` is the ordinary colour word and is ON the bundled board. It",
+    "     is not blocked. Neither is `gitano`, which is an ethnonym before it",
+    "     is anything else. Blocking either would break real vocabulary to",
+    "     catch a use we cannot detect from a word list anyway.",
+    "  2. Regional profanity differs sharply (peninsular vs. Latin American),",
+    "     so the list covers both rather than assuming one variety.",
+    "",
+    "Words that are profanity in one register and neutral in another (`coger`",
+    "is `to take` in Spain and vulgar in much of Latin America) are KEPT:",
+    "`coger` is on the Acciones page, and prediction that refused to complete",
+    "a board word would be a bug."
+  ],
+  "_keptDeliberately": {
+    "_why": [
+      "AAC users experience abuse at far higher rates than the general",
+      "population, and lacking the vocabulary to describe bodies, sex, and",
+      "assault is a documented barrier to disclosure. Stripping clinical and",
+      "protective vocabulary out of prediction would make the app worse at the",
+      "moment it matters most. These words stay, and build-lexicon.mjs asserts",
+      "that no future blocklist edit removes them."
+    ],
+    "anatomy": [
+      "pene", "vagina", "vulva", "pecho", "pechos", "pezón", "pezones",
+      "ano", "nalgas", "genitales", "testículos", "púbico", "erección",
+      "trasero"
+    ],
+    "health": [
+      "regla", "menstruación", "embarazada", "embarazo", "condón",
+      "preservativo", "tampón", "compresa", "pubertad", "sexo", "sexual",
+      "sexualidad", "desnudo", "desnuda", "sonda", "pañal"
+    ],
+    "protective": [
+      "violación", "violar", "abuso", "abusar", "abusado", "acoso",
+      "daño", "duele", "dolor", "tocar", "tocado", "tocando", "privado",
+      "íntimo", "secreto", "asustado", "asustada", "miedo", "parar",
+      "basta", "no", "ayuda", "socorro"
+    ]
+  },
+  "profanity": [
+    "joder", "jodido", "jodida", "jode", "jodes", "mierda", "mierdas",
+    "puta", "puto", "putas", "putos", "cabrón", "cabrona", "cabrones",
+    "gilipollas", "coño", "coños", "hostia", "hostias", "pendejo",
+    "pendeja", "pendejos", "chingar", "chinga", "chingada", "chingado",
+    "verga", "vergas", "culero", "culera", "boludo", "boluda", "pelotudo",
+    "pelotuda", "carajo", "cojones", "follar", "folla", "follando",
+    "polla", "pollas", "capullo", "gilipolleces", "pinche", "cagar",
+    "cagada", "cagado", "cabronazo", "hijoputa", "hijueputa", "malparido",
+    "huevón", "huevona", "concha", "conchudo", "pajero", "pajearse",
+    "mamón", "mamona", "zorra", "perra", "putada", "mear", "meada",
+    "gilipollez", "cojudo", "webón", "wey", "güey"
+  ],
+  "sexual": [
+    "porno", "pornografía", "pornográfico", "masturbación", "masturbarse",
+    "orgasmo", "prostituta", "prostituto", "prostitución", "burdel",
+    "erótico", "erótica", "fetiche", "sexo oral", "penetración",
+    "eyaculación", "semen", "consolador", "vibrador", "striptease",
+    "orgía", "sadomasoquismo", "voyeur", "incesto", "zoofilia"
+  ],
+  "slurs": [
+    "maricón", "maricones", "marica", "maricas", "bollera", "bolleras",
+    "travelo", "sudaca", "sudacas", "negrata", "negratas", "panchito",
+    "moromierda", "retrasado", "retrasada", "retrasados", "mongólico",
+    "mongólica", "mongolo", "subnormal", "subnormales", "tarado", "tarada",
+    "deficiente", "anormal", "esquizo", "loquero", "tullido", "inválido",
+    "sidoso", "gordinflón", "enano", "espástico", "paralítico"
+  ]
+}

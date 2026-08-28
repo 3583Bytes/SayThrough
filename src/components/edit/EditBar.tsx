@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
+import { useT } from '../../hooks/useT'
 
 interface EditBarProps {
   pageName: string
@@ -29,17 +30,18 @@ export function EditBar({
   onUndo,
   onRedo,
 }: EditBarProps) {
+  const t = useT()
   return (
     <View style={styles.bar}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Done editing"
+        accessibilityLabel={t('edit.doneEditing')}
         onPress={onDone}
         style={({ pressed }) => [styles.doneButton, pressed && styles.pressed]}
       >
         <View style={styles.buttonRow}>
           <MaterialIcons name="check" size={18} color="#FFFFFF" />
-          <Text style={styles.doneText}>Done</Text>
+          <Text style={styles.doneText}>{t('common.done')}</Text>
         </View>
       </Pressable>
       <Text style={styles.title}>
@@ -50,7 +52,7 @@ export function EditBar({
       <View style={styles.rightGroup}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Undo"
+          accessibilityLabel={t('edit.undo')}
           disabled={!canUndo}
           onPress={onUndo}
           style={({ pressed }) => [
@@ -63,7 +65,7 @@ export function EditBar({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Redo"
+          accessibilityLabel={t('edit.redo')}
           disabled={!canRedo}
           onPress={onRedo}
           style={({ pressed }) => [
@@ -76,24 +78,24 @@ export function EditBar({
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Page options"
+          accessibilityLabel={t('edit.pageOptions')}
           onPress={onPageMenu}
           style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
         >
           <View style={styles.buttonRow}>
             <MaterialIcons name="description" size={16} color="#7A4F01" />
-            <Text style={styles.settingsText}>Page…</Text>
+            <Text style={styles.settingsText}>{t('edit.page')}</Text>
           </View>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Open settings"
+          accessibilityLabel={t('edit.openSettings')}
           onPress={onSettings}
           style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
         >
           <View style={styles.buttonRow}>
             <MaterialIcons name="settings" size={16} color="#7A4F01" />
-            <Text style={styles.settingsText}>Settings</Text>
+            <Text style={styles.settingsText}>{t('edit.settings')}</Text>
           </View>
         </Pressable>
       </View>

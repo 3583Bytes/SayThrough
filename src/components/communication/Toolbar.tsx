@@ -4,6 +4,7 @@ import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 
 export type ToolbarSection = 'core' | 'quick' | 'keyboard' | null
 
@@ -18,12 +19,13 @@ interface ToolbarProps {
 // home page's navigation buttons, Forms arrives in v1.1
 export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarProps) {
   const theme = useTheme()
+  const t = useT()
   const items: Array<
     [keyof typeof MaterialIcons.glyphMap, string, () => void, ToolbarSection]
   > = [
-    ['apps', 'Core', onCore, 'core'],
-    ['bolt', 'Quick', onQuick, 'quick'],
-    ['keyboard', 'Keys', onKeyboard, 'keyboard'],
+    ['apps', t('toolbar.core'), onCore, 'core'],
+    ['bolt', t('toolbar.quick'), onQuick, 'quick'],
+    ['keyboard', t('toolbar.keys'), onKeyboard, 'keyboard'],
   ]
   return (
     <View
@@ -38,7 +40,9 @@ export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarP
         <Pressable
           key={label}
           accessibilityRole="button"
-          accessibilityLabel={`${label} section${active ? ', current' : ''}`}
+          accessibilityLabel={
+            active ? t('nav.sectionCurrent', { label }) : t('nav.section', { label })
+          }
           onPress={onPress}
           style={({ pressed }) => [
             styles.item,

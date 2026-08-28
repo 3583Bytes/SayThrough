@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 
 interface PinEntryModalProps {
   visible: boolean
@@ -24,6 +25,7 @@ export function PinEntryModal({
   error,
 }: PinEntryModalProps) {
   const theme = useTheme()
+  const t = useT()
   const [pin, setPin] = useState('')
 
   const submit = () => {
@@ -35,7 +37,7 @@ export function PinEntryModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={[styles.backdrop, { backgroundColor: theme.backdrop }]}>
         <View style={[styles.card, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.title, { color: theme.text }]}>Enter caregiver PIN</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{t('pin.title')}</Text>
           <TextInput
             value={pin}
             onChangeText={setPin}
@@ -47,14 +49,14 @@ export function PinEntryModal({
               styles.input,
               { backgroundColor: theme.surfaceAlt, borderColor: theme.border, color: theme.text },
             ]}
-            accessibilityLabel="PIN input"
+            accessibilityLabel={t('pin.input')}
             onSubmitEditing={submit}
           />
           {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
           <View style={styles.buttons}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cancel PIN entry"
+              accessibilityLabel={t('pin.cancel')}
               onPress={onCancel}
               style={({ pressed }) => [
                 styles.button,
@@ -62,11 +64,11 @@ export function PinEntryModal({
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[styles.buttonText, { color: theme.text }]}>Cancel</Text>
+              <Text style={[styles.buttonText, { color: theme.text }]}>{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Submit PIN"
+              accessibilityLabel={t('pin.submit')}
               onPress={submit}
               style={({ pressed }) => [
                 styles.button,

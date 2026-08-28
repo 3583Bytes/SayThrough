@@ -15,6 +15,7 @@ import { UI_COLORS } from '../../constants/colors'
 import { LAYOUT } from '../../constants/layout'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import { playAttentionChime } from '../../services/attentionSound'
 import { getSymbolUri } from '../../services/SymbolService'
 import { ttsService } from '../../services/TTSService'
@@ -38,6 +39,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
   const [actionFeedback, setActionFeedback] = useState('')
   const scanned = (id: string) => scanHighlightIds?.has(id)
   const theme = useTheme()
+  const t = useT()
 
   const activeUser = useUserStore((s) => s.activeUser)
   const showAttention = activeUser?.attentionButton !== false // default on
@@ -131,7 +133,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         {showAttention && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Get attention"
+            accessibilityLabel={t('message.attention')}
             onPress={playAttentionChime}
             style={({ pressed }) => [
               styles.smallButton,
@@ -145,7 +147,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         {emergencyPhrase !== '' && (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Speak emergency phrase"
+            accessibilityLabel={t('message.emergency')}
             onPress={() => ttsService.speak(emergencyPhrase)}
             style={({ pressed }) => [
               styles.smallButton,
@@ -160,7 +162,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         )}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Message actions"
+          accessibilityLabel={t('message.actions')}
           onPress={() => {
             setActionFeedback('')
             setActionsVisible(true)
@@ -175,7 +177,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Speak message"
+          accessibilityLabel={t('message.speakLabel')}
           onPress={speakMessage}
           style={({ pressed }) => [
             styles.speakButton,
@@ -184,11 +186,11 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
           ]}
         >
           <MaterialIcons name="play-arrow" size={26} color="#FFFFFF" />
-          <Text style={styles.speakText}>Speak</Text>
+          <Text style={styles.speakText}>{t('message.speak')}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Delete last word"
+          accessibilityLabel={t('message.deleteLast')}
           onPress={deleteLastToken}
           style={({ pressed }) => [
             styles.smallButton,
@@ -222,7 +224,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
                 </Text>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Copy message"
+                  accessibilityLabel={t('message.copy')}
                   onPress={copyMessage}
                   style={({ pressed }) => [
                     styles.sheetButton,
@@ -236,7 +238,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Share message"
+                  accessibilityLabel={t('message.share')}
                   onPress={shareMessage}
                   style={({ pressed }) => [
                     styles.sheetButton,
@@ -252,7 +254,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
                     with the ⌫ backspace, which deletes only the last word */}
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Clear message"
+                  accessibilityLabel={t('message.clear')}
                   onPress={() => {
                     clearMessage()
                     setActionsVisible(false)
@@ -271,7 +273,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
             )}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Recent messages"
+              accessibilityLabel={t('message.recent')}
               onPress={() => {
                 setActionsVisible(false)
                 setHistoryVisible(true)

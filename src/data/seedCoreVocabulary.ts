@@ -1,7 +1,10 @@
 import { POS_COLORS, PartOfSpeech, UI_COLORS } from '../constants/colors'
+import { type LanguageCode, SUPPORTED_LANGUAGES, langCode } from '../i18n'
 import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
+import coreWordsEsJson from './coreWords.es.json'
 import coreWordsJson from './coreWords.json'
+import seedSymbolMapEsJson from './seedSymbolMap.es.json'
 import seedSymbolMapJson from './seedSymbolMap.json'
 
 // Built-in content uses STABLE, deterministic ids (not random uuids) so
@@ -38,31 +41,140 @@ interface SizeLayout {
   topics: Record<string, Word[]>
 }
 
-const SIZES = coreWordsJson.sizes as unknown as Record<string, SizeLayout>
-const SYMBOL_MAP = seedSymbolMapJson as Record<string, string>
+// §19.7: one authored layout set PER LANGUAGE. Spanish is not a translation
+// of the English boards — it carries two copulas, marks person on the verb
+// and inflects its determiners, so the core layout and the Palabras de apoyo
+// page differ by design. See scripts/vocabulary/build-spanish-core.mjs.
+const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
+  en: coreWordsJson.sizes as unknown as Record<string, SizeLayout>,
+  es: coreWordsEsJson.sizes as unknown as Record<string, SizeLayout>,
+}
+
+const SYMBOL_MAPS: Record<LanguageCode, Record<string, string>> = {
+  en: seedSymbolMapJson as Record<string, string>,
+  es: seedSymbolMapEsJson as Record<string, string>,
+}
+
+// Seeded labels that are STRUCTURE rather than vocabulary. These are stored
+// on the button rows, so they are frozen at seed time — which is correct,
+// because each language has its own page sets: the English board says
+// "Back", the Spanish one says "Atrás", and neither changes under the other.
+const CHROME: Record<
+  LanguageCode,
+  { back: string; more: string; home: string; quickPhrases: string; quickDescription: string }
+> = {
+  en: {
+    back: 'Back', more: 'More', home: 'Home',
+    quickPhrases: 'Quick Phrases',
+    quickDescription: 'Pre-stored phrases spoken with one tap (§19.5)',
+  },
+  es: {
+    back: 'Atrás', more: 'Más', home: 'Inicio',
+    quickPhrases: 'Frases rápidas',
+    quickDescription: 'Frases guardadas que se dicen con un solo toque (§19.5)',
+  },
+}
+
+export const LANGUAGE_CODES: LanguageCode[] = SUPPORTED_LANGUAGES.map((l) => l.code)
 
 /** The size whose ids shipped first; it keeps them for back-compatibility. */
 export const DEFAULT_SIZE = '5x6'
-export const SIZE_KEYS = Object.keys(SIZES)
+// Every language authors the same three sizes, so one list serves all of them.
+export const SIZE_KEYS = Object.keys(LAYOUTS.en)
 
-const QUICK_SET_ID = 'builtin-quick-phrases'
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+// Accents are folded rather than dropped, so "Palabras pequeñas" becomes
+// `palabras-pequenas` instead of `palabras-peque-as`. English topic names are
+// ASCII, so existing ids are unaffected.
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 
-// The 5×6 set predates multi-size support and must keep the exact ids it
-// shipped with, or existing profiles, word lists and user pages would all
-// point at rows that no longer exist.
-const setIdFor = (size: string) =>
-  size === DEFAULT_SIZE ? 'builtin-core-vocabulary' : `builtin-core-${size}`
-const homeIdFor = (size: string) =>
-  size === DEFAULT_SIZE ? 'builtin-core-home' : `builtin-core-${size}-home`
-const topicIdFor = (size: string, topic: string) =>
-  size === DEFAULT_SIZE
+// The English 5×6 set predates both multi-size and multi-language support and
+// must keep the exact ids it shipped with, or existing profiles, word lists
+// and user pages would all point at rows that no longer exist. English keeps
+// its unsuffixed ids for the same reason; every other language is suffixed.
+const langPart = (lang: LanguageCode) => (lang === 'en' ? '' : `-${lang}`)
+const isLegacy = (lang: LanguageCode, size: string) =>
+  lang === 'en' && size === DEFAULT_SIZE
+
+const setIdFor = (lang: LanguageCode, size: string) =>
+  isLegacy(lang, size) ? 'builtin-core-vocabulary' : `builtin-core${langPart(lang)}-${size}`
+const homeIdFor = (lang: LanguageCode, size: string) =>
+  isLegacy(lang, size) ? 'builtin-core-home' : `builtin-core${langPart(lang)}-${size}-home`
+const topicIdFor = (lang: LanguageCode, size: string, topic: string) =>
+  isLegacy(lang, size)
     ? `builtin-core-${slug(topic)}`
-    : `builtin-core-${size}-${slug(topic)}`
+    : `builtin-core${langPart(lang)}-${size}-${slug(topic)}`
 
-export const CORE_SET_ID = setIdFor(DEFAULT_SIZE)
+const quickSetIdFor = (lang: LanguageCode) =>
+  lang === 'en' ? 'builtin-quick-phrases' : `builtin-quick-phrases-${lang}`
+
+// The meta key the toolbar's Quick jump reads. English keeps the original key.
+export const quickPhrasesMetaKey = (lang: LanguageCode) =>
+  lang === 'en' ? 'quickPhrasesPageSetId' : `quickPhrasesPageSetId:${lang}`
+
+export const CORE_SET_ID = setIdFor('en', DEFAULT_SIZE)
+
+/** Id of a bundled core set. Exported so tests can address one directly
+ *  rather than inferring it from grid dimensions, which no longer identify a
+ *  set now that every language authors the same sizes. */
+export function builtInCoreSetId(lang: LanguageCode, size: string): string {
+  return setIdFor(lang, size)
+}
+
+/** Structural labels (Back / More / Home) for a language. */
+export function chromeLabels(lang: LanguageCode): { back: string; more: string; home: string } {
+  const { back, more, home } = CHROME[lang]
+  return { back, more, home }
+}
+
+/** The authored layout for a (language, size), for tests and tooling. */
+export function layoutFor(lang: LanguageCode, size: string): SizeLayout {
+  return LAYOUTS[lang][size]
+}
+
+/** Default page set for a language — what a new profile in it starts on. */
+export function coreSetIdForLanguage(language: string | undefined): string {
+  return setIdFor(langCode(language), DEFAULT_SIZE)
+}
+
+/**
+ * The same board SIZE in another language. Switching language must not also
+ * change grid size — a 6×10 user landing on 5×6 would lose two thirds of
+ * their vocabulary and every motor plan they had built.
+ */
+export function sameSizeInLanguage(
+  pageSetId: string,
+  lang: LanguageCode,
+): string | null {
+  for (const size of SIZE_KEYS) {
+    for (const from of LANGUAGE_CODES) {
+      if (setIdFor(from, size) === pageSetId) return setIdFor(lang, size)
+    }
+  }
+  if (LANGUAGE_CODES.some((from) => quickSetIdFor(from) === pageSetId)) {
+    return quickSetIdFor(lang)
+  }
+  return null
+}
+
+/** Which language a built-in page set belongs to, or null if it is not one. */
+export function languageOfPageSet(pageSetId: string): LanguageCode | null {
+  for (const lang of LANGUAGE_CODES) {
+    for (const size of SIZE_KEYS) {
+      if (setIdFor(lang, size) === pageSetId) return lang
+    }
+    if (quickSetIdFor(lang) === pageSetId) return lang
+  }
+  return null
+}
 
 function makeButton(
+  lang: LanguageCode,
   pageId: string,
   label: string,
   pos: PartOfSpeech,
@@ -81,7 +193,7 @@ function makeButton(
     columnSpan: 1,
     label,
     partOfSpeech: pos,
-    symbolId: SYMBOL_MAP[label],
+    symbolId: SYMBOL_MAPS[lang][label],
     backgroundColor: POS_COLORS[pos],
     borderColor: UI_COLORS.buttonBorder,
     borderWidth: 1,
@@ -102,6 +214,7 @@ function makeButton(
 // `columnOffset`. `startIndex` shifts placement forward (reserving the first
 // content cell for Back); anything past the last row flows off.
 function placeWords(
+  lang: LanguageCode,
   pageId: string,
   words: Word[],
   columnOffset: number,
@@ -116,6 +229,7 @@ function placeWords(
       const idx = i + startIndex
       return {
         button: makeButton(
+          lang,
           pageId,
           label,
           pos,
@@ -134,11 +248,17 @@ function placeWords(
 // A real Back button in the first content cell (§19.6 motor plan: its
 // position is fixed in the data, so it never moves between edit and use
 // mode). SymbolButton draws a ← arrow for navigate_back buttons.
-function makeBackButton(pageId: string, coreColumns: number, now: number): Button {
+function makeBackButton(
+  lang: LanguageCode,
+  pageId: string,
+  coreColumns: number,
+  now: number,
+): Button {
   return {
     ...makeButton(
+      lang,
       pageId,
-      'Back',
+      CHROME[lang].back,
       'category',
       0,
       coreColumns,
@@ -183,20 +303,20 @@ interface BuiltSet {
  * source of truth for both seeding and the level map — deriving them from the
  * same function is what stops the two drifting apart.
  */
-function buildSet(size: string, now: number): BuiltSet {
-  const layout = SIZES[size]
-  const pageSetId = setIdFor(size)
-  const homePageId = homeIdFor(size)
+function buildSet(lang: LanguageCode, size: string, now: number): BuiltSet {
+  const layout = LAYOUTS[lang][size]
+  const pageSetId = setIdFor(lang, size)
+  const homePageId = homeIdFor(lang, size)
   const contentColumns = layout.columns - layout.coreColumns
   const topicIds = new Map(
-    Object.keys(layout.topics).map((t) => [t, topicIdFor(size, t)]),
+    Object.keys(layout.topics).map((t) => [t, topicIdFor(lang, size, t)]),
   )
 
   const pageSet: PageSet = {
     id: pageSetId,
     name: layout.name,
     description: `Bundled starter vocabulary, ${layout.rows}×${layout.columns} (§19) — pending SLP review`,
-    language: 'en',
+    language: lang,
     rootPageId: homePageId,
     schemaVersion: 1,
     isBuiltIn: true,
@@ -219,7 +339,7 @@ function buildSet(size: string, now: number): BuiltSet {
   })
 
   const appendAction = (): ButtonAction[] => [{ type: 'append_to_message' }]
-  const pages: Page[] = [makePage(homePageId, 'Home')]
+  const pages: Page[] = [makePage(homePageId, CHROME[lang].home)]
   const buttons: Button[] = []
   const levels = new Map<string, VocabularyLevel>()
 
@@ -231,6 +351,7 @@ function buildSet(size: string, now: number): BuiltSet {
   // Core region — identical on every page (home + topics)
   for (const pageId of [homePageId, ...topicIds.values()]) {
     for (const entry of placeWords(
+      lang,
       pageId,
       layout.core,
       0,
@@ -262,6 +383,7 @@ function buildSet(size: string, now: number): BuiltSet {
     if (chunkIndex > 0) {
       pages.push(makePage(pageId, `Home ${chunkIndex + 1}`))
       for (const entry of placeWords(
+        lang,
         pageId,
         layout.core,
         0,
@@ -272,7 +394,7 @@ function buildSet(size: string, now: number): BuiltSet {
       )) {
         add(entry.button, entry.level)
       }
-      add(makeBackButton(pageId, layout.coreColumns, now), 1)
+      add(makeBackButton(lang, pageId, layout.coreColumns, now), 1)
     }
 
     // Continuation pages spend their first content cell on Back.
@@ -284,6 +406,7 @@ function buildSet(size: string, now: number): BuiltSet {
       // Topic pages stay category grey.
       add(
         makeButton(
+          lang,
           pageId,
           topic,
           layout.corePages?.[topic] ?? 'category',
@@ -301,8 +424,9 @@ function buildSet(size: string, now: number): BuiltSet {
     if (nextChunk) {
       add(
         makeButton(
+          lang,
           pageId,
-          'More',
+          CHROME[lang].more,
           'category',
           layout.rows - 1,
           layout.columns - 1,
@@ -334,6 +458,7 @@ function buildSet(size: string, now: number): BuiltSet {
       if (chunkIndex > 0) {
         pages.push(makePage(pageId, pageName))
         for (const entry of placeWords(
+          lang,
           pageId,
           layout.core,
           0,
@@ -348,9 +473,10 @@ function buildSet(size: string, now: number): BuiltSet {
         pages.push(makePage(pageId, pageName))
       }
 
-      add(makeBackButton(pageId, layout.coreColumns, now), 1) // always the way out
+      add(makeBackButton(lang, pageId, layout.coreColumns, now), 1) // always the way out
 
       for (const entry of placeWords(
+        lang,
         pageId,
         chunk,
         layout.coreColumns,
@@ -375,8 +501,9 @@ function buildSet(size: string, now: number): BuiltSet {
         ) as VocabularyLevel
         add(
           makeButton(
+            lang,
             pageId,
-            'More',
+            CHROME[lang].more,
             'category',
             layout.rows - 1,
             layout.columns - 1,
@@ -398,7 +525,7 @@ function buildSet(size: string, now: number): BuiltSet {
   for (const page of pages) {
     if (pageIds.has(page.id)) {
       throw new Error(
-        `Duplicate page id "${page.id}" in the ${size} layout — rename the topic whose slug collides.`,
+        `Duplicate page id "${page.id}" in the ${lang}/${size} layout — rename the topic whose slug collides.`,
       )
     }
     pageIds.add(page.id)
@@ -415,11 +542,23 @@ let levelCache: Map<string, VocabularyLevel> | null = null
 function allLevels(): Map<string, VocabularyLevel> {
   if (levelCache) return levelCache
   const merged = new Map<string, VocabularyLevel>()
-  for (const size of SIZE_KEYS) {
-    for (const [id, level] of buildSet(size, 0).levels) merged.set(id, level)
+  for (const lang of LANGUAGE_CODES) {
+    for (const size of SIZE_KEYS) {
+      for (const [id, level] of buildSet(lang, size, 0).levels) merged.set(id, level)
+    }
   }
   levelCache = merged
   return merged
+}
+
+/** (language, size) of a built-in core page set, or null if it is not one. */
+function locate(pageSetId: string): { lang: LanguageCode; size: string } | null {
+  for (const lang of LANGUAGE_CODES) {
+    for (const size of SIZE_KEYS) {
+      if (setIdFor(lang, size) === pageSetId) return { lang, size }
+    }
+  }
+  return null
 }
 
 /** Level at which a built-in button appears; user-created buttons are always 1. */
@@ -429,44 +568,72 @@ export function levelOfButton(buttonId: string): VocabularyLevel {
 
 /** How many distinct levels a page set actually uses (1 = no level choice). */
 export function levelCountForPageSet(pageSetId: string): number {
-  const size = SIZE_KEYS.find((key) => setIdFor(key) === pageSetId)
-  if (!size) return 1
-  return new Set(buildSet(size, 0).levels.values()).size
+  const found = locate(pageSetId)
+  if (!found) return 1
+  return new Set(buildSet(found.lang, found.size, 0).levels.values()).size
 }
 
 /** Width of the persistent core region for a built-in set; 0 if not one. */
 export function coreColumnsForPageSet(pageSetId: string): number {
-  const size = SIZE_KEYS.find((key) => setIdFor(key) === pageSetId)
-  return size ? SIZES[size].coreColumns : 0
+  const found = locate(pageSetId)
+  return found ? LAYOUTS[found.lang][found.size].coreColumns : 0
 }
 
-// §19.5 Quick Phrases — 18 one-tap complete utterances, 3×6 single page
-const QUICK_PHRASES: Array<[string, PartOfSpeech]> = [
-  ['Hello!', 'social'],
-  ['Goodbye!', 'social'],
-  ['How are you?', 'question'],
-  ['Thank you!', 'social'],
-  ['Please!', 'social'],
-  ['I like that!', 'social'],
-  ['I need help.', 'little'],
-  ['I need a break.', 'little'],
-  ['Can I have more?', 'question'],
-  ['I need the bathroom.', 'little'],
-  ["That's funny!", 'social'],
-  ["That's great!", 'social'],
-  ["I don't like that.", 'descriptor'],
-  ['Look at this!', 'social'],
-  ["That's not what I meant.", 'descriptor'],
-  ['Something else.', 'descriptor'],
-  ['Come here please!', 'social'],
-  ['Something is wrong!', 'question'],
-]
+// §19.5 Quick Phrases — 18 one-tap complete utterances, 3×6 single page.
+// The Spanish set is not a translation: `¿Me ayudas?` and `Me toca a mí` are
+// what a Spanish-speaking child actually says, and Spanish opens questions
+// with an inverted mark, which the TTS needs in order to get the intonation
+// right.
+const QUICK_PHRASES: Record<LanguageCode, Array<[string, PartOfSpeech]>> = {
+  en: [
+    ['Hello!', 'social'],
+    ['Goodbye!', 'social'],
+    ['How are you?', 'question'],
+    ['Thank you!', 'social'],
+    ['Please!', 'social'],
+    ['I like that!', 'social'],
+    ['I need help.', 'little'],
+    ['I need a break.', 'little'],
+    ['Can I have more?', 'question'],
+    ['I need the bathroom.', 'little'],
+    ["That's funny!", 'social'],
+    ["That's great!", 'social'],
+    ["I don't like that.", 'descriptor'],
+    ['Look at this!', 'social'],
+    ["That's not what I meant.", 'descriptor'],
+    ['Something else.', 'descriptor'],
+    ['Come here please!', 'social'],
+    ['Something is wrong!', 'question'],
+  ],
+  es: [
+    ['¡Hola!', 'social'],
+    ['¡Adiós!', 'social'],
+    ['¿Qué tal?', 'question'],
+    ['¡Gracias!', 'social'],
+    ['¡Por favor!', 'social'],
+    ['¡Me gusta!', 'social'],
+    ['Necesito ayuda.', 'little'],
+    ['Necesito un descanso.', 'little'],
+    ['¿Me das más?', 'question'],
+    ['Tengo que ir al baño.', 'little'],
+    ['¡Qué gracioso!', 'social'],
+    ['¡Qué bien!', 'social'],
+    ['No me gusta.', 'descriptor'],
+    ['¡Mira esto!', 'social'],
+    ['No quería decir eso.', 'descriptor'],
+    ['Otra cosa.', 'descriptor'],
+    ['¡Ven aquí, por favor!', 'social'],
+    ['¡Algo va mal!', 'question'],
+  ],
+}
 
 const SEED_META_KEY = 'coreVocabularySeeded'
 const SEED_VERSION_KEY = 'seedVersion'
 // Bump when bundled content changes. From v6 on, a bump runs a
 // data-preserving migration (rebuildBuiltInContent) — NOT a wipe.
-const SEED_VERSION = '10'
+// v11 adds the Spanish boards and Frases rápidas (§19.7); English ids are
+// untouched, so existing profiles and word lists migrate in place.
+const SEED_VERSION = '11'
 
 export async function seedIfNeeded(storage: Storage): Promise<string> {
   const existing = await storage.getMeta(SEED_META_KEY)
@@ -526,14 +693,19 @@ export const restoreBuiltInPageSets = rebuildBuiltInContent
 async function createBuiltInSets(storage: Storage): Promise<string> {
   const now = Date.now()
 
-  for (const size of SIZE_KEYS) {
-    const { pageSet, pages, buttons } = buildSet(size, now)
-    await storage.createPageSet(pageSet)
-    for (const page of pages) await storage.createPage(page)
-    for (const button of buttons) await storage.createButton(button)
+  // Every language's boards are seeded, not just the active one: switching a
+  // profile's language must not require a re-seed, and a family with an
+  // English-speaking sibling and a Spanish-speaking one shares one device.
+  for (const lang of LANGUAGE_CODES) {
+    for (const size of SIZE_KEYS) {
+      const { pageSet, pages, buttons } = buildSet(lang, size, now)
+      await storage.createPageSet(pageSet)
+      for (const page of pages) await storage.createPage(page)
+      for (const button of buttons) await storage.createButton(button)
+    }
+    await seedQuickPhrases(storage, lang, now)
   }
 
-  await seedQuickPhrases(storage, now)
   await storage.setMeta(SEED_META_KEY, CORE_SET_ID)
 
   return CORE_SET_ID
@@ -541,16 +713,20 @@ async function createBuiltInSets(storage: Storage): Promise<string> {
 
 // §19.5: each button speaks its full sentence in one tap, bypassing the
 // message bar
-async function seedQuickPhrases(storage: Storage, now: number): Promise<void> {
-  const pageSetId = QUICK_SET_ID
-  const pageId = `${QUICK_SET_ID}-page`
-  await storage.setMeta('quickPhrasesPageSetId', pageSetId) // toolbar jump
+async function seedQuickPhrases(
+  storage: Storage,
+  lang: LanguageCode,
+  now: number,
+): Promise<void> {
+  const pageSetId = quickSetIdFor(lang)
+  const pageId = `${pageSetId}-page`
+  await storage.setMeta(quickPhrasesMetaKey(lang), pageSetId) // toolbar jump
 
   await storage.createPageSet({
     id: pageSetId,
-    name: 'Quick Phrases',
-    description: 'Pre-stored phrases spoken with one tap (§19.5)',
-    language: 'en',
+    name: CHROME[lang].quickPhrases,
+    description: CHROME[lang].quickDescription,
+    language: lang,
     rootPageId: pageId,
     schemaVersion: 1,
     isBuiltIn: true,
@@ -561,7 +737,7 @@ async function seedQuickPhrases(storage: Storage, now: number): Promise<void> {
   await storage.createPage({
     id: pageId,
     pageSetId,
-    name: 'Quick Phrases',
+    name: CHROME[lang].quickPhrases,
     rows: 3,
     columns: 6,
     backgroundColor: '#FFFFFF',
@@ -572,10 +748,12 @@ async function seedQuickPhrases(storage: Storage, now: number): Promise<void> {
     updatedAt: now,
   })
 
-  for (let i = 0; i < QUICK_PHRASES.length; i++) {
-    const [label, pos] = QUICK_PHRASES[i]
+  const phrases = QUICK_PHRASES[lang]
+  for (let i = 0; i < phrases.length; i++) {
+    const [label, pos] = phrases[i]
     await storage.createButton(
       makeButton(
+        lang,
         pageId,
         label,
         pos,

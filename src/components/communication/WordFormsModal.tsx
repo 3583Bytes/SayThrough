@@ -2,11 +2,18 @@ import { useMemo } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { PartOfSpeech } from '../../constants/colors'
 import { FONTS } from '../../constants/typography'
+import { useT } from '../../hooks/useT'
 import { useTheme } from '../../hooks/useTheme'
+import { useLanguage } from '../../hooks/useT'
 import { wordForms } from '../../services/morphology'
+import { useMessageStore } from '../../stores/messageStore'
 
-// §Tier-1 word forms: long-press a word to pick an inflection (plural,
-// tense, comparative, possessive) instead of the base word.
+// §Tier-1 word forms: long-press a word to pick an inflection instead of the
+// base word. What that offers is language-specific — English gives tense and
+// plural, Spanish gives person, gender and number — so the modal reads the
+// active profile's language and passes the message bar as context, which is
+// what lets a Spanish adjective agree with the noun already in the sentence
+// (§19.7).
 export function WordFormsModal({
   visible,
   word,
@@ -21,7 +28,13 @@ export function WordFormsModal({
   onClose: () => void
 }) {
   const theme = useTheme()
-  const forms = useMemo(() => wordForms(word, pos), [word, pos])
+  const t = useT()
+  const language = useLanguage()
+  const tokens = useMessageStore((s) => s.tokens)
+  const forms = useMemo(
+    () => wordForms(word, pos, language, { precedingWords: tokens.map((tk) => tk.text) }),
+    [word, pos, language, tokens],
+  )
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -31,14 +44,14 @@ export function WordFormsModal({
       >
         <Pressable style={[styles.card, { backgroundColor: theme.surface }]} onPress={() => {}}>
           <Text style={[styles.title, { color: theme.textMuted }]}>
-            Forms of “{word}”
+            {t('forms.title', { word })}
           </Text>
           <View style={styles.grid}>
             {forms.map((form) => (
               <Pressable
                 key={`${form.value}-${form.hint}`}
                 accessibilityRole="button"
-                accessibilityLabel={`Insert ${form.value}`}
+                accessibilityLabel={t('forms.insert', { word: form.value })}
                 onPress={() => onPick(form.value)}
                 style={({ pressed }) => [
                   styles.chip,

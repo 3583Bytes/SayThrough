@@ -45,8 +45,9 @@ scripts/symbols/data/
 # scripts/voice/build-runtime.mjs and build-phonemizer.mjs produce these.
 public/ort/
 public/voice/
-# Piper voice model, fetched by scripts/voice/download-voice.mjs (~63 MB).
-# Published as a release asset and unpacked at deploy, like the symbol library.
+# Piper voice models, fetched by scripts/voice/download-voice.mjs — one per
+# language (~63 MB en, ~73 MB es). Fetched by the deploy workflow, not
+# committed; devices download only the model their profile's language needs.
 scripts/voice/data/
 public/voices/
 

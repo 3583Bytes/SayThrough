@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import {
   loadHistory,
   type MessageHistory,
@@ -21,6 +22,7 @@ export function MessageHistoryModal({
   onClose: () => void
 }) {
   const theme = useTheme()
+  const t = useT()
   const userId = useUserStore((s) => s.activeUser?.id)
   const loadMessage = useMessageStore((s) => s.loadMessage)
   const [history, setHistory] = useState<MessageHistory>({
@@ -42,7 +44,7 @@ export function MessageHistoryModal({
       <View key={text} style={[styles.row, { borderColor: theme.border }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Use phrase: ${text}`}
+          accessibilityLabel={t('message.usePhrase', { text })}
           onPress={() => {
             loadMessage(text)
             onClose()
@@ -77,10 +79,10 @@ export function MessageHistoryModal({
       >
         <Pressable style={[styles.card, { backgroundColor: theme.surface }]} onPress={() => {}}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Recent messages</Text>
+            <Text style={[styles.title, { color: theme.text }]}>{t('message.recent')}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close recent messages"
+              accessibilityLabel={t('message.closeRecent')}
               onPress={onClose}
               style={({ pressed }) => [styles.closeBtn, pressed && styles.pressed]}
             >
@@ -94,11 +96,11 @@ export function MessageHistoryModal({
               </Text>
             )}
             {history.favorites.length > 0 && (
-              <Text style={[styles.section, { color: theme.textMuted }]}>Favorites</Text>
+              <Text style={[styles.section, { color: theme.textMuted }]}>{t('message.favorites')}</Text>
             )}
             {history.favorites.map(renderRow)}
             {recentsOnly.length > 0 && (
-              <Text style={[styles.section, { color: theme.textMuted }]}>Recent</Text>
+              <Text style={[styles.section, { color: theme.textMuted }]}>{t('message.recentSection')}</Text>
             )}
             {recentsOnly.map(renderRow)}
           </ScrollView>

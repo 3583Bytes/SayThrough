@@ -1,14 +1,19 @@
 import type { PartOfSpeech } from '../constants/colors'
+import { langCode } from '../i18n'
+import { spanishWordForms } from './morphology.es'
+import type { MorphContext, WordForm } from './morphologyTypes'
 
 // English word-forms / grammar (§Tier-1). Rule-based inflection plus an
 // irregulars table, chosen by the word's part of speech (which every seeded
 // button carries). Approximate — English is long-tailed — but covers the
 // core vocabulary well. Pure + unit-tested.
+//
+// `wordForms` at the bottom of this file is the language dispatcher: English
+// is handled here, Spanish in `morphology.es.ts`. They are separate engines
+// rather than one parameterised one because Spanish inflects for person and
+// agrees for gender — see the header of that file.
 
-export interface WordForm {
-  value: string // the inflected word to insert
-  hint: string // short grammatical label shown under it ('' for the base)
-}
+export type { MorphContext, WordForm }
 
 // ---- regular spelling rules -------------------------------------------------
 
@@ -144,7 +149,7 @@ function genericForms(w: string, base: string): WordForm[] {
 
 // Returns the base plus its inflected forms; a length of 1 means there's
 // nothing useful to offer (function words), so the caller can skip the popup.
-export function wordForms(word: string, pos?: PartOfSpeech): WordForm[] {
+export function englishWordForms(word: string, pos?: PartOfSpeech): WordForm[] {
   const base = word.trim()
   const w = base.toLowerCase()
   if (!w) return []
@@ -172,4 +177,23 @@ export function wordForms(word: string, pos?: PartOfSpeech): WordForm[] {
   // de-duplicate forms that collapse to the same string (e.g. put/put/put)
   const seen = new Set<string>()
   return forms.filter((f) => (seen.has(f.value) ? false : seen.add(f.value)))
+}
+
+/**
+ * Word forms for the active language. `language` is a BCP-47 tag (the value
+ * on `UserProfile.language`); anything unrecognised falls back to English so
+ * a profile from a future version still opens.
+ *
+ * `context` carries what is already in the message bar. English ignores it;
+ * Spanish uses it to agree an adjective with the noun it follows.
+ */
+export function wordForms(
+  word: string,
+  pos?: PartOfSpeech,
+  language?: string,
+  context?: MorphContext,
+): WordForm[] {
+  return langCode(language) === 'es'
+    ? spanishWordForms(word, pos, context)
+    : englishWordForms(word, pos)
 }

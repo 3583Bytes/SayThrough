@@ -12,7 +12,10 @@ class EnhancedBackendStub implements TtsBackend {
   readonly id = 'enhanced' as const
   // Signature matches enhancedBackend.web.ts so callers typecheck against
   // either platform's implementation.
-  async init(_onProgress?: (loaded: number, total: number) => void): Promise<boolean> {
+  async init(
+    _onProgress?: (loaded: number, total: number) => void,
+    _language?: string,
+  ): Promise<boolean> {
     return false
   }
   isAvailable(): boolean {
@@ -30,8 +33,12 @@ class EnhancedBackendStub implements TtsBackend {
     return 'The enhanced voice is not available on this platform.'
   }
 
-  isDownloaded(): Promise<boolean> {
+  isDownloaded(_language?: string): Promise<boolean> {
     return Promise.resolve(false)
+  }
+
+  loadedLanguage(): null {
+    return null
   }
 }
 

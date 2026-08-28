@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { FONTS } from '../../constants/typography'
 import { useTheme } from '../../hooks/useTheme'
+import { useT } from '../../hooks/useT'
 import type { Prediction } from '../../services/prediction'
 
 // §18 prediction bar. Two AAC-specific rules a generic autocomplete would
@@ -29,10 +30,11 @@ export function PredictionBar({
   highlightedIds?: Set<string>
 }) {
   const theme = useTheme()
+  const t = useT()
   const slots = Array.from({ length: PREDICTION_SLOTS }, (_, i) => predictions[i])
 
   return (
-    <View style={styles.bar} accessibilityLabel="Word suggestions">
+    <View style={styles.bar} accessibilityLabel={t('prediction.bar')}>
       {slots.map((prediction, index) => {
         const highlighted = highlightedIds?.has(predictionSlotId(index)) ?? false
         if (!prediction) {
@@ -50,7 +52,7 @@ export function PredictionBar({
           <Pressable
             key={prediction.word}
             accessibilityRole="button"
-            accessibilityLabel={`Insert ${prediction.word}`}
+            accessibilityLabel={t('prediction.insert', { word: prediction.word })}
             onPress={() => onSelect(prediction.word)}
             style={({ pressed }) => [
               styles.slot,

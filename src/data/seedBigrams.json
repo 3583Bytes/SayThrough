@@ -12,50 +12,398 @@
     "Personal bigrams outrank these as soon as the user has any, so a wrong",
     "guess here decays out of the way rather than sticking."
   ],
-
   "en": {
-    "i": ["want", "need", "like", "am", "have", "feel", "don't", "can't"],
-    "you": ["are", "want", "can", "have", "know"],
-    "we": ["can", "are", "have", "want"],
-    "it": ["is", "was", "hurts"],
-    "that": ["is", "one", "hurts"],
-    "this": ["one", "is"],
-    "my": ["turn", "name", "mom", "head", "hand"],
-    "want": ["to", "more", "some", "it", "that"],
-    "need": ["to", "help", "more", "a"],
-    "like": ["it", "that", "to"],
-    "feel": ["sick", "sad", "happy", "tired", "better"],
-    "am": ["hungry", "tired", "sad", "happy", "done", "sick"],
-    "have": ["to", "a", "some"],
-    "can": ["i", "you", "we"],
-    "is": ["it", "this", "that"],
-    "are": ["you", "we"],
-    "don't": ["like", "want", "know"],
-    "not": ["now", "yet"],
-    "all": ["done", "finished"],
-    "more": ["please"],
-    "go": ["to", "home", "outside", "away"],
-    "let's": ["go", "play", "eat"],
-    "help": ["me", "please"],
-    "give": ["me"],
-    "take": ["me", "it"],
-    "come": ["here"],
-    "look": ["at"],
-    "put": ["it", "on"],
-    "turn": ["it", "on", "off"],
-    "open": ["it"],
-    "stop": ["it"],
-    "play": ["with", "outside"],
-    "eat": ["lunch", "dinner"],
-    "drink": ["water"],
-    "read": ["a", "book"],
-    "watch": ["tv"],
-    "where": ["is", "are"],
-    "what": ["is", "are"],
-    "who": ["is"],
-    "how": ["are", "much"],
-    "good": ["morning", "night", "job"],
-    "thank": ["you"],
-    "let": ["me"]
+    "i": [
+      "want",
+      "need",
+      "like",
+      "am",
+      "have",
+      "feel",
+      "don't",
+      "can't"
+    ],
+    "you": [
+      "are",
+      "want",
+      "can",
+      "have",
+      "know"
+    ],
+    "we": [
+      "can",
+      "are",
+      "have",
+      "want"
+    ],
+    "it": [
+      "is",
+      "was",
+      "hurts"
+    ],
+    "that": [
+      "is",
+      "one",
+      "hurts"
+    ],
+    "this": [
+      "one",
+      "is"
+    ],
+    "my": [
+      "turn",
+      "name",
+      "mom",
+      "head",
+      "hand"
+    ],
+    "want": [
+      "to",
+      "more",
+      "some",
+      "it",
+      "that"
+    ],
+    "need": [
+      "to",
+      "help",
+      "more",
+      "a"
+    ],
+    "like": [
+      "it",
+      "that",
+      "to"
+    ],
+    "feel": [
+      "sick",
+      "sad",
+      "happy",
+      "tired",
+      "better"
+    ],
+    "am": [
+      "hungry",
+      "tired",
+      "sad",
+      "happy",
+      "done",
+      "sick"
+    ],
+    "have": [
+      "to",
+      "a",
+      "some"
+    ],
+    "can": [
+      "i",
+      "you",
+      "we"
+    ],
+    "is": [
+      "it",
+      "this",
+      "that"
+    ],
+    "are": [
+      "you",
+      "we"
+    ],
+    "don't": [
+      "like",
+      "want",
+      "know"
+    ],
+    "not": [
+      "now",
+      "yet"
+    ],
+    "all": [
+      "done",
+      "finished"
+    ],
+    "more": [
+      "please"
+    ],
+    "go": [
+      "to",
+      "home",
+      "outside",
+      "away"
+    ],
+    "let's": [
+      "go",
+      "play",
+      "eat"
+    ],
+    "help": [
+      "me",
+      "please"
+    ],
+    "give": [
+      "me"
+    ],
+    "take": [
+      "me",
+      "it"
+    ],
+    "come": [
+      "here"
+    ],
+    "look": [
+      "at"
+    ],
+    "put": [
+      "it",
+      "on"
+    ],
+    "turn": [
+      "it",
+      "on",
+      "off"
+    ],
+    "open": [
+      "it"
+    ],
+    "stop": [
+      "it"
+    ],
+    "play": [
+      "with",
+      "outside"
+    ],
+    "eat": [
+      "lunch",
+      "dinner"
+    ],
+    "drink": [
+      "water"
+    ],
+    "read": [
+      "a",
+      "book"
+    ],
+    "watch": [
+      "tv"
+    ],
+    "where": [
+      "is",
+      "are"
+    ],
+    "what": [
+      "is",
+      "are"
+    ],
+    "who": [
+      "is"
+    ],
+    "how": [
+      "are",
+      "much"
+    ],
+    "good": [
+      "morning",
+      "night",
+      "job"
+    ],
+    "thank": [
+      "you"
+    ],
+    "let": [
+      "me"
+    ]
+  },
+  "es": {
+    "yo": [
+      "quiero",
+      "necesito",
+      "tengo",
+      "voy",
+      "puedo",
+      "soy",
+      "estoy"
+    ],
+    "tú": [
+      "quieres",
+      "tienes",
+      "puedes",
+      "eres",
+      "estás"
+    ],
+    "quiero": [
+      "ir",
+      "comer",
+      "beber",
+      "jugar",
+      "más",
+      "eso",
+      "agua",
+      "ayuda"
+    ],
+    "necesito": [
+      "ayuda",
+      "ir",
+      "agua",
+      "descansar",
+      "eso"
+    ],
+    "tengo": [
+      "hambre",
+      "sed",
+      "sueño",
+      "frío",
+      "calor",
+      "miedo",
+      "que"
+    ],
+    "tienes": [
+      "que",
+      "razón",
+      "hambre"
+    ],
+    "es": [
+      "bueno",
+      "malo",
+      "mío",
+      "grande",
+      "eso",
+      "para"
+    ],
+    "está": [
+      "bien",
+      "mal",
+      "aquí",
+      "allí",
+      "roto",
+      "sucio",
+      "caliente"
+    ],
+    "estoy": [
+      "bien",
+      "cansado",
+      "triste",
+      "contento",
+      "enfadado",
+      "aquí"
+    ],
+    "soy": [
+      "yo",
+      "grande",
+      "mayor"
+    ],
+    "me": [
+      "gusta",
+      "duele",
+      "toca",
+      "ayudas",
+      "voy"
+    ],
+    "te": [
+      "quiero",
+      "toca",
+      "gusta",
+      "ayudo"
+    ],
+    "no": [
+      "quiero",
+      "me",
+      "sé",
+      "puedo",
+      "está",
+      "hay",
+      "gusta"
+    ],
+    "más": [
+      "agua",
+      "comida",
+      "por favor",
+      "tarde",
+      "grande"
+    ],
+    "mi": [
+      "mamá",
+      "papá",
+      "turno",
+      "casa",
+      "nombre",
+      "hermano"
+    ],
+    "mucho": [
+      "gusto",
+      "más",
+      "tiempo"
+    ],
+    "vamos": [
+      "a",
+      "casa",
+      "fuera"
+    ],
+    "puedo": [
+      "ir",
+      "tener",
+      "jugar",
+      "comer",
+      "salir"
+    ],
+    "dónde": [
+      "está",
+      "vas",
+      "estamos"
+    ],
+    "qué": [
+      "es",
+      "pasa",
+      "hago",
+      "quieres",
+      "tal"
+    ],
+    "por": [
+      "favor",
+      "qué",
+      "aquí"
+    ],
+    "voy": [
+      "a"
+    ],
+    "hay": [
+      "que",
+      "más",
+      "agua"
+    ],
+    "gusta": [
+      "eso",
+      "mucho",
+      "esto"
+    ],
+    "un": [
+      "poco",
+      "momento",
+      "rato"
+    ],
+    "una": [
+      "vez",
+      "cosa",
+      "más"
+    ],
+    "la": [
+      "casa",
+      "comida",
+      "escuela",
+      "mano"
+    ],
+    "el": [
+      "baño",
+      "coche",
+      "colegio",
+      "parque"
+    ],
+    "ayuda": [
+      "por favor"
+    ],
+    "vamos a": [
+      "comer",
+      "jugar",
+      "casa"
+    ]
   }
 }
