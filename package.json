@@ -60,7 +60,8 @@
     "voice:pl": "node scripts/voice/download-voice.mjs pl_PL-gosia-medium",
     "polish-core": "node scripts/vocabulary/build-polish-core.mjs && node scripts/vocabulary/build-polish-symbols.mjs",
     "voice:pt": "node scripts/voice/download-voice.mjs pt_BR-faber-medium",
-    "portuguese-core": "node scripts/vocabulary/build-portuguese-core.mjs && node scripts/vocabulary/build-portuguese-symbols.mjs"
+    "portuguese-core": "node scripts/vocabulary/build-portuguese-core.mjs && node scripts/vocabulary/build-portuguese-symbols.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "private": true
 }

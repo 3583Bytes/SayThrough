@@ -26,10 +26,10 @@ const ORIGIN = 'https://saythrough.com'
 // Language code → URL prefix and the `<html lang>` / hreflang value. English
 // is unprefixed because it was there first and its URLs are already indexed.
 const LANGUAGES = [
-  { code: 'en', prefix: '', htmlLang: 'en', hreflang: 'en', label: 'English' },
-  { code: 'es', prefix: '/es', htmlLang: 'es', hreflang: 'es', label: 'Español' },
-  { code: 'pl', prefix: '/pl', htmlLang: 'pl', hreflang: 'pl', label: 'Polski' },
-  { code: 'pt', prefix: '/pt', htmlLang: 'pt-BR', hreflang: 'pt-BR', label: 'Português' },
+  { code: 'en', prefix: '', htmlLang: 'en', hreflang: 'en', label: 'English', short: 'EN' },
+  { code: 'es', prefix: '/es', htmlLang: 'es', hreflang: 'es', label: 'Español', short: 'ES' },
+  { code: 'pl', prefix: '/pl', htmlLang: 'pl', hreflang: 'pl', label: 'Polski', short: 'PL' },
+  { code: 'pt', prefix: '/pt', htmlLang: 'pt-BR', hreflang: 'pt-BR', label: 'Português', short: 'PT' },
 ]
 
 // template file → output path (relative, no language prefix) and sitemap weight
@@ -115,14 +115,24 @@ function hreflangFor(pageUrl) {
   return `\n${links.join('\n')}`
 }
 
-/** The always-visible switcher. Real links, so it works with no JavaScript. */
+/**
+ * The always-visible switcher. Real links, so it works with no JavaScript.
+ *
+ * Each entry carries BOTH the endonym and a short code, and CSS shows one or
+ * the other. Four full names ("English Español Polski Português") are about
+ * 250px, which is enough to overflow the header on a laptop — the nav links
+ * wrapped to three lines and the call-to-action was pushed off the edge. The
+ * full name stays the accessible name either way.
+ */
 function switcherFor(language, pageUrl) {
   if (!pageUrl) pageUrl = '/'
+  const inner = (l) =>
+    `<span class="lang-full">${l.label}</span><span class="lang-short" aria-hidden="true">${l.short}</span>`
   const items = LANGUAGES.map((l) => {
     const href = `${l.prefix}${pageUrl}`
     return l.code === language.code
-      ? `<span class="lang-current" aria-current="true">${l.label}</span>`
-      : `<a href="${href}" hreflang="${l.hreflang}" lang="${l.htmlLang}">${l.label}</a>`
+      ? `<span class="lang-current" aria-current="true" aria-label="${l.label}">${inner(l)}</span>`
+      : `<a href="${href}" hreflang="${l.hreflang}" lang="${l.htmlLang}" aria-label="${l.label}">${inner(l)}</a>`
   })
   return `<div class="lang-switch" data-lang-switch>${items.join('')}</div>`
 }

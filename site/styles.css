@@ -92,7 +92,7 @@ p { margin: 0 0 1em; }
   backdrop-filter: saturate(160%) blur(10px);
   border-bottom: 1px solid var(--border);
 }
-.nav { display: flex; align-items: center; gap: 20px; height: 66px; }
+.nav { display: flex; align-items: center; gap: 20px; min-height: 66px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: var(--green); }
 .brand:hover { text-decoration: none; }
 .brand-logo {
@@ -100,12 +100,13 @@ p { margin: 0 0 1em; }
   display: grid; place-items: center;
 }
 .nav-links { display: flex; gap: 22px; margin-left: 12px; }
-.nav-links a { color: var(--ink); font-weight: 600; font-size: 0.96rem; }
+.nav-links a { color: var(--ink); font-weight: 600; font-size: 0.96rem; white-space: nowrap; }
 .nav-spacer { flex: 1; }
 
 /* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  white-space: nowrap;
   font-weight: 700; font-size: 1rem; border-radius: 12px; padding: 13px 22px;
   border: 1.5px solid transparent; cursor: pointer; transition: transform .05s ease, background .15s ease;
 }
@@ -241,8 +242,33 @@ table.compare tbody th { font-weight: 600; }
 .lang-switch a:focus-visible { outline: 2px solid var(--green-600); outline-offset: 1px; }
 .lang-switch .lang-current { color: var(--ink); font-weight: 700; background: var(--surface-2); }
 
+/* The header switcher always uses short codes; the endonym is the accessible
+   name via aria-label, and the footer shows it in full. Chasing a breakpoint
+   where four endonyms fit was the wrong shape of fix: "English Español Polski
+   Português" is ~250px, and the header also carries a brand, five nav links
+   and a call to action whose label is longest in exactly the languages that
+   make the switcher widest ("Otwórz aplikację", "Abrir o aplicativo"). Short
+   codes are the same width in every language, so the row is predictable. */
+.lang-full { display: none; }
+.lang-short { display: inline; }
+
+/* The header carries brand + five nav links + switcher + call to action. The
+   nav labels are longest in Portuguese and Polish, so they go first — each
+   one is repeated in the footer and the three in-page anchors are reachable
+   by scrolling, so nothing becomes unreachable. A header that overflows its
+   own box is broken for everyone. */
+@media (max-width: 1179px) {
+  .nav-links { gap: 16px; margin-left: 4px; }
+}
+@media (max-width: 1119px) {
+  .nav-links { display: none; }
+}
+
+/* The footer has room, so it always shows the endonyms. */
 .footer-lang { margin-top: 14px; }
 .footer-lang .lang-switch { flex-wrap: wrap; }
+.footer-lang .lang-full { display: inline; }
+.footer-lang .lang-short { display: none; }
 
 .lang-banner {
   display: flex;
@@ -269,7 +295,10 @@ table.compare tbody th { font-weight: 600; }
 .lang-banner-x:hover { color: var(--ink); }
 .lang-banner-x:focus-visible { outline: 2px solid var(--green-600); outline-offset: 1px; }
 
-@media (max-width: 720px) {
-  .lang-nav { order: 3; width: 100%; margin-top: 6px; }
-  .lang-switch { justify-content: center; }
+/* Narrow screens: let the row wrap once brand + switcher + button stop
+   fitting side by side, and give it breathing room when it does. */
+@media (max-width: 600px) {
+  .nav { flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 10px 14px; }
+  .nav-spacer { display: none; }
+  .lang-nav { margin-left: auto; }
 }

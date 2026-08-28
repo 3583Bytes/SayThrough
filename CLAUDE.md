@@ -51,6 +51,7 @@ npm run e2e        # build + Playwright E2E against the web build (tests/e2e)
 npm run lexicon    # rebuild prediction lexicons (en + es) from OpenSubtitles
 npm run spanish-core  # regenerate the Spanish boards + symbol map
 npm run polish-core   # regenerate the Polish boards + symbol map
+npm run screenshots   # regenerate docs/screenshots from the built app (--light, --lang pl)
 npm run portuguese-core # regenerate the Portuguese boards + symbol map
 npm run review-packet # regenerate docs/slp-review*.md (one per language)
 npm run voice      # fetch the English Piper model (voice:es/pl/pt too)

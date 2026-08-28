@@ -4,7 +4,7 @@
 
 SayThrough is Augmentative and Alternative Communication (AAC) software: a symbol-and-word grid that speaks aloud, so children and adults who are non-verbal or have limited speech can build sentences and be heard. It's a free alternative to apps like TD Snap ($9.99/month) and Proloquo2Go ($249.99) — built for the teachers, parents, speech-language pathologists (SLPs), and communicators who can't afford, or shouldn't have to pay for, a voice.
 
-![The Core Vocabulary home page](docs/screenshots/home.png)
+![The Core Vocabulary home page in dark mode](docs/screenshots/home-dark.png)
 
 ## Why it exists
 
@@ -18,14 +18,15 @@ A commercial AAC app can cost more per month than a family's internet bill, or h
 
 Tap words to build a sentence in the message bar, then press **Speak** — the device reads it aloud.
 
-![Building "I want cookie" on the Food page](docs/screenshots/topic-and-message.png)
+![Building "I want cookie" on the Food page](docs/screenshots/topic-and-message-dark.png)
 
-- **Core-word vocabulary** — the ~15 highest-frequency words (I, want, more, help, stop, go…) sit in a framed panel that stays in the same place on *every* page, so access becomes muscle memory. Topic pages (Food, Feelings, Animals, and more) open from the folder buttons on the right, and the core words come with you.
-- **13,500+ picture symbols** from the open-licensed ARASAAC library, searchable, with a picker for customizing any button — or use a photo from your own device.
-- **Speaks aloud** using the device's built-in text-to-speech (free and offline). *(Higher-quality neural voices are on the roadmap.)*
+- **Core-word vocabulary** — the ~15 highest-frequency words (I, want, more, help, stop, go…) sit in a framed panel that stays in the same place on *every* page, so access becomes muscle memory. Topic pages (Food, Feelings, Actions, and more) open from the folder buttons on the right, and the core words come with you.
+- **13,700+ picture symbols** from the open-licensed ARASAAC library, searchable, with a picker for customizing any button — or use a photo from your own device.
+- **Speaks aloud** using the device's built-in text-to-speech (free and offline), plus an optional natural-sounding neural voice (Piper) that runs entirely on the device — the kind other apps charge for.
 - **Quick Phrases** — one-tap complete sentences ("I need help", "Thank you!") for fast everyday communication.
 - **A keyboard** for any word that doesn't have a button.
 - **Fully customizable** — add, edit, move, and delete buttons; create and link new pages; drag to rearrange; undo/redo; all changes save automatically. Edit mode is PIN-protected so it can't be changed by accident.
+- **Four languages** — English, Español, Polski and Português, each with its own authored board, prediction lexicon, voice and grammar engine rather than a machine translation.
 - **Multiple profiles** on one device, each with its own vocabulary, voice, and settings — for a classroom or a family.
 - **Built for real access needs** — touch accommodations (hold-to-activate, ignore accidental taps), adjustable button spacing and text size, a message-bar position that suits mounted devices, and a clinical **Vocabulary Filter** and **data tracking** (off by default) for SLPs.
 - **No lock-in** — import and export standard **Open Board Format** (`.obz`) files, compatible with CoughDrop, TD Snap, and other AAC apps.

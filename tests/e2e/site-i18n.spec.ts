@@ -48,8 +48,40 @@ test.describe('localised marketing pages', () => {
 
   test('the switcher marks the current language and is not a link', async ({ page }) => {
     await page.goto('/pt/')
-    await expect(page.locator('.lang-switch .lang-current').first()).toHaveText('Português')
+    const current = page.locator('.lang-switch .lang-current').first()
+    // The header shows a short code to keep the row from overflowing, so the
+    // endonym is carried as the accessible name rather than the visible text.
+    await expect(current).toHaveAttribute('aria-label', 'Português')
+    await expect(current.locator('.lang-short')).toHaveText('PT')
     await expect(page.locator('.lang-switch a[lang="pt-BR"]')).toHaveCount(0)
+  })
+
+  test('the header stays on one row without clipping, in every language', async ({ page }) => {
+    // The regression this guards: four endonyms in the header squeezed the
+    // call-to-action until its label wrapped, which made it taller than the
+    // fixed-height header and clipped its top edge.
+    for (const path of ['/', '/es/', '/pl/', '/pt/']) {
+      for (const width of [1440, 1280, 1120, 1024, 900, 700, 480, 360]) {
+        await page.setViewportSize({ width, height: 400 })
+        await page.goto(path)
+        const overflow = await page.evaluate(() => {
+          const header = document.querySelector('.site-header')
+          const box = header.getBoundingClientRect()
+          return [...header.querySelectorAll('.btn, .lang-switch a, .brand')]
+            .filter((el) => {
+              const r = el.getBoundingClientRect()
+              if (!r.width && !r.height) return false
+              return (
+                r.top < box.top - 0.5 ||
+                r.bottom > box.bottom + 0.5 ||
+                r.right > window.innerWidth + 0.5
+              )
+            })
+            .map((el) => el.textContent.trim().slice(0, 20))
+        })
+        expect({ path, width, overflow }).toEqual({ path, width, overflow: [] })
+      }
+    }
   })
 
   test('the app link carries the language across', async ({ page }) => {
