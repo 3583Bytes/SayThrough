@@ -1,0 +1,15 @@
+    <!-- Retire the old root-scoped service worker from the previous
+         app-at-root deploy (the app's own SW now lives under /app/). -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (r) {
+            try {
+              if (new URL(r.scope).pathname === '/') r.unregister()
+            } catch (e) {}
+          })
+        })
+      }
+    </script>
+    <script src="/lang.js" defer></script>
+    <script src="/analytics.js" defer></script>

@@ -79,4 +79,8 @@ Pushing to `main` triggers `.github/workflows/deploy.yml` → GitHub Pages at th
 - **`/`** — the hand-authored static marketing site + guides (source in `site/`, copied by `scripts/build-site.mjs`; each page is real crawlable HTML with its own SEO/OG tags).
 - **`/app/`** — the Expo web app (exported with `EXPO_BASE_URL=/app` so it's a self-contained PWA under that path; `postbuild-web.mjs` handles its manifest/SW and marks it `noindex`).
 
-`CNAME`, `robots.txt`, `sitemap.xml`, `og-image.png` live at the `dist/` root (from `site/`, not `public/`). The OG share image is generated from `scripts/og-image.html` via `npm run og-image`.
+The marketing site is **generated, not hand-authored**: `site/_templates/` holds the page structure and `site/_content/{en,es,pl,pt}.json` the copy, rendered by `scripts/build-site.mjs` into one real HTML file per (language, page) — `/`, `/es/`, `/pl/`, `/pt/`. `en.json` is canonical and the build fails on a key any language is missing. Each page carries its own canonical + reciprocal `hreflang` (with `x-default` → English), and the sitemap lists all of them.
+
+Language detection **suggests, never redirects on a first visit** (`site/lang.js`): Pages cannot vary on `Accept-Language`, so a JS redirect on `/` would hide the localised pages from crawlers and trap anyone who wanted English. A visible switcher is the primary mechanism; a dismissible banner is the hint; an *explicit* choice is remembered and honoured on later visits. The language pages link to `/app/?lang=xx` so onboarding pre-selects it.
+
+`CNAME`, `robots.txt`, `og-image.png` live at the `dist/` root (from `site/`, not `public/`); `sitemap.xml` is generated. The OG share image is generated from `scripts/og-image.html` via `npm run og-image`.

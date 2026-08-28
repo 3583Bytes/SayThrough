@@ -224,3 +224,52 @@ table.compare tbody th { font-weight: 600; }
   .hero { padding: 48px 0 24px; }
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---- Language switcher & suggestion banner (§19.7) ---------------------- */
+/* Real links, so the switcher works with no JavaScript and is crawlable. */
+.lang-nav { display: flex; align-items: center; }
+.lang-switch { display: flex; align-items: center; gap: 2px; font-size: 0.82rem; }
+.lang-switch a,
+.lang-switch .lang-current {
+  padding: 4px 8px;
+  border-radius: 7px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lang-switch a { color: var(--muted); }
+.lang-switch a:hover { color: var(--ink); background: var(--surface-2); }
+.lang-switch a:focus-visible { outline: 2px solid var(--green-600); outline-offset: 1px; }
+.lang-switch .lang-current { color: var(--ink); font-weight: 700; background: var(--surface-2); }
+
+.footer-lang { margin-top: 14px; }
+.footer-lang .lang-switch { flex-wrap: wrap; }
+
+.lang-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+}
+.lang-banner-go { font-weight: 700; }
+.lang-banner-x {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.lang-banner-x:hover { color: var(--ink); }
+.lang-banner-x:focus-visible { outline: 2px solid var(--green-600); outline-offset: 1px; }
+
+@media (max-width: 720px) {
+  .lang-nav { order: 3; width: 100%; margin-top: 6px; }
+  .lang-switch { justify-content: center; }
+}

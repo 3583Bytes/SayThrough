@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › {{contact.crumb}}</p>
+      <h1>{{contact.h1}}</h1>
+      <p class="lead">{{contact.lead}}</p>
+
+      <h2>{{contact.broken.title}}</h2>
+      <p>{{contact.broken.body}}</p>
+
+      <h2>{{contact.clinical.title}}</h2>
+      <p>{{contact.clinical.body}}</p>
+
+      <h2>{{contact.else.title}}</h2>
+      <p>{{contact.else.body}}</p>
+
+      <p class="email-line" id="email-slot">
+        <noscript>
+          <strong>contact</strong> at <strong>3583bytes</strong> dot <strong>com</strong>
+          &mdash; {{contact.noscript}}
+        </noscript>
+      </p>
+
+      <div class="callout">
+        <h3>{{contact.privacy.title}}</h3>
+        <p>{{contact.privacy.body}}</p>
+      </div>
+
+      <p style="margin-top:32px">
+        <a href="https://www.3583bytes.com/about/contact/">{{contact.other}}</a>
+      </p>
+    </main>
+{{> footer}}
+    <script>
+      // Assembled at runtime: scrapers overwhelmingly do not execute JS, but
+      // the result is ordinary text in the DOM, so screen readers announce it
+      // and it can be selected and copied. An image of the address would beat
+      // the bots too — and be unreadable to exactly the people this app is for.
+      (function () {
+        var address = 'contact' + String.fromCharCode(64) + ['3583bytes', 'com'].join('.')
+        var slot = document.getElementById('email-slot')
+        if (!slot) return
+        var link = document.createElement('a')
+        link.className = 'btn btn-primary'
+        link.href = 'mai' + 'lto:' + address
+        link.textContent = address
+        slot.textContent = ''
+        slot.appendChild(link)
+      })()
+    </script>
+{{> scripts}}
+  </body>
+</html>

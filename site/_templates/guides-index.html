@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › {{guides.crumb}}</p>
+      <h1>{{guides.h1}}</h1>
+      <p class="lead">{{guides.lead}}</p>
+
+      <ul class="guide-list" style="margin-top:28px">
+        <li><a href="{{p}}/guides/quick-start/"><span class="g-title">{{guides.quickStart.link}}</span><span class="g-desc">{{guides.quickStart.desc}}</span></a></li>
+        <li><a href="{{p}}/guides/what-is-aac/"><span class="g-title">{{guides.whatIsAac.link}}</span><span class="g-desc">{{guides.whatIsAac.desc}}</span></a></li>
+      </ul>
+
+      <div class="callout">
+        <p>{{guides.more}}</p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

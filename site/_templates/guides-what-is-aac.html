@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{whatIsAac.crumb}}</p>
+      <h1>{{whatIsAac.h1}}</h1>
+      <p class="lead">{{whatIsAac.lead}}</p>
+
+      <h2>{{whatIsAac.vs.title}}</h2>
+      <p>{{whatIsAac.vs.body}}</p>
+
+      <h2>{{whatIsAac.types.title}}</h2>
+      <ul>
+        <li>{{whatIsAac.types.low}}</li>
+        <li>{{whatIsAac.types.high}}</li>
+      </ul>
+
+      <h2>{{whatIsAac.core.title}}</h2>
+      <p>{{whatIsAac.core.body}}</p>
+
+      <h2>{{whatIsAac.speech.title}}</h2>
+      <p>{{whatIsAac.speech.body}}</p>
+
+      <h2>{{whatIsAac.start.title}}</h2>
+      <ol>
+        <li>{{whatIsAac.start.s1}}</li>
+        <li>{{whatIsAac.start.s2}}</li>
+        <li>{{whatIsAac.start.s3}}</li>
+        <li>{{whatIsAac.start.s4}}</li>
+      </ol>
+
+      <div class="callout">
+        <p>{{whatIsAac.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/quick-start/">{{whatIsAac.quickCta}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

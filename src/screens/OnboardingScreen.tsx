@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -23,6 +24,16 @@ import { useUserStore } from '../stores/userStore'
 import type { PageSet } from '../types/models'
 import { generatePinSalt, hashPin } from '../utils/pin'
 
+/** `?lang=` on the app URL, set by the marketing site's language pages. */
+function languageFromUrl(): string | null {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null
+  try {
+    return new URLSearchParams(window.location.search).get('lang')
+  } catch {
+    return null
+  }
+}
+
 // §5.2 onboarding — shown when no profile exists. Creates the first
 // profile (name → starting vocabulary → skippable caregiver PIN) or
 // starts a nothing-saved guest session ("Try SayThrough").
@@ -38,7 +49,14 @@ export function OnboardingScreen() {
   // No profile exists yet, so there is nothing to read a language off —
   // onboarding translates against the locally chosen option instead of
   // `useT()`, and the whole screen re-renders when it changes.
-  const [language, setLanguageChoice] = useState<LanguageOption>(SUPPORTED_LANGUAGES[0])
+  //
+  // §19.7: the marketing site links to `/app/?lang=pt`, so somebody arriving
+  // from the Portuguese page is not asked a question that page already
+  // answered. It only seeds the initial selection — the picker is still shown
+  // and still changeable, and an unknown value falls back to English.
+  const [language, setLanguageChoice] = useState<LanguageOption>(
+    () => SUPPORTED_LANGUAGES.find((l) => l.code === languageFromUrl()) ?? SUPPORTED_LANGUAGES[0],
+  )
   const t = (key: Parameters<typeof translate>[0], params?: Record<string, string | number>) =>
     translate(key, language.bcp47, params)
   const [step, setStep] = useState<'welcome' | 'setup'>('welcome')

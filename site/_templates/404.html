@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article" style="text-align:center">
+      <p class="eyebrow">404</p>
+      <h1>{{notFound.h1}}</h1>
+      <p class="lead">{{notFound.body}}</p>
+      <p style="margin-top:28px">
+        <a class="btn btn-primary" href="{{p}}/">{{notFound.home}}</a> &nbsp;
+        <a class="btn btn-ghost" href="{{appHref}}">{{nav.openApp}}</a>
+      </p>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

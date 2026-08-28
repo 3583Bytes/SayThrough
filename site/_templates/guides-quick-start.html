@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{quickStart.crumb}}</p>
+      <h1>{{quickStart.h1}}</h1>
+      <p class="lead">{{quickStart.lead}}</p>
+
+      <h2>{{quickStart.s1.title}}</h2>
+      <p>{{quickStart.s1.body}}</p>
+
+      <h2>{{quickStart.s2.title}}</h2>
+      <p>{{quickStart.s2.body}}</p>
+      <ul>
+        <li>{{quickStart.s2.b1}}</li>
+        <li>{{quickStart.s2.b2}}</li>
+        <li>{{quickStart.s2.b3}}</li>
+      </ul>
+
+      <h2>{{quickStart.s3.title}}</h2>
+      <p>{{quickStart.s3.body}}</p>
+      <div class="callout"><p>{{quickStart.s3.tip}}</p></div>
+
+      <h2>{{quickStart.s4.title}}</h2>
+      <p>{{quickStart.s4.body}}</p>
+      <ul>
+        <li>{{quickStart.s4.ios}}</li>
+        <li>{{quickStart.s4.chrome}}</li>
+        <li>{{quickStart.s4.android}}</li>
+      </ul>
+
+      <h2>{{quickStart.next.title}}</h2>
+      <ul>
+        <li>{{quickStart.next.b1}}</li>
+        <li>{{quickStart.next.b2}}</li>
+        <li>{{quickStart.next.b3}}</li>
+      </ul>
+
+      <p style="margin-top:32px"><a class="btn btn-primary" href="{{appHref}}">{{quickStart.cta}}</a></p>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

@@ -7,6 +7,14 @@ export default defineConfig({
   testDir: './tests/e2e',
   timeout: 60_000,
   fullyParallel: true,
+  // Capped deliberately. Three of these specs load a ~60 MB Piper model into a
+  // browser, and dist/ now carries one per language, so unbounded parallelism
+  // exhausts memory and kills browsers mid-test ("Target page, context or
+  // browser has been closed") — a harness failure that reads like a product
+  // one. Playwright's default is half the core count, which is fine on a
+  // 2-core CI runner and far too many on a developer laptop; 2 passes
+  // reliably in both places for about 45s more wall clock.
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
