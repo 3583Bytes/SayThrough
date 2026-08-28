@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { useTheme } from '../hooks/useTheme'
 import { useEffect, useState } from 'react'
 import {
   Pressable,
@@ -24,6 +25,7 @@ interface Report {
 // Calendar heatmap, CSV export, and modeling separation arrive with
 // the fuller SLP tooling.
 export function TrackingReportScreen() {
+  const theme = useTheme()
   const navigation = useNavigation()
   const activeUser = useUserStore((s) => s.activeUser)
   const [report, setReport] = useState<Report | null>(null)
@@ -53,7 +55,7 @@ export function TrackingReportScreen() {
   }, [activeUser])
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
@@ -61,9 +63,9 @@ export function TrackingReportScreen() {
           onPress={() => navigation.goBack()}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.text }]}>← Back</Text>
         </Pressable>
-        <Text style={styles.title}>Communication Data</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Communication Data</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -77,24 +79,24 @@ export function TrackingReportScreen() {
               <Stat label="Messages (7 days)" value={report.messages7d} />
             </View>
 
-            <Text style={styles.sectionTitle}>Most used words (7 days)</Text>
-            <View style={styles.card} testID="report-words">
+            <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Most used words (7 days)</Text>
+            <View style={[styles.card, { backgroundColor: theme.surface }]} testID="report-words">
               {report.topWords.length === 0 && (
-                <Text style={styles.hint}>
+                <Text style={[styles.hint, { color: theme.textMuted }]}>
                   No data yet — communication will appear here once tracking
                   is on and buttons are pressed.
                 </Text>
               )}
               {report.topWords.map(([word, count], index) => (
                 <View key={word} style={styles.wordRow}>
-                  <Text style={styles.wordRank}>{index + 1}.</Text>
-                  <Text style={styles.wordLabel}>{word}</Text>
-                  <Text style={styles.wordCount}>{count}</Text>
+                  <Text style={[styles.wordRank, { color: theme.textMuted }]}>{index + 1}.</Text>
+                  <Text style={[styles.wordLabel, { color: theme.text }]}>{word}</Text>
+                  <Text style={[styles.wordCount, { color: theme.accent }]}>{count}</Text>
                 </View>
               ))}
             </View>
 
-            <Text style={styles.hint}>
+            <Text style={[styles.hint, { color: theme.textMuted }]}>
               All data stays on this device. Least-used-word reports, CSV
               export, and modeling separation are planned (§4.13).
             </Text>
@@ -106,10 +108,11 @@ export function TrackingReportScreen() {
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
+  const theme = useTheme()
   return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={[styles.stat, { backgroundColor: theme.surface }]}>
+      <Text style={[styles.statValue, { color: theme.accent }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: theme.textMuted }]}>{label}</Text>
     </View>
   )
 }

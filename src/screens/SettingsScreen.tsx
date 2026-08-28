@@ -401,10 +401,10 @@ export function SettingsScreen() {
                 onPress={() => updateActiveUser({ ttsVoiceId: voice.identifier })}
                 style={styles.voiceSelect}
               >
-                <Text style={styles.voiceRadio}>
+                <Text style={[styles.voiceRadio, { color: theme.accent }]}>
                   {activeUser.ttsVoiceId === voice.identifier ? '◉' : '○'}
                 </Text>
-                <Text style={styles.voiceName} numberOfLines={1}>
+                <Text style={[styles.voiceName, { color: theme.text }]} numberOfLines={1}>
                   {voice.name}
                 </Text>
               </Pressable>
@@ -416,7 +416,7 @@ export function SettingsScreen() {
                 }
                 style={({ pressed }) => [styles.previewButton, pressed && styles.pressed]}
               >
-                <Text style={styles.previewText}>▶</Text>
+                <Text style={[styles.previewText, { color: theme.text }]}>▶</Text>
               </Pressable>
             </View>
           ))}
@@ -449,7 +449,7 @@ export function SettingsScreen() {
           </View>
 
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Speak each word when tapped</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Speak each word when tapped</Text>
             <Switch
               value={activeUser.speakOnSelect}
               onValueChange={(value) => updateActiveUser({ speakOnSelect: value })}
@@ -457,7 +457,7 @@ export function SettingsScreen() {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Return to home after speaking</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Return to home after speaking</Text>
             <Switch
               value={activeUser.returnHomeAfterSpeak ?? false}
               onValueChange={(value) => updateActiveUser({ returnHomeAfterSpeak: value })}
@@ -465,7 +465,7 @@ export function SettingsScreen() {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Clear message after speaking</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Clear message after speaking</Text>
             <Switch
               value={activeUser.clearAfterSpeak ?? false}
               onValueChange={(value) => updateActiveUser({ clearAfterSpeak: value })}
@@ -478,7 +478,7 @@ export function SettingsScreen() {
         <Text style={[styles.sectionTitle, mutedT]}>Quick Buttons</Text>
         <View style={[styles.card, cardT]}>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Attention bell</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Attention bell</Text>
             <Switch
               value={activeUser.attentionButton ?? true}
               onValueChange={(value) => updateActiveUser({ attentionButton: value })}
@@ -716,7 +716,7 @@ export function SettingsScreen() {
             Limit which words are active during therapy. Words not in the
             list stay visible (so a partner can model) but don't respond.
           </Text>
-          {wordLists.length > 0 && <Text style={styles.fieldLabel}>Word lists</Text>}
+          {wordLists.length > 0 && <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Word lists</Text>}
           <View style={styles.chipRow}>
             {wordLists.map((list) => (
               <Chip
@@ -787,7 +787,7 @@ export function SettingsScreen() {
             </Pressable>
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Filter on (also in top bar: ⊘)</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Filter on (also in top bar: ⊘)</Text>
             <Switch
               value={activeUser.filterEnabled ?? false}
               onValueChange={(value) => updateActiveUser({ filterEnabled: value })}
@@ -845,7 +845,7 @@ export function SettingsScreen() {
               onPress={voiceBusy ? () => {} : enableEnhancedVoice}
             />
           </View>
-          {voiceStatus ? <Text style={styles.hint}>{voiceStatus}</Text> : null}
+          {voiceStatus ? <Text style={[styles.hint, { color: theme.textMuted }]}>{voiceStatus}</Text> : null}
         </View>
 
         {/* 5. Vocabulary level (§19) — only where the board defines levels */}
@@ -884,7 +884,7 @@ export function SettingsScreen() {
             tracking below.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Suggest words while typing</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Suggest words while typing</Text>
             <Switch
               value={activeUser.predictionEnabled ?? true}
               onValueChange={(value) => updateActiveUser({ predictionEnabled: value })}
@@ -909,7 +909,7 @@ export function SettingsScreen() {
             sent anywhere. SLPs use this to document progress.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Track communication data</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Track communication data</Text>
             <Switch
               value={activeUser.trackingEnabled ?? false}
               onValueChange={(value) => updateActiveUser({ trackingEnabled: value })}
@@ -936,7 +936,7 @@ export function SettingsScreen() {
             leaves this device: words, messages, pages and recordings never do.
           </Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Report that the app is in use</Text>
+            <Text style={[styles.switchLabel, { color: theme.text }]}>Report that the app is in use</Text>
             <Switch
               value={countingOn}
               onValueChange={(value) => {
@@ -994,7 +994,7 @@ export function SettingsScreen() {
               onPress={restoreBuiltIns}
             />
           </View>
-          {backupStatus ? <Text style={styles.hint}>{backupStatus}</Text> : null}
+          {backupStatus ? <Text style={[styles.hint, { color: theme.textMuted }]}>{backupStatus}</Text> : null}
         </View>
 
         {/* 6b. Install (§12.6) */}
@@ -1161,7 +1161,7 @@ function PinSetupModal({
             style={[styles.input, inputT]}
             accessibilityLabel="Confirm PIN"
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
           <View style={styles.chipRow}>
             <Chip label="Cancel" selected={false} onPress={onClose} />
             <Chip label="Save PIN" selected onPress={save} />
@@ -1348,7 +1348,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   error: {
-    color: UI_COLORS.clearRed,
     textAlign: 'center',
     fontSize: 13,
   },

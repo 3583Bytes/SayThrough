@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { useTheme } from '../../hooks/useTheme'
+import { executeButtonActions } from '../../services/actionExecutor'
 import { ttsService } from '../../services/TTSService'
 import { storage } from '../../storage'
 import { useNavigationStore } from '../../stores/navigationStore'
@@ -20,9 +21,13 @@ interface SearchModalProps {
   onClose: () => void
 }
 
-// §12.4 v1.0 vocabulary search: substring match over the active page
-// set; tap a result to jump to its page (button flashes), or speak it
-// directly from the results. Path highlighting is v1.2.
+// §12.4 vocabulary search: substring match over the active page set.
+//
+// Tapping a result USES the word — it goes into the message bar exactly as if
+// the button had been tapped on its page, because searching for a word is
+// almost always wanting to say it. The board then navigates to that word and
+// flashes it, so the next time it can be reached by memory instead of search.
+// Speak a result outright with the speaker button, which does not add it.
 export function SearchModal({ visible, onClose }: SearchModalProps) {
   const theme = useTheme()
   const [query, setQuery] = useState('')
@@ -44,7 +49,12 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
     }
   }, [query, visible])
 
-  const jumpTo = (result: { button: Button; pageName: string }) => {
+  const useWord = (result: { button: Button; pageName: string }) => {
+    // Runs the button's own actions rather than appending the label directly,
+    // so a search hit behaves identically to tapping it: the symbol travels
+    // with the word, speak-on-select fires, and tracking records the press.
+    executeButtonActions(result.button)
+
     const nav = useNavigationStore.getState()
     nav.navigateTo(result.button.pageId)
     nav.flashButton(result.button.id)
@@ -78,7 +88,7 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
               }}
               style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
             >
-              <Text style={styles.closeText}>✕</Text>
+              <Text style={[styles.closeText, { color: theme.textMuted }]}>✕</Text>
             </Pressable>
           </View>
           <ScrollView style={styles.results}>
@@ -86,8 +96,8 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
               <View key={result.button.id} style={styles.resultRow}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`Go to ${result.button.label} on ${result.pageName}`}
-                  onPress={() => jumpTo(result)}
+                  accessibilityLabel={`Add ${result.button.label}, from ${result.pageName}`}
+                  onPress={() => useWord(result)}
                   style={styles.resultMain}
                 >
                   <Text style={[styles.resultLabel, { color: theme.text }]}>
@@ -103,12 +113,12 @@ export function SearchModal({ visible, onClose }: SearchModalProps) {
                   onPress={() => ttsService.speak(result.button.label)}
                   style={({ pressed }) => [styles.speakButton, pressed && styles.pressed]}
                 >
-                  <Text style={styles.speakIcon}>▶</Text>
+                  <Text style={[styles.speakIcon, { color: theme.text }]}>▶</Text>
                 </Pressable>
               </View>
             ))}
             {query.trim() !== '' && results.length === 0 && (
-              <Text style={styles.empty}>No words found for “{query.trim()}”</Text>
+              <Text style={[styles.empty, { color: theme.textMuted }]}>No words found for “{query.trim()}”</Text>
             )}
           </ScrollView>
         </View>

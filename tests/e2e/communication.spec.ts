@@ -80,12 +80,28 @@ test.describe('navigation & persistent core', () => {
     await expect(page.getByLabel('Back')).toHaveCount(0)
   })
 
-  test('search jumps to a word on its page', async ({ page }) => {
+  test('searching for a word puts it in the message', async ({ page }) => {
+    // Searching for a word is almost always wanting to say it — showing where
+    // it lives without adding it made the user do the work twice.
     await setupProfile(page)
     await page.getByRole('button', { name: 'Search vocabulary' }).click()
     await page.getByRole('textbox', { name: 'Search vocabulary' }).fill('cook')
-    await page.getByLabel('Go to cookie on Food').click()
-    await expect(page.getByLabel('cookie', { exact: true })).toBeVisible()
+    await page.getByLabel('Add cookie, from Food').click()
+
+    await expect(messageBar(page).getByText('cookie', { exact: true })).toBeVisible()
+    // ...and it still navigates to where the word lives, so next time it can
+    // be reached from memory rather than searched for again. Checked via a
+    // different word on that page: 'cookie' now matches the grid button AND
+    // the token just added to the message bar.
+    await expect(page.getByLabel('hungry', { exact: true })).toBeVisible()
+  })
+
+  test('a searched word can be spoken without adding it', async ({ page }) => {
+    await setupProfile(page)
+    await page.getByRole('button', { name: 'Search vocabulary' }).click()
+    await page.getByRole('textbox', { name: 'Search vocabulary' }).fill('cook')
+    await page.getByLabel('Speak cookie').click()
+    await expect(messageBar(page).getByText('cookie', { exact: true })).toHaveCount(0)
   })
 })
 

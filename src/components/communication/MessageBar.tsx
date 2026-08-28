@@ -150,11 +150,12 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
             style={({ pressed }) => [
               styles.smallButton,
               styles.emergencyButton,
+              { borderColor: theme.danger },
               { backgroundColor: theme.surfaceAlt },
               pressed && styles.pressed,
             ]}
           >
-            <MaterialIcons name="warning" size={20} color={UI_COLORS.clearRed} />
+            <MaterialIcons name="warning" size={20} color={theme.danger} />
           </Pressable>
         )}
         <Pressable
@@ -258,11 +259,11 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
                   }}
                   style={({ pressed }) => [
                     styles.sheetButton,
-                    { borderColor: UI_COLORS.clearRed },
+                    { borderColor: theme.danger },
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={[styles.sheetButtonText, { color: UI_COLORS.clearRed }]}>
+                  <Text style={[styles.sheetButtonText, { color: theme.danger }]}>
                     Clear message
                   </Text>
                 </Pressable>
@@ -374,9 +375,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emergencyButton: {
-    borderColor: UI_COLORS.clearRed,
-  },
+  emergencyButton: {},
   scanHighlight: {
     borderWidth: 4,
     borderColor: '#1565C0',

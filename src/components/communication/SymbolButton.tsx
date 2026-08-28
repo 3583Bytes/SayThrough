@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#CFD8DC',
     borderBottomWidth: 5,
-    borderBottomColor: '#00897B',
+    borderBottomColor: '#00796B',
   },
   selected: {
     borderWidth: 3,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: '#00897B',
+    backgroundColor: '#00796B',
     borderRadius: 11,
     width: 22,
     height: 22,

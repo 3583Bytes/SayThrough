@@ -480,8 +480,8 @@ export function CommunicationScreen() {
           />
         )}
         {isGuest && (
-          <View style={styles.guestBanner}>
-            <Text style={styles.guestText}>
+          <View style={[styles.guestBanner, { backgroundColor: theme.accentSurface }]}>
+            <Text style={[styles.guestText, { color: theme.accent }]}>
               Demo mode — nothing is saved.
             </Text>
             <Pressable
@@ -489,7 +489,7 @@ export function CommunicationScreen() {
               accessibilityLabel="Set up SayThrough"
               onPress={() => useUserStore.getState().endGuest()}
             >
-              <Text style={styles.guestAction}>Set up SayThrough</Text>
+              <Text style={[styles.guestAction, { color: theme.accent }]}>Set up SayThrough</Text>
             </Pressable>
           </View>
         )}
@@ -608,7 +608,7 @@ export function CommunicationScreen() {
             <TextInput
               value={pageRenameText}
               onChangeText={setPageRenameText}
-              style={styles.menuInput}
+              style={[styles.menuInput, { color: theme.text }]}
               accessibilityLabel="Page name"
               onSubmitEditing={handlePageRename}
             />
@@ -618,7 +618,7 @@ export function CommunicationScreen() {
               onPress={handlePageRename}
               style={({ pressed }) => [styles.menuButton, pressed && styles.menuPressed]}
             >
-              <Text style={styles.menuButtonText}>Rename</Text>
+              <Text style={[styles.menuButtonText, { color: theme.text }]}>Rename</Text>
             </Pressable>
             {!isRootPage && (
               <Pressable
@@ -628,16 +628,17 @@ export function CommunicationScreen() {
                 style={({ pressed }) => [
                   styles.menuButton,
                   styles.menuDelete,
+                  { borderColor: theme.danger },
                   pressed && styles.menuPressed,
                 ]}
               >
-                <Text style={styles.menuDeleteText}>
+                <Text style={[styles.menuDeleteText, { color: theme.danger }]}>
                   Delete page (buttons that open it become plain words)
                 </Text>
               </Pressable>
             )}
             {isRootPage && (
-              <Text style={styles.menuHint}>The home page cannot be deleted.</Text>
+              <Text style={[styles.menuHint, { color: theme.textMuted }]}>The home page cannot be deleted.</Text>
             )}
           </Pressable>
         </Pressable>
@@ -714,16 +715,13 @@ const styles = StyleSheet.create({
     borderColor: UI_COLORS.barBorder,
     paddingHorizontal: 8,
   },
-  menuDelete: {
-    borderColor: UI_COLORS.clearRed,
-  },
+  menuDelete: {},
   menuButtonText: {
     fontSize: 14,
     fontWeight: '600',
   },
   menuDeleteText: {
     fontSize: 13,
-    color: UI_COLORS.clearRed,
     fontWeight: '600',
     textAlign: 'center',
   },

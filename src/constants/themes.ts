@@ -19,6 +19,8 @@ export interface Theme {
   backdrop: string // modal scrim
   icon: string // chrome icon color
   accent: string // primary action / highlight blue
+  accentSurface: string // tinted background behind accent text (selected states)
+  danger: string // destructive actions & error text — must stay legible on `surface`
 }
 
 export const LIGHT: Theme = {
@@ -32,11 +34,13 @@ export const LIGHT: Theme = {
   coreFrame: '#EEF3F7',
   coreFrameBorder: '#D3DEE7',
   text: '#1A1A1A',
-  textMuted: '#777777',
+  textMuted: '#6B6B6B',
   border: '#DDDDDD',
   backdrop: 'rgba(0,0,0,0.4)',
   icon: '#444444',
-  accent: '#1976D2',
+  accent: '#1565C0',
+  accentSurface: '#E3F2FD',
+  danger: '#C62828', // 5.39:1 on surfaceAlt
 }
 
 export const DARK: Theme = {
@@ -55,6 +59,8 @@ export const DARK: Theme = {
   backdrop: 'rgba(0,0,0,0.6)',
   icon: '#CFCFCF',
   accent: '#64B5F6',
+  accentSurface: 'rgba(100,181,246,0.18)',
+  danger: '#E57373', // 4.81:1 on surfaceAlt
 }
 
 export type ThemePreference = 'light' | 'dark' | 'system'

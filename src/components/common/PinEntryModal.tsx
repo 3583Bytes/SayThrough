@@ -50,7 +50,7 @@ export function PinEntryModal({
             accessibilityLabel="PIN input"
             onSubmitEditing={submit}
           />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
           <View style={styles.buttons}>
             <Pressable
               accessibilityRole="button"
@@ -112,7 +112,6 @@ const styles = StyleSheet.create({
     letterSpacing: 8,
   },
   error: {
-    color: UI_COLORS.clearRed,
     textAlign: 'center',
     fontSize: 13,
   },

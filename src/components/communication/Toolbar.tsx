@@ -43,6 +43,7 @@ export function Toolbar({ activeSection, onCore, onQuick, onKeyboard }: ToolbarP
           style={({ pressed }) => [
             styles.item,
             active && styles.itemActive,
+            active && { backgroundColor: theme.accentSurface, borderTopColor: theme.accent },
             pressed && styles.pressed,
           ]}
         >
@@ -74,8 +75,6 @@ const styles = StyleSheet.create({
   },
   itemActive: {
     borderTopWidth: 2,
-    borderTopColor: '#1976D2',
-    backgroundColor: '#E3F2FD',
   },
   label: {
     fontFamily: FONTS.bold,

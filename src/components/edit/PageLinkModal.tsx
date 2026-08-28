@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTheme } from '../../hooks/useTheme'
 import {
   Modal,
   Pressable,
@@ -36,6 +37,7 @@ export function PageLinkModal({
   hasLink,
   onClose,
 }: PageLinkModalProps) {
+  const theme = useTheme()
   const [pages, setPages] = useState<Page[]>([])
   const [newPageName, setNewPageName] = useState('')
   const [includeCore, setIncludeCore] = useState(true)
@@ -68,8 +70,8 @@ export function PageLinkModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>This button opens…</Text>
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.title, { color: theme.text }]}>This button opens…</Text>
 
           <ScrollView style={styles.pageList}>
             {pages.map((page) => (
@@ -80,22 +82,22 @@ export function PageLinkModal({
                 onPress={() => onSelect(page.id)}
                 style={({ pressed }) => [styles.pageRow, pressed && styles.pressed]}
               >
-                <Text style={styles.pageName}>{page.name}</Text>
+                <Text style={[styles.pageName, { color: theme.text }]}>{page.name}</Text>
               </Pressable>
             ))}
           </ScrollView>
 
-          <Text style={styles.sectionLabel}>…or a new page</Text>
+          <Text style={[styles.sectionLabel, { color: theme.textMuted }]}>…or a new page</Text>
           <TextInput
             value={newPageName}
             onChangeText={setNewPageName}
             placeholder="New page name (e.g. Minecraft)"
-            style={styles.input}
+            style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
             accessibilityLabel="New page name"
             onSubmitEditing={createAndLink}
           />
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>
+            <Text style={[styles.switchLabel, { color: theme.textMuted }]}>
               Include core words (same left columns as every page)
             </Text>
             <Switch
@@ -123,7 +125,7 @@ export function PageLinkModal({
                 onPress={onRemoveLink}
                 style={({ pressed }) => [styles.footerButton, pressed && styles.pressed]}
               >
-                <Text style={styles.removeText}>Remove link</Text>
+                <Text style={[styles.removeText, { color: theme.danger }]}>Remove link</Text>
               </Pressable>
             )}
             <Pressable
@@ -132,7 +134,7 @@ export function PageLinkModal({
               onPress={onClose}
               style={({ pressed }) => [styles.footerButton, pressed && styles.pressed]}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: theme.textMuted }]}>Cancel</Text>
             </Pressable>
           </View>
         </View>
@@ -222,7 +224,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   removeText: {
-    color: UI_COLORS.clearRed,
     fontFamily: FONTS.bold,
   },
   cancelText: {

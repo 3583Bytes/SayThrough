@@ -92,7 +92,7 @@ export function OnboardingScreen() {
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: theme.screen }]}>
         <View style={styles.welcome}>
-          <Text accessibilityRole="header" style={styles.title}>
+          <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
             SayThrough
           </Text>
           <Text style={[styles.subtitle, textT]}>
@@ -117,7 +117,7 @@ export function OnboardingScreen() {
             onPress={tryGuest}
             style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
           >
-            <Text style={styles.secondaryText}>Try it first — nothing is saved</Text>
+            <Text style={[styles.secondaryText, { color: theme.accent }]}>Try it first — nothing is saved</Text>
           </Pressable>
           <Text style={[styles.audience, mutedT]}>
             Made for AAC users and the families, teachers, and speech-language
@@ -140,7 +140,7 @@ export function OnboardingScreen() {
           }}
           style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
         >
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={[styles.backText, { color: theme.accent }]}>← Back</Text>
         </Pressable>
         <Text style={[styles.heading, textT]}>Who is this voice for?</Text>
         <TextInput
@@ -212,7 +212,7 @@ export function OnboardingScreen() {
           />
         )}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
 
         <Pressable
           accessibilityRole="button"
@@ -325,11 +325,9 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: FONTS.regular,
     fontSize: 13,
-    color: '#777777',
     lineHeight: 19,
   },
   error: {
-    color: UI_COLORS.clearRed,
     fontSize: 13,
   },
   primaryButton: {

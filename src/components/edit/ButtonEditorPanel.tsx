@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import { useTheme } from '../../hooks/useTheme'
 import * as ImageManipulator from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { useEffect, useState } from 'react'
@@ -43,6 +44,7 @@ export function ButtonEditorPanel({
   onDelete,
   onClose,
 }: ButtonEditorPanelProps) {
+  const theme = useTheme()
   const [label, setLabel] = useState(button.label)
   const [backgroundColor, setBackgroundColor] = useState(button.backgroundColor)
   const [symbolId, setSymbolId] = useState(button.symbolId)
@@ -123,20 +125,20 @@ export function ButtonEditorPanel({
   }
 
   return (
-    <View style={styles.panel}>
+    <View style={[styles.panel, { backgroundColor: theme.surface }]}>
       <View style={styles.topRow}>
         <View style={styles.labelColumn}>
-          <Text style={styles.heading}>Label</Text>
+          <Text style={[styles.heading, { color: theme.textMuted }]}>Label</Text>
           <TextInput
             value={label}
             onChangeText={setLabel}
-            style={styles.input}
+            style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
             accessibilityLabel="Button label"
             placeholder="What should this button say?"
           />
         </View>
         <View style={styles.symbolColumn}>
-          <Text style={styles.heading}>Symbol</Text>
+          <Text style={[styles.heading, { color: theme.textMuted }]}>Symbol</Text>
           <View style={styles.symbolRow}>
             <View style={styles.symbolPreview}>
               {previewUri ? (
@@ -146,7 +148,7 @@ export function ButtonEditorPanel({
                   contentFit="contain"
                 />
               ) : (
-                <Text style={styles.noSymbol}>none</Text>
+                <Text style={[styles.noSymbol, { color: theme.textMuted }]}>none</Text>
               )}
             </View>
             <View style={styles.symbolActions}>
@@ -175,9 +177,9 @@ export function ButtonEditorPanel({
         </View>
       </View>
 
-      <Text style={styles.heading}>This button opens</Text>
+      <Text style={[styles.heading, { color: theme.textMuted }]}>This button opens</Text>
       <View style={styles.linkRow}>
-        <Text style={styles.linkValue}>
+        <Text style={[styles.linkValue, { color: theme.textMuted }]}>
           {linkedPageId ? (linkedPageName ?? '…') : 'nothing — it speaks its word'}
         </Text>
         <SmallAction
@@ -194,7 +196,7 @@ export function ButtonEditorPanel({
         )}
       </View>
 
-      <Text style={styles.heading}>Color</Text>
+      <Text style={[styles.heading, { color: theme.textMuted }]}>Color</Text>
       <View style={styles.swatches}>
         {COLOR_CHOICES.map((color) => (
           <Pressable
@@ -216,9 +218,9 @@ export function ButtonEditorPanel({
           accessibilityRole="button"
           accessibilityLabel="Delete button"
           onPress={onDelete}
-          style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.deleteButton, { borderColor: theme.danger }, pressed && styles.pressed]}
         >
-          <Text style={styles.deleteText}>Delete Button</Text>
+          <Text style={[styles.deleteText, { color: theme.danger }]}>Delete Button</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -267,6 +269,7 @@ function SmallAction({
   accessibilityLabel: string
   onPress: () => void
 }) {
+  const theme = useTheme()
   return (
     <Pressable
       accessibilityRole="button"
@@ -274,7 +277,7 @@ function SmallAction({
       onPress={onPress}
       style={({ pressed }) => [styles.smallAction, pressed && styles.pressed]}
     >
-      <Text style={styles.smallActionText}>{label}</Text>
+      <Text style={[styles.smallActionText, { color: theme.text }]}>{label}</Text>
     </Pressable>
   )
 }
@@ -387,10 +390,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: UI_COLORS.clearRed,
   },
   deleteText: {
-    color: UI_COLORS.clearRed,
     fontWeight: '600',
   },
   saveButton: {

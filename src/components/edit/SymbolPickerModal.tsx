@@ -1,4 +1,5 @@
 import { Image } from 'expo-image'
+import { useTheme } from '../../hooks/useTheme'
 import { useEffect, useState } from 'react'
 import {
   Modal,
@@ -28,6 +29,7 @@ export function SymbolPickerModal({
   onSelect,
   onClose,
 }: SymbolPickerModalProps) {
+  const theme = useTheme()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SymbolResult[]>([])
 
@@ -48,14 +50,14 @@ export function SymbolPickerModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.surface }]}>
           <View style={styles.searchRow}>
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Search symbols…"
               autoFocus
-              style={styles.input}
+              style={[styles.input, { color: theme.text, backgroundColor: theme.surfaceAlt, borderColor: theme.border }]}
               accessibilityLabel="Search symbols"
             />
             <Pressable
@@ -64,7 +66,7 @@ export function SymbolPickerModal({
               onPress={onClose}
               style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
             >
-              <Text style={styles.closeText}>✕</Text>
+              <Text style={[styles.closeText, { color: theme.textMuted }]}>✕</Text>
             </Pressable>
           </View>
           <ScrollView contentContainerStyle={styles.grid}>
@@ -77,13 +79,13 @@ export function SymbolPickerModal({
                 style={({ pressed }) => [styles.cell, pressed && styles.pressed]}
               >
                 <Image source={{ uri: result.uri }} style={styles.symbol} contentFit="contain" />
-                <Text style={styles.cellLabel} numberOfLines={1}>
+                <Text style={[styles.cellLabel, { color: theme.textMuted }]} numberOfLines={1}>
                   {result.label}
                 </Text>
               </Pressable>
             ))}
             {query.trim() !== '' && results.length === 0 && (
-              <Text style={styles.empty}>
+              <Text style={[styles.empty, { color: theme.textMuted }]}>
                 No symbols found — the catalog grows as more of the library
                 is hosted. You can also use a photo instead.
               </Text>
