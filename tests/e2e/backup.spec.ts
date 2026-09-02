@@ -107,7 +107,20 @@ test.describe('full device backup (§14.3)', () => {
     // The file is described before anything is written.
     await expect(page.getByText(/Robin/)).toBeVisible()
     await page.getByLabel('Confirm restore').click()
-    await expect(page.getByText('Restored.')).toBeVisible()
+    // Restore rewrites local storage row by row: ~6,300 buttons across 176
+    // pages and 16 built-in page sets (three sizes × four languages, plus
+    // Quick Phrases), and on web each write is its OWN IndexedDB
+    // transaction. That is ~1.3s on a dev machine and several seconds on a
+    // 2-core CI runner, so the default 5s expect timeout made this a flake
+    // rather than a signal — the .obz import next door already waits 15s for
+    // the same reason.
+    //
+    // Waiting for either terminal status, then asserting which one, means a
+    // genuine restore failure reports its own error text instead of timing
+    // out anonymously.
+    const outcome = page.getByText(/^Restored\.$|^Restore failed:/)
+    await expect(outcome).toBeVisible({ timeout: 60_000 })
+    await expect(outcome).toHaveText('Restored.')
 
     await page.reload({ waitUntil: 'networkidle' })
     await page.getByLabel('want', { exact: true }).waitFor({ timeout: 20_000 })
