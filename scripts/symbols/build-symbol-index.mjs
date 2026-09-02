@@ -50,6 +50,25 @@ async function loadArasaac(locale) {
   return byId
 }
 
+// Locally-authored keywords for pictograms ARASAAC has not translated.
+// ARASAAC ALWAYS WINS: an override is consulted only where upstream has no
+// keyword for that pictogram in that language, so each entry retires itself
+// the moment the translation lands upstream. Nothing here can shadow real
+// ARASAAC data, which is what keeps the file safe to leave in place.
+async function loadOverrides(lang) {
+  const path = join(here, `keyword-overrides.${lang}.json`)
+  const raw = await readFile(path, 'utf8').catch(() => null)
+  if (!raw) return new Map()
+  const json = JSON.parse(raw)
+  const map = new Map()
+  for (const [id, words] of Object.entries(json)) {
+    if (id.startsWith('_')) continue // _comment, _pendingVerification, …
+    const list = (Array.isArray(words) ? words : [words]).filter(Boolean)
+    if (list.length) map.set(id, list.slice(0, MAX_KEYWORDS))
+  }
+  return map
+}
+
 /**
  * @param symbolsDir directory of `{library}/{id}.webp` — the source of truth
  *   for WHAT exists; the ARASAAC index only supplies keywords for it.
@@ -76,8 +95,13 @@ export async function buildIndexes(symbolsDir, outDir) {
     const keywords =
       locale === LOCALES[FALLBACK] ? fallbackKeywords : await loadArasaac(locale)
 
+    const overrides = await loadOverrides(lang)
+    const unusedOverrides = new Set(overrides.keys())
+
     const entries = []
     let borrowed = 0
+    let authored = 0
+    let superseded = 0
     for (const { library, id } of hosted) {
       if (library !== 'arasaac') {
         // mulberry etc. — filename is the keyword, and it is not translated
@@ -86,7 +110,15 @@ export async function buildIndexes(symbolsDir, outDir) {
       }
       let words = keywords.get(id)
       if (!words) continue // not in the ARASAAC index at all — skip everywhere
-      if (words.length === 0) {
+      if (words.length) {
+        // Upstream has it. If we also carry an override, upstream wins and
+        // the override is dead weight worth reporting.
+        if (unusedOverrides.delete(id)) superseded++
+      } else if (overrides.has(id)) {
+        words = overrides.get(id)
+        unusedOverrides.delete(id)
+        authored++
+      } else {
         // ARASAAC's per-language coverage is not complete (Polish sits ~92%).
         // Borrowing English keeps the symbol findable rather than invisible;
         // an English label in the picker beats a picture nobody can reach.
@@ -101,9 +133,16 @@ export async function buildIndexes(symbolsDir, outDir) {
     const outPath = join(outDir, `${lang}.json`)
     await writeFile(outPath, JSON.stringify(entries))
     const kb = Math.round((await stat(outPath)).size / 1024)
+    const notes = [
+      authored && `${authored} locally authored`,
+      borrowed && `${borrowed} borrowed ${FALLBACK}`,
+      superseded && `${superseded} overrides now superseded upstream — delete them`,
+      unusedOverrides.size &&
+        `${unusedOverrides.size} overrides for pictograms not hosted here`,
+    ].filter(Boolean)
     console.log(
       `${lang}.json: ${entries.length} entries, ${kb} KB` +
-        (borrowed ? ` (${borrowed} borrowed ${FALLBACK} keywords)` : ''),
+        (notes.length ? ` (${notes.join('; ')})` : ''),
     )
   }
 }

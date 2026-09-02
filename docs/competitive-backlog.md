@@ -43,6 +43,35 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
   The deploy check now probes each index for a word that exists only in that
   language, so an English index shipped under a localised filename fails the
   build instead of passing a length check.
+  **Then we wrote the missing Polish ourselves.** The borrow was a floor, not a
+  fix: 1,090 pictograms still read English in a Polish picker. They now carry
+  Polish keywords in `keyword-overrides.pl.json`, so **Polish borrows nothing**.
+  Two things made that safe to do. **ARASAAC always wins** — an override is
+  consulted only where upstream has no keyword, so every entry retires itself
+  when the real translation lands, and the build reports which have been
+  superseded. And these are *search* keywords: never spoken, never a button
+  label on their own, so they sit outside the never-machine-translate rule that
+  governs boards. They are still **pending a native check** —
+  `npm run override-review` emits the reviewable list with ARASAAC's own English
+  and Spanish beside ours, ordered by how likely the concept is to be searched,
+  so reviewing the top covers most of the risk. Two findings on the way: the 96
+  clock faces are **rule-generated, not translated**, because Polish half-past
+  names the *next* hour (`03:30` is *wpół do czwartej*) and translating either
+  source language gets it wrong every time; and **ARASAAC's own English and
+  Spanish disagree by one day** on the weekday entries (39717 is `next Saturday`
+  but `próximo domingo`), so those follow the Spanish, which is their source.
+
+- [x] **`five` was a clock face on all four boards** — found while auditing the
+  symbol data, not by anyone using the app. The board word `five` mapped to
+  `arasaac:39311`, whose keywords include "five" and "5" but whose picture is a
+  **clock showing 5 o'clock** (category `day hours`). Every other number is the
+  clean `[number]` series — `jeden` 2627, `dwa` 2628, `trzy` 2629, `cztery`
+  2630 — and five broke it. On the Quantity page a pre-literate user learning to
+  count was looking at a clock. It reached **all four languages**, because the
+  localised symbol maps derive from the English one. Fixed at 2631, the actual
+  continuation of the series, via `symbol-overrides.json` — the same mechanism
+  that already existed because "stop" once matched a bus stop. A sweep of every
+  board word in all four maps against the `day hours` category found no others.
 
 - [x] **Brazilian Portuguese — the contraction language (§19.7)** — the
   reach pick: ~215M speakers in a market where commercial AAC is priced in USD

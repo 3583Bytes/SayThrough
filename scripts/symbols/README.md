@@ -19,9 +19,30 @@ file, with that language's keywords. The picker fetches only the profile's,
 so a Polish board is customised by typing Polish rather than by guessing the
 English word. Note the locale mismatch: **ARASAAC calls Brazilian Portuguese
 `br`**, and `pt` is European Portuguese — the board is Brazilian, so the
-build reads `br` and writes `pt.json`. Coverage is not complete in every
-language (Polish ~92%); a pictogram with no keyword in a language borrows the
-English one, because an English label beats an unreachable picture.
+build reads `br` and writes `pt.json`.
+
+**Filling ARASAAC's gaps: `keyword-overrides.{lang}.json`.** Upstream coverage
+is not uniform. ARASAAC's Polish translation **stopped in 2024** — everything
+created up to 2020 has Polish keywords, 2025–26 has none — which left 1,090
+pictograms unsearchable in Polish. Those now have locally-authored keywords.
+
+- **ARASAAC always wins.** An override is consulted only where upstream has no
+  keyword for that pictogram, so every entry retires itself when the real
+  translation lands and nothing local can shadow ARASAAC data. The build
+  reports `N overrides now superseded upstream — delete them` when that happens.
+- Any pictogram still lacking a keyword falls back to English rather than
+  disappearing: an English label beats an unreachable picture.
+- **Clock faces are rule-generated**, not translated — `npm run clock-keywords`.
+  Polish clock time is a rule, and one that translating from English or Spanish
+  reliably gets wrong: `03:30` is *wpół do czwartej*, "half **to** four", not
+  "half past three". See the header of `gen-clock-keywords.mjs`.
+- **They are pending a native check.** `npm run override-review` regenerates
+  `keyword-overrides.pl.review.md`, which lists every entry with ARASAAC's own
+  English and Spanish beside ours, ordered by how likely the concept is to be
+  searched, so reviewing the top covers most of the risk.
+- These are SEARCH keywords: never spoken, and never a button label on their own
+  (the caregiver types that), so they are not governed by the
+  never-machine-translate rule that applies to boards.
 
 `symbol-overrides.json` holds hand-curated label→id picks that beat
 keyword matching (visually verified; e.g. "stop" keyword-matched a bus

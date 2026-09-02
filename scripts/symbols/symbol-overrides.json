@@ -1,6 +1,7 @@
 {
-  "_comment": "Curated label→ARASAAC-id picks that beat exact-keyword matching. Keys MUST be lowercase — build-seed-symbols.mjs looks up label.toLowerCase(), so a capitalised key silently does nothing. Example fixed here: 'stop' keyword-matched a bus stop.",
+  "_comment": "Curated label→ARASAAC-id picks that beat exact-keyword matching. Keys MUST be lowercase — build-seed-symbols.mjs looks up label.toLowerCase(), so a capitalised key silently does nothing. Examples fixed here: 'stop' keyword-matched a bus stop; 'five' matched a CLOCK FACE showing 5 o'clock (arasaac:39311, category 'day hours') because its keywords include 'five' and '5' — every other number uses the [number] series 2627-2630, so five continues it at 2631. That one reached all four boards, since the localised maps derive from this one.",
   "stop": 7195,
+  "five": 2631,
   "do": 32751,
   "more": 26913,
   "feel": 11476,
