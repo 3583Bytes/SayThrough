@@ -17,18 +17,34 @@ const CHECKS = [
   { path: '/', required: true, label: 'marketing site' },
   { path: '/app/', required: true, label: 'app shell' },
   { path: '/contact/', required: true, label: 'contact page' },
-  {
-    path: '/app/symbolIndex.json',
+  // One symbol index PER LANGUAGE (§19.7). The pictograms are shared but the
+  // keywords are not, so each file is checked for a word that only exists in
+  // that language — an English index deployed under a localised filename
+  // passes a length check and leaves the picker unusable in that language,
+  // which is the exact bug these files were split to fix.
+  ...[
+    ['en', 'water'],
+    ['es', 'agua'],
+    ['pl', 'woda'],
+    ['pt', 'água'],
+  ].map(([lang, probe]) => ({
+    path: `/app/symbolIndex/${lang}.json`,
     required: true,
-    label: 'symbol index',
+    label: `symbol index (${lang})`,
     verify: async (res) => {
       const list = await res.json()
       if (!Array.isArray(list) || list.length < 300) {
         throw new Error(`only ${list.length} symbols — the library did not deploy`)
       }
+      const localised = list.some((entry) =>
+        (entry.keywords ?? []).some((k) => k.toLowerCase() === probe),
+      )
+      if (!localised) {
+        throw new Error(`no "${probe}" — this is not the ${lang} index`)
+      }
       return `${list.length} symbols`
     },
-  },
+  })),
   { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon (en)' },
   { path: '/app/prediction/es.txt', required: true, label: 'prediction lexicon (es)' },
   { path: '/app/prediction/pl.txt', required: true, label: 'prediction lexicon (pl)' },

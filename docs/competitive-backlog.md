@@ -5,7 +5,7 @@ comparison against the major AAC apps. Companion to
 `aac-requirements.txt` (the requirements) and `technical-specification.md`
 (the build spec). Update the checkboxes as items ship.
 
-**Last reviewed:** 2026-08-28
+**Last reviewed:** 2026-08-31
 **Benchmarked against:** TD Snap (Tobii Dynavox), Proloquo2Go / Proloquo
 (AssistiveWare), LAMP Words for Life & TouchChat (PRC-Saltillo), Speak for
 Yourself, CoughDrop, and the open-source field (Cboard, AsTeRICS Grid).
@@ -16,6 +16,33 @@ Status: `[x]` shipped · `[~]` partial / data-ready · `[ ]` not started.
 ---
 
 ## 0. Shipped recently (so the backlog reflects reality)
+
+- [x] **The symbol picker speaks the board's language (§19.7)** — found by a
+  competitive audit, not by the language work itself. Four localised boards
+  shipped, and the symbol picker behind them searched **English only**: all
+  13,799 index entries carried English keywords, so a Polish parent
+  customising a Polish board had to guess the English word for the picture
+  they wanted. That quietly cancelled **D-05** — "ARASAAC symbols in 10+
+  languages" — which is the differentiator the whole multilingual bet is
+  argued from. The pictograms were always language-neutral; only the search
+  was not.
+  Now one index per language (`public/symbolIndex/{lang}.json`, ~1 MB each),
+  and a device fetches only its own, the way the prediction lexicon already
+  worked. Three things the fix turned up:
+  **(1) ARASAAC's Brazilian locale is `br`, not `pt`** — `pt` is European
+  Portuguese, and asking for it would have labelled the picker in the wrong
+  Portuguese on a board that is pt-BR throughout.
+  **(2) Coverage is not uniform.** Spanish and Portuguese are ~100%, Polish
+  ~92% — 1,089 pictograms have no Polish keyword at all. Those borrow the
+  English keyword rather than vanishing from the catalog, because an English
+  label beats a picture nobody can reach.
+  **(3) Diacritics have to be optional to type.** Matching folds case and
+  accents (and Polish `ł`, which has no unicode decomposition), so `agua`
+  finds `água` and `jesc` finds `jeść` — the picker should not require a
+  keyboard the caregiver may not have set up.
+  The deploy check now probes each index for a word that exists only in that
+  language, so an English index shipped under a localised filename fails the
+  build instead of passing a length check.
 
 - [x] **Brazilian Portuguese — the contraction language (§19.7)** — the
   reach pick: ~215M speakers in a market where commercial AAC is priced in USD

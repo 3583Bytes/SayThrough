@@ -131,7 +131,7 @@ test.describe('marketing claims stay true', () => {
     const quoted = text.match(/([\d,]+)\+ symbols/)
     if (!quoted) return
     const claimed = Number(quoted[1].replace(/,/g, ''))
-    const index = await (await request.get('/app/symbolIndex.json')).json()
+    const index = await (await request.get('/app/symbolIndex/en.json')).json()
     expect(index.length).toBeGreaterThanOrEqual(claimed)
     // and a sample of them must really resolve
     for (const entry of [index[0], index[Math.floor(index.length / 2)], index[index.length - 1]]) {

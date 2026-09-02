@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import { UI_COLORS } from '../../constants/colors'
 import { searchSymbols, type SymbolResult } from '../../services/symbolCatalog'
+import { useUserStore } from '../../stores/userStore'
 
 interface SymbolPickerModalProps {
   visible: boolean
@@ -34,6 +35,8 @@ export function SymbolPickerModal({
   const t = useT()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SymbolResult[]>([])
+  // §19.7 — search the catalog in the profile's language, not English.
+  const language = useUserStore((s) => s.activeUser?.language)
 
   useEffect(() => {
     if (visible) setQuery(initialQuery ?? '')
@@ -41,13 +44,13 @@ export function SymbolPickerModal({
 
   useEffect(() => {
     let cancelled = false
-    searchSymbols(query).then((found) => {
+    searchSymbols(query, language).then((found) => {
       if (!cancelled) setResults(found)
     })
     return () => {
       cancelled = true
     }
-  }, [query])
+  }, [query, language])
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

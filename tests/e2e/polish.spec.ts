@@ -170,3 +170,30 @@ test.describe('grammatical gender (§19.7)', () => {
     await expect(page.getByText('Grammatical gender')).toHaveCount(0)
   })
 })
+
+test.describe('Polish symbol picker (§19.7)', () => {
+  // The pictograms are the same images in every language; their KEYWORDS are
+  // not. The picker searched an English-only index, so customising a Polish
+  // board meant guessing the English word for the picture you wanted.
+  async function openPicker(page: Page) {
+    await setupPolishProfile(page)
+    await page.getByLabel('Tryb edycji').click()
+    await page.getByText(/^Edytujesz: /).waitFor({ timeout: 5_000 })
+    await page.getByLabel('chcę', { exact: true }).click()
+    await page.getByLabel('chcę', { exact: true }).click() // 2nd tap → editor
+    await page.getByLabel('Zmień symbol').click()
+    await page.getByLabel('Szukaj symboli').waitFor()
+  }
+
+  test('finds a symbol by its Polish keyword', async ({ page }) => {
+    await openPicker(page)
+    await page.getByLabel('Szukaj symboli').fill('woda')
+    await expect(page.getByLabel('Symbol woda').first()).toBeVisible({ timeout: 15_000 })
+  })
+
+  test('matches without the diacritics a hurried caregiver skips', async ({ page }) => {
+    await openPicker(page)
+    await page.getByLabel('Szukaj symboli').fill('jesc')
+    await expect(page.getByLabel('Symbol jeść').first()).toBeVisible({ timeout: 15_000 })
+  })
+})

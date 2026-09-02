@@ -33,7 +33,7 @@ which are therefore the K most frequent matches. Storing counts would double
 the file size to feed a column nothing reads.
 
 The service worker picks the file up through its stale-while-revalidate
-catch-all (the same path `symbolIndex.json` takes), so it is offline after
+catch-all (the same path `symbolIndex/<lang>.json` takes), so it is offline after
 first fetch and needs no precache entry.
 
 ## Why this corpus
