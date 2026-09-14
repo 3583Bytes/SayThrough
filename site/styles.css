@@ -402,3 +402,66 @@ table.compare tbody th { font-weight: 600; }
 }
 .qa h3:first-child { margin-top: 0.8em; }
 .qa p { color: var(--muted); margin: 0.5em 0 0; }
+
+/* ---- Printable low-tech boards ------------------------------------------ */
+/* Generated from src/data/coreWords.*.json + the per-language symbol map, so
+   a printed board and the board on screen show the same picture for the same
+   word — which is the whole point: the motor plan has to transfer. */
+.pb-wrap { margin-top: 24px; display: flex; flex-direction: column; gap: 34px; }
+.pb-board { margin: 0; }
+.pb-board figcaption {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.pb-board figcaption strong { color: var(--ink); }
+.pb-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pb-cols, 3), 1fr);
+  gap: 8px;
+  max-width: 620px;
+}
+.pb-cell {
+  background: var(--pb-bg, #fff);
+  border: 1.5px solid rgba(23, 32, 42, 0.18);
+  border-radius: 10px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px;
+  /* The Fitzgerald pastels are light in both themes, exactly as on a board,
+     so the label stays dark ink rather than following the page theme. */
+  color: #17202a;
+  font-weight: 700;
+  text-align: center;
+  overflow: hidden;
+}
+.pb-cell img { width: 68%; height: auto; max-height: 62%; object-fit: contain; }
+/* The label has to be readable across a table by a communication partner, not
+   just by whoever is holding the board — so it scales with the cell rather
+   than sitting at a fixed caption size. */
+.pb-cell span {
+  font-size: clamp(0.8rem, calc(0.45rem + 1.1vw), 1.35rem);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+@media print {
+  /* Paper gets the board and nothing else — no nav, no prose, no footer. */
+  .site-header, .site-footer, .no-print, .lang-banner { display: none !important; }
+  .article { max-width: none; padding: 0; }
+  .article h1, .article .lead { display: none; }
+  .pb-wrap { gap: 0; }
+  .pb-board { break-after: page; page-break-after: always; }
+  .pb-board:last-child { break-after: auto; page-break-after: auto; }
+  .pb-grid { max-width: none; gap: 6px; }
+  /* Without this most browsers drop the fills, and the Fitzgerald colour
+     coding is not decoration — it is how a word class is recognised. */
+  .pb-cell { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* vw units mean nothing on paper — pin the label to a real point size. */
+  .pb-cell span { font-size: 13pt; }
+  .pb-board figcaption { font-size: 9pt; margin-bottom: 6px; }
+}

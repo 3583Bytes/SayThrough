@@ -27,8 +27,19 @@
 
   var pageLang = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase()
 
-  // Same path, different language prefix. `/es/guides/` ↔ `/guides/`.
+  // Where a given language lives for THIS page.
+  //
+  // The switcher already knows: the build renders it per page, and for a
+  // market-scoped page (a comparison that only exists in one language) it
+  // points the other languages at their home page rather than at a URL that
+  // was never written. Reading its hrefs keeps the banner and the remembered
+  // choice honest — computing the path here instead used to offer English a
+  // translation of the Polish-only MÓWik comparison, which is a 404.
   function urlFor(lang) {
+    var link = document.querySelector('[data-lang-switch] a[lang^="' + lang + '"]')
+    if (link) return link.getAttribute('href')
+    // No switcher (or no entry for this language): fall back to the same path
+    // under the other prefix, which is right for every ordinary page.
     var path = location.pathname.replace(/^\/(es|pl|pt)(?=\/|$)/, '') || '/'
     return (lang === 'en' ? '' : '/' + lang) + path + location.search + location.hash
   }

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb no-print"><a href="{{p}}/">{{crumb.home}}</a> › {{printable.crumb}}</p>
+      <h1>{{printable.h1}}</h1>
+      <p class="lead">{{printable.lead}}</p>
+
+      <div class="callout no-print">
+        <p>{{printable.how}}</p>
+        <p style="margin-top:12px"><button type="button" class="btn btn-primary" data-print>{{printable.printBtn}}</button></p>
+      </div>
+
+      <h2 class="no-print">{{printable.why.title}}</h2>
+      <p class="no-print">{{printable.why.body}}</p>
+
+      <h2 class="no-print">{{printable.match.title}}</h2>
+      <p class="no-print">{{printable.match.body}}</p>
+
+      <h2 class="no-print">{{printable.boards.title}}</h2>
+      <p class="no-print">{{printable.boards.body}}</p>
+
+      <div class="pb-wrap">
+{{printableBoards}}
+      </div>
+
+      <h2 class="no-print">{{printable.tips.title}}</h2>
+      <ul class="no-print">
+        <li>{{printable.tips.b1}}</li>
+        <li>{{printable.tips.b2}}</li>
+        <li>{{printable.tips.b3}}</li>
+        <li>{{printable.tips.b4}}</li>
+      </ul>
+
+      <p class="fineprint no-print">{{printable.limitation}}</p>
+
+      <h2 class="no-print">{{printable.licence.title}}</h2>
+      <p class="no-print">{{printable.licence.body}}</p>
+
+      <div class="callout no-print">
+        <p>{{printable.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/core-words/">{{guides.coreWords.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+    <script>
+      // Progressive enhancement: the boards are printable from the browser's
+      // own menu either way, this just saves finding it.
+      document.querySelector('[data-print]')?.addEventListener('click', function () {
+        window.print()
+      })
+    </script>
+{{> scripts}}
+  </body>
+</html>

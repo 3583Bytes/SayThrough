@@ -294,7 +294,7 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 |---|---|---|---|
 | **Natural neural TTS (Piper)** | Kills the robot-voice problem for good; competitors *charge* for premium voices. Synthesizing in-browser at RTF 0.18 from self-hosted assets, one model per language. Deploy packaging done; remaining work is cache pre-warming, storage management and real-device QA | L (~1–2 wk) | [~] |
 | **Multilingual (Spanish, Polish, Portuguese)** | ARASAAC symbols are already localized in 10+ languages (differentiator D-05); TouchChat/LAMP charge per language. **Shipped** — four languages, three morphology engines; see §0. Remaining: §19.6 SLP sign-off per language | M+L | [x] |
-| **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique | M | [ ] |
+| **Printable companion boards (PDF)** | Backup when the device dies; free classroom copies (D-10). Trivial on web via print-to-PDF; genuinely unique. **Half done:** the marketing site publishes printable core boards at `/printable-boards/` (default boards, all three sizes, four languages) — that covers the free-classroom-copies half. The app itself still has no print path, so a board somebody has *customised* cannot be printed, which is the half that actually backs up a device | M | [~] |
 | **Recorded button audio** ("Mom's voice" / own voice) | TD Snap's *paid* My-Own-Voice. Model fields `audioUri`/`audioCueUri` already exist — just needs an `expo-audio` record UI | S–M | [~] |
 
 ### Tier 3 — Open new user segments
@@ -408,17 +408,49 @@ So the constraint was never the markup — it was surface area and citations.
   language files. An English page about MÓWik would be a thin page, not a
   translation.
 
-**Outstanding — buildable, blocked on a decision or on facts:**
+- [x] Two integrity guards in `site-i18n.spec.ts`, both added after the bugs
+  they catch shipped. The crawl follows every internal link from each
+  language's home page and insists the target returns 200 — a page dropped
+  from `PAGES` is otherwise invisible locally, because `build-site.mjs` does
+  not clear `dist/` and a stale build keeps serving the file it no longer
+  writes (this is exactly how `/contact/` disappeared and only CI noticed).
+  The second half compares the crawl against the sitemap, because a URL
+  nothing links to is an orphan — which is how the Polish MÓWik comparison
+  shipped, listed in the sitemap and reachable from nowhere.
+- [x] `site/lang.js` reads the switcher's own hrefs instead of computing a
+  path. On a market-scoped page the computed path pointed at a translation
+  that does not exist, so the suggestion banner offered an English visitor a
+  404. The switcher is already rendered per page and already knows the answer.
 
-- [ ] A changelog or release-notes page. Free crawl freshness, and it answers
-  the loudest unspoken objection to a free AAC tool: *is anyone still working
-  on this?* **Blocked:** the repo has no tags and sits at 0.1.0, so there is
-  no release history to generate from and no basis for inventing one. Needs a
-  decision on what counts as a release first.
+- [x] `/printable-boards/` — paper core boards with real ARASAAC symbols,
+  generated from `coreWords.*.json` plus the per-language symbol map, in each
+  size's true grid. Targets *"free printable communication board"*, a query
+  the site could not answer and one whose results are dominated by exactly the
+  teacher and SLP resource pages whose links we need. It is also a real
+  clinical artifact rather than SEO bait: a paper backup is standard AAC
+  practice, and these mirror the device layout so the motor plan transfers.
+  Print CSS drops everything but the boards, one per sheet, colours preserved.
+- [x] **Accuracy pass provoked by the `marketing claims stay true` guard.**
+  Writing the ARASAAC guide, three strings claimed Mulberry ships and quoted a
+  combined "16,500 symbols"; only ARASAAC is in the build (13,799). Corrected
+  in all four languages, and the guard now checks every quoted symbol figure
+  against `symbolIndex/en.json` on every page instead of grepping one word on
+  one page. **Still open for a decision:** `footer.symbols` credits Mulberry
+  sitewide, which over-attributes until it is actually bundled.
+
+**Outstanding — buildable:**
+
 - [ ] A Livox (Brazil) comparison. **Blocked on facts:** Livox is free to
   download but subscription-gated, and no current price is publicly
   verifiable — the whole value of a comparison page is the price contrast, so
   it is not worth writing on a guess.
+
+**Decided against:** a changelog / release-notes page. It was proposed in the
+audit for crawl freshness and as an answer to *is anyone still working on
+this?*, and rejected — the repo has no tags and sits at 0.1.0, so there is no
+release history to generate from, and manufacturing one to feed a crawler is
+not a reason to define releases. Revisit only if versioned releases start
+existing for their own sake.
 
 **Outstanding — off-page, and worth more than anything above.** All manual,
 none of it buildable:

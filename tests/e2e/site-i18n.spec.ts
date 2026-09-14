@@ -173,6 +173,19 @@ test.describe('site integrity', () => {
     expect(broken, 'internal links pointing at pages that are not built').toEqual([])
     // A floor rather than an exact count, so adding a page does not fail this.
     expect(seen.size).toBeGreaterThan(50)
+
+    // The other half: a page in the sitemap that nothing links to is an
+    // orphan, which is close to not having published it. Market-scoped pages
+    // are the easy ones to strand, since the shared template has no row for
+    // them — the comparison hub renders those rows per language.
+    const xml = await (await page.request.get('/sitemap.xml')).text()
+    const sitemap = [...xml.matchAll(/<loc>https:\/\/saythrough\.com([^<]*)<\/loc>/g)].map(
+      (m) => m[1],
+    )
+    expect(
+      sitemap.filter((url) => !seen.has(url)),
+      'sitemap URLs that nothing on the site links to',
+    ).toEqual([])
   })
 })
 
@@ -210,6 +223,47 @@ test.describe('structured data', () => {
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article')
   })
 
+  test('the printable boards mirror the app, symbols and all', async ({ page }) => {
+    await page.goto('/printable-boards/')
+    // One board per grid size, each in its real column count — the point of
+    // the page is that paper and screen share a layout, so a motor plan
+    // learned on one transfers to the other.
+    const boards = page.locator('.pb-board')
+    await expect(boards).toHaveCount(3)
+    await expect(boards.nth(0).locator('.pb-cell')).toHaveCount(6)
+    await expect(boards.nth(1).locator('.pb-cell')).toHaveCount(15)
+    await expect(boards.nth(2).locator('.pb-cell')).toHaveCount(24)
+
+    // Symbols come from the app's own deployed assets. If that path ever
+    // moves, every board here silently becomes a grid of empty boxes.
+    // They are lazy-loaded, so scroll the page before counting them.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await expect
+      .poll(
+        () =>
+          page
+            .locator('.pb-cell img')
+            .evaluateAll(
+              (els) => els.filter((e) => (e as HTMLImageElement).naturalWidth > 0).length,
+            ),
+        { message: 'board symbols that failed to load from /app/symbols/' },
+      )
+      .toBe(45)
+
+    // Printing gives you the board and nothing else.
+    await page.emulateMedia({ media: 'print' })
+    await expect(page.locator('.site-header')).toBeHidden()
+    await expect(page.locator('.site-footer')).toBeHidden()
+    await expect(boards.first()).toBeVisible()
+  })
+
+  test('the printable boards are localised, not translated labels on one grid', async ({
+    page,
+  }) => {
+    await page.goto('/pl/printable-boards/')
+    await expect(page.locator('.pb-cell', { hasText: /^chcę$/ })).toHaveCount(3)
+  })
+
   test('screenshots carry real alt text', async ({ page }) => {
     await page.goto('/')
     const images = page.locator('.shot img')
@@ -229,6 +283,17 @@ test.describe('structured data', () => {
     await expect(page.locator('h1')).toHaveText('Darmowa alternatywa dla MÓWika')
     await expect(page.locator('link[rel=alternate]')).toHaveCount(0)
     await expect(page.locator('.lang-switch a[lang="en"]').first()).toHaveAttribute('href', '/')
+
+    // The suggestion banner has to respect that too. It reads the switcher's
+    // hrefs rather than computing a path, because computing one here offered
+    // an English visitor a translation of this page that does not exist.
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US'] })
+      Object.defineProperty(navigator, 'language', { get: () => 'en-US' })
+    })
+    await page.goto('/pl/compare/mowik-alternative/')
+    const offer = page.locator('.lang-banner-go')
+    if (await offer.count()) await expect(offer).toHaveAttribute('href', '/')
 
     expect((await page.request.get('/compare/mowik-alternative/')).status()).toBe(404)
     const xml = await (await page.request.get('/sitemap.xml')).text()

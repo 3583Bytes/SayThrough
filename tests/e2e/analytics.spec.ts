@@ -115,12 +115,33 @@ test.describe('marketing claims stay true', () => {
     await page.goto('/', { waitUntil: 'networkidle' })
     const text = (await page.locator('body').innerText()).toLowerCase()
 
-    // Printable/PDF boards: backlog Tier 2, not started.
-    expect(text).not.toContain('printable')
-    // Modeling mode: isModeling() is hardcoded false.
-    expect(text).not.toMatch(/\bmodeling\b/)
-    // Mulberry symbols are not in the build yet.
+    // Modeling mode: isModeling() is hardcoded false. (The *practice* of
+    // modelling has a guide; the app has no Modeling Mode feature.)
+    expect(text).not.toMatch(/\bmodeling mode\b/)
+    // Mulberry symbols are not in the build yet — only ARASAAC ships, so no
+    // page may quote a combined figure.
     expect(text).not.toContain('16,500')
+  })
+
+  test('printable boards are a real page, not just a claim', async ({ page }) => {
+    // This replaces a guard that forbade the word "printable" while the
+    // feature was unbuilt. The claim is allowed now because the page exists —
+    // so what is pinned is the page, not the wording.
+    await page.goto('/printable-boards/', { waitUntil: 'networkidle' })
+    await expect(page.locator('.pb-board')).toHaveCount(3)
+    await expect(page.locator('.pb-cell').first()).toBeVisible()
+  })
+
+  test('no page quotes a symbol count the library cannot back up', async ({ page, request }) => {
+    const index = await (await request.get('/app/symbolIndex/en.json')).json()
+    for (const path of ['/', '/guides/arasaac-symbols/', '/printable-boards/']) {
+      await page.goto(path, { waitUntil: 'networkidle' })
+      const body = await page.locator('body').innerText()
+      for (const [, figure] of body.matchAll(/([\d][\d,. ]{3,})\s*(?:\+\s*)?(?:symbols|pictograms)/gi)) {
+        const claimed = Number(figure.replace(/[,. ]/g, ''))
+        expect(claimed, `${path} quotes ${figure}`).toBeLessThanOrEqual(index.length)
+      }
+    }
   })
 
   test('the symbol count it advertises is actually served', async ({ page, request }) => {

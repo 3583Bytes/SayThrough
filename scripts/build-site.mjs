@@ -174,6 +174,14 @@ const PAGES = [
     crumbs: [{ key: 'guides.crumb', url: '/guides/' }, { key: 'arasaac.crumb' }],
   },
   {
+    template: 'printable-boards.html',
+    out: 'printable-boards/index.html',
+    url: '/printable-boards/',
+    meta: 'meta.printable',
+    article: true,
+    crumbs: [{ key: 'printable.crumb' }],
+  },
+  {
     template: 'contact.html',
     out: 'contact/index.html',
     url: '/contact/',
@@ -326,6 +334,52 @@ async function coreWordTable(langCode) {
   return groups.join('\n')
 }
 
+/**
+ * Printable low-tech core boards, one per grid size.
+ *
+ * A paper backup board is standard AAC practice — devices run out of battery,
+ * get left at home, and do not go in the bath or the pool. What makes a backup
+ * board work rather than merely exist is that it mirrors the device's own
+ * layout, so the motor plan transfers instead of having to be learned twice.
+ * That is why these render the PERSISTENT core region of each size, in its
+ * real grid geometry, rather than a hand-picked word list.
+ *
+ * Symbols come from the app's own deployed assets (`/app/symbols/...` — same
+ * origin, same build) and the per-language symbol map, so the printed board
+ * and the board on screen show the same picture for the same word.
+ */
+async function printableBoards(langCode, strings) {
+  const file = langCode === 'en' ? 'coreWords.json' : `coreWords.${langCode}.json`
+  const mapFile = langCode === 'en' ? 'seedSymbolMap.json' : `seedSymbolMap.${langCode}.json`
+  const data = JSON.parse(await readFile(join(root, 'src', 'data', file), 'utf8'))
+  const symbols = JSON.parse(await readFile(join(root, 'src', 'data', mapFile), 'utf8'))
+
+  const out = []
+  for (const key of ['3x4', '5x6', '6x10']) {
+    const set = data.sizes[key]
+    const cells = set.core
+      .map(([label, pos]) => {
+        const ref = symbols[label]
+        const id = ref?.startsWith('arasaac:') ? ref.slice('arasaac:'.length) : null
+        // The label is printed next to the symbol, so the image is decorative
+        // to a screen reader — announcing both just says everything twice.
+        const img = id
+          ? `<img src="/app/symbols/arasaac/${id}.webp" alt="" loading="lazy" decoding="async" width="80" height="80" />`
+          : ''
+        const bg = posColors[pos] || posColors.noun || '#FFFFFF'
+        return `<div class="pb-cell" style="--pb-bg:${bg}">${img}<span>${escapeHtml(label)}</span></div>`
+      })
+      .join('')
+    out.push(
+      `<figure class="pb-board" style="--pb-cols:${set.coreColumns}">` +
+        `<figcaption><strong>${escapeHtml(set.name)}</strong> — ${set.core.length} ${strings['printable.wordsLabel']}</figcaption>` +
+        `<div class="pb-grid">${cells}</div>` +
+        `</figure>`,
+    )
+  }
+  return out.join('\n')
+}
+
 /** Total core words in the expanded set, for the copy to quote accurately. */
 async function coreWordCount(langCode) {
   const file = langCode === 'en' ? 'coreWords.json' : `coreWords.${langCode}.json`
@@ -432,6 +486,27 @@ function switcherFor(language, page) {
   return `<div class="lang-switch" data-lang-switch>${items.join('')}</div>`
 }
 
+/**
+ * Extra rows for the comparison hub, for competitors that only matter in one
+ * market. Without this the market-scoped pages are orphans: in the sitemap,
+ * but with nothing linking to them, which is close to not publishing them.
+ */
+function marketCompareFor(language, strings) {
+  return PAGES.filter(
+    (page) =>
+      page.languages?.includes(language.code) && page.url?.startsWith('/compare/'),
+  )
+    .map((page) => {
+      const name = page.meta.replace(/^meta\./, '')
+      return (
+        `<li><a href="${language.prefix}${page.url}">` +
+        `<span class="g-title">${strings[`${name}.cardTitle`]}</span>` +
+        `<span class="g-desc">${strings[`${name}.cardDesc`]}</span></a></li>`
+      )
+    })
+    .join('\n        ')
+}
+
 const jsonLd = (obj) =>
   `    <script type="application/ld+json">\n${JSON.stringify(obj, null, 2)
     .split('\n')
@@ -530,6 +605,7 @@ for (const language of LANGUAGES) {
   const strings = content[language.code]
   const coreTable = await coreWordTable(language.code)
   const coreTotal = String(await coreWordCount(language.code))
+  const boards = await printableBoards(language.code, content[language.code])
 
   for (const page of PAGES) {
     // 404 exists once, at the root, because that is the only path Pages serves
@@ -567,6 +643,8 @@ for (const language of LANGUAGES) {
       siteSchema: siteSchema(language, strings),
       breadcrumbSchema: breadcrumbSchema(page, language, strings),
       articleSchema: articleSchema(page, language, strings, lastmod),
+      marketCompare: marketCompareFor(language, strings),
+      printableBoards: boards,
       coreWordTable: coreTable,
       coreWordTotal: coreTotal,
       lastmod,

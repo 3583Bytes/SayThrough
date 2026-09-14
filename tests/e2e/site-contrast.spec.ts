@@ -25,6 +25,7 @@ const PAGES = [
   '/guides/schools/',
   '/guides/arasaac-symbols/',
   '/faq/',
+  '/printable-boards/',
 ]
 
 async function expectReadable(page: Page, where: string) {
