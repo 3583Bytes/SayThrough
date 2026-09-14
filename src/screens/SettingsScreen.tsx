@@ -28,6 +28,12 @@ import {
   serializeBackup,
 } from '../services/backupService'
 import { exportPageSet, importPageSet } from '../services/OBFService'
+import {
+  buildPrintablePages,
+  printDocument,
+  renderPrintDocument,
+} from '../services/printService'
+import { getSymbolUri } from '../services/SymbolService'
 import { resetLearning } from '../services/predictionModel'
 import {
   isUsageCountingEnabled,
@@ -184,6 +190,61 @@ export function SettingsScreen() {
     anchor.click()
     URL.revokeObjectURL(url)
     setBackupStatus(t('status.exported'))
+  }
+
+  // §14.4 printing. Web-only in Phase 1 like the other output paths above;
+  // Phase 2 routes the same HTML through expo-print.
+  const [printStatus, setPrintStatus] = useState<string | undefined>()
+  const [pageCount, setPageCount] = useState(0)
+
+  useEffect(() => {
+    const pageSetId = activeUser?.activePageSetId
+    if (!pageSetId) return
+    storage.getPagesForPageSet(pageSetId).then((pages) => setPageCount(pages.length))
+  }, [activeUser?.activePageSetId])
+
+  const printBoard = async (scope: 'root' | 'all') => {
+    if (Platform.OS !== 'web') return
+    const pageSetId = activeUser?.activePageSetId
+    if (!pageSetId) return
+    setPrintStatus(t('status.printing'))
+
+    const pageSet = await storage.getPageSet(pageSetId)
+    const all = await storage.getPagesForPageSet(pageSetId)
+    const pages =
+      scope === 'root' ? all.filter((page) => page.id === pageSet?.rootPageId) : all
+
+    const buttonsByPage = new Map(
+      await Promise.all(
+        pages.map(
+          async (page) =>
+            [page.id, await storage.getButtonsForPage(page.id)] as const,
+        ),
+      ),
+    )
+
+    const printable = buildPrintablePages(
+      pages,
+      buttonsByPage,
+      getSymbolUri,
+      pageSet?.rootPageId,
+    )
+    if (!printable.some((page) => page.cells.length)) {
+      setPrintStatus(t('status.printEmpty'))
+      return
+    }
+
+    await printDocument(
+      renderPrintDocument(printable, {
+        title: pageSet?.name ?? t('app.name'),
+        // The ARASAAC licence requires attribution wherever the material
+        // appears, and a printed sheet is such a place — so the print carries
+        // the same credit the About section does. Only ARASAAC can appear on
+        // a sheet, so only ARASAAC is credited.
+        credit: t('settings.aboutSymbols'),
+      }),
+    )
+    setPrintStatus(t('status.printed'))
   }
 
   // §10.5 enhanced neural voice. The download is ~60 MB, so it is explicit,
@@ -1054,6 +1115,31 @@ export function SettingsScreen() {
           </View>
           {backupStatus ? <Text style={[styles.hint, { color: theme.textMuted }]}>{backupStatus}</Text> : null}
         </View>
+
+        {/* 6a. Print (§14.4) */}
+        {Platform.OS === 'web' && (
+          <>
+            <Text style={[styles.sectionTitle, mutedT]}>{t('settings.printing')}</Text>
+            <View style={[styles.card, cardT]}>
+              <Text style={[styles.hint, mutedT]}>{t('settings.printHint')}</Text>
+              <View style={styles.chipRow}>
+                <Chip
+                  label={t('settings.printBoard')}
+                  selected={false}
+                  onPress={() => printBoard('root')}
+                />
+                <Chip
+                  label={t('settings.printAll', { count: String(pageCount) })}
+                  selected={false}
+                  onPress={() => printBoard('all')}
+                />
+              </View>
+              {printStatus ? (
+                <Text style={[styles.hint, { color: theme.textMuted }]}>{printStatus}</Text>
+              ) : null}
+            </View>
+          </>
+        )}
 
         {/* 6b. Install (§12.6) */}
         {installState !== 'unavailable' && (

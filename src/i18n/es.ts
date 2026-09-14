@@ -287,6 +287,12 @@ export const ES: Record<StringKey, string> = {
   'settings.restoreBuiltIn': 'Restaurar los conjuntos originales',
   'settings.restoreArmed': 'Toca otra vez para restaurar',
 
+  'settings.printing': 'Imprimir',
+  'settings.printHint': 
+    'Imprime tu tablero en papel: el respaldo que un dispositivo no puede ser. Aguanta una batería agotada, entra en la bañera y en la piscina, y no necesita cargador. Se imprime TU tablero: tus botones, pictogramas, fotos y colores, en los mismos sitios, para que la disposición que ya conoces se mantenga.',
+  'settings.printBoard': 'Imprimir este tablero',
+  'settings.printAll': 'Imprimir todas las páginas ({count} hojas)',
+
   'settings.install': 'Instalación',
   'settings.installed': 'Instalada ✓: SayThrough se abre a pantalla completa y funciona sin conexión.',
   'settings.installHint':
@@ -319,6 +325,9 @@ export const ES: Record<StringKey, string> = {
   // ---- status messages ---------------------------------------------------
   'status.exporting': 'Exportando…',
   'status.exported': 'Exportado.',
+  'status.printing': 'Preparando las hojas…',
+  'status.printed': 'Enviado a la impresora.',
+  'status.printEmpty': 'Todavía no hay nada que imprimir en este tablero.',
   'status.restoring': 'Restaurando…',
   'status.restored': 'Restaurado.',
   'status.importing': 'Importando…',

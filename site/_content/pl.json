@@ -610,5 +610,5 @@
   "guides.printable.name": "Tablice do druku",
   "guides.printable.link": "Darmowe tablice do druku →",
   "guides.printable.desc": "Papierowe tablice podstawowe z piktogramami, zgodne z aplikacją.",
-  "printable.limitation": "<strong>Jedno ograniczenie, wprost:</strong> to są tablice, które SayThrough ma domyślnie. Jeśli tablicę dostosowałeś — dodałeś przyciski, podmieniłeś piktogramy, wstawiłeś własne zdjęcia — <em>tej</em> na razie nie da się wydrukować. Jest to na liście."
+  "printable.limitation": "<strong>Dostosowałeś swoją tablicę?</strong> Wydrukuj właśnie ją — otwórz <strong>Ustawienia → Drukowanie</strong> w aplikacji, a wydrukują się twoje przyciski, piktogramy i zdjęcia, w tych samych miejscach. Te kartki to tablice w wersji domyślnej, dla tych, którzy nic jeszcze nie zmieniali."
 }

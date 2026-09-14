@@ -287,6 +287,12 @@ export const PL: Record<StringKey, string> = {
   'settings.restoreBuiltIn': 'Przywróć wbudowane zestawy stron',
   'settings.restoreArmed': 'Dotknij ponownie, aby przywrócić',
 
+  'settings.printing': 'Drukowanie',
+  'settings.printHint': 
+    'Wydrukuj swoją tablicę na papierze — to zapas, którym urządzenie być nie może. Przetrwa rozładowaną baterię, wejdzie do wanny i na basen, nie potrzebuje ładowarki. Drukuje się TWOJA tablica: twoje przyciski, piktogramy, zdjęcia i kolory, w tych samych miejscach, więc znany już układ zostaje zachowany.',
+  'settings.printBoard': 'Wydrukuj tę tablicę',
+  'settings.printAll': 'Wydrukuj wszystkie strony ({count} kartek)',
+
   'settings.install': 'Instalacja',
   'settings.installed': 'Zainstalowano ✓ — SayThrough otwiera się na pełnym ekranie i działa offline.',
   'settings.installHint':
@@ -338,6 +344,9 @@ export const PL: Record<StringKey, string> = {
   // ---- status messages ---------------------------------------------------
   'status.exporting': 'Eksportowanie…',
   'status.exported': 'Wyeksportowano.',
+  'status.printing': 'Przygotowywanie kartek…',
+  'status.printed': 'Wysłano do drukarki.',
+  'status.printEmpty': 'Na tej tablicy nie ma jeszcze nic do wydrukowania.',
   'status.restoring': 'Przywracanie…',
   'status.restored': 'Przywrócono.',
   'status.importing': 'Importowanie…',

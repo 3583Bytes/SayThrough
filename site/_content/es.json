@@ -578,5 +578,5 @@
   "guides.printable.name": "Tableros para imprimir",
   "guides.printable.link": "Tableros gratis para imprimir →",
   "guides.printable.desc": "Tableros nucleares en papel con pictogramas, igual que en la app.",
-  "printable.limitation": "<strong>Una limitación, sin rodeos:</strong> estos son los tableros que SayThrough trae de serie. Si has personalizado un tablero — añadido botones, cambiado pictogramas, usado tus propias fotos — todavía no hay forma de imprimir <em>ese</em>. Está en la lista."
+  "printable.limitation": "<strong>¿Has personalizado tu tablero?</strong> Imprime ese: abre <strong>Ajustes → Imprimir</strong> en la app y saldrán tus propios botones, pictogramas y fotos, en los mismos sitios. Estas hojas son los tableros tal y como vienen, para quien todavía no ha cambiado nada."
 }

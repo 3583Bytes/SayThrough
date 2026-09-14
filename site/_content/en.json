@@ -578,5 +578,5 @@
   "guides.printable.name": "Printable boards",
   "guides.printable.link": "Free printable boards →",
   "guides.printable.desc": "Paper core boards with symbols, matching the app's layout.",
-  "printable.limitation": "<strong>One limitation, plainly:</strong> these are the boards SayThrough ships. If you have customised a board — added buttons, swapped symbols, used your own photos — there is no way to print <em>that</em> yet. It is on the list."
+  "printable.limitation": "<strong>Customised your board?</strong> Print that one instead — open <strong>Settings → Print</strong> in the app and it prints your own buttons, symbols and photos, in the same places. These sheets are the boards as they ship, for anyone who has not changed anything yet."
 }

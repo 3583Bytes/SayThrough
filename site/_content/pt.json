@@ -578,5 +578,5 @@
   "guides.printable.name": "Pranchas para imprimir",
   "guides.printable.link": "Pranchas grátis para imprimir →",
   "guides.printable.desc": "Pranchas nucleares em papel com pictogramas, iguais às do aplicativo.",
-  "printable.limitation": "<strong>Uma limitação, sem rodeios:</strong> estas são as pranchas que o SayThrough traz de fábrica. Se você personalizou uma prancha — acrescentou botões, trocou pictogramas, usou fotos suas — ainda não há como imprimir <em>essa</em>. Está na lista."
+  "printable.limitation": "<strong>Personalizou sua prancha?</strong> Imprima essa — abra <strong>Configurações → Imprimir</strong> no aplicativo e saem os seus botões, pictogramas e fotos, nos mesmos lugares. Estas folhas são as pranchas como vêm de fábrica, para quem ainda não mudou nada."
 }

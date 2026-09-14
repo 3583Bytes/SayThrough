@@ -283,6 +283,12 @@ export const EN = {
   'settings.restoreBuiltIn': 'Restore built-in page sets',
   'settings.restoreArmed': 'Tap again to restore',
 
+  'settings.printing': 'Print',
+  'settings.printHint': 
+    'Print your board onto paper — the backup a device cannot be. It survives a flat battery, goes in the bath and the pool, and needs no charger. What prints is YOUR board: your buttons, symbols, photos and colours, in the same places, so the layout you already know carries over.',
+  'settings.printBoard': 'Print this board',
+  'settings.printAll': 'Print every page ({count} sheets)',
+
   'settings.install': 'Install',
   'settings.installed': 'Installed ✓ — SayThrough opens full-screen and works offline.',
   'settings.installHint':
@@ -315,6 +321,9 @@ export const EN = {
   // ---- status messages ---------------------------------------------------
   'status.exporting': 'Exporting…',
   'status.exported': 'Exported.',
+  'status.printing': 'Preparing the sheets…',
+  'status.printed': 'Sent to your printer.',
+  'status.printEmpty': 'There is nothing on this board to print yet.',
   'status.restoring': 'Restoring…',
   'status.restored': 'Restored.',
   'status.importing': 'Importing…',

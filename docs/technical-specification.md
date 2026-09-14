@@ -1905,6 +1905,45 @@ Design notes:
 - **The file contains personal data** — PIN hash, tracking, history, learned
   words. It is never uploaded anywhere, and the UI says so.
 
+### 14.4 Printable Boards
+
+A paper board is the backup a device cannot be: it survives a flat battery,
+it goes in the bath and the pool, and it needs no charger. Printing is
+therefore a first-class output alongside `.obz` and the JSON backup, not a
+convenience.
+
+**What is printed is the user's own board**, not a stock one — their buttons,
+their symbols, their photos, their colours, at their vocabulary level. A paper
+copy whose words sit somewhere else is a second system to learn; under
+pressure that is worse than no paper at all. So the print layout reproduces
+each page's real grid (`page.rows` × `page.columns`) and each button's real
+cell (`row`/`column`/`rowSpan`/`columnSpan`), and a hidden button leaves its
+cell **empty rather than closing the gap** — closing it would shift every
+button after it and break the motor plan the print exists to preserve.
+
+`src/services/printService.ts` is split so the interesting half is testable
+without a DOM:
+
+- `buildPrintablePages(pages, buttonsByPage, resolveSymbol)` — pure. Orders
+  pages root-first, maps buttons onto grid cells, resolves symbol refs through
+  the caller's resolver (`SymbolService.getSymbolUri` in the app, a stub in
+  tests), and drops hidden buttons while keeping their cells.
+- `renderPrintDocument(pages, opts)` — pure. Returns a standalone HTML
+  document: CSS Grid per page, one page per sheet, `print-color-adjust: exact`
+  so the Fitzgerald colour coding survives (the colour is not decoration — it
+  is how a word class is recognised), landscape by default because every
+  authored grid is wider than it is tall.
+- `printDocument(html)` — the only part that touches the DOM. Renders into a
+  hidden same-origin `iframe` via `srcdoc` and prints that, rather than
+  `window.open`, which pop-up blockers eat. Waits for the frame's `load`
+  (fires after images) so symbols are never missing from the sheet.
+
+**Web-only in Phase 1**, guarded like the other file paths in §14; Phase 2
+routes the same HTML through `expo-print`. Two entry points in Settings,
+because printing every page of a 513-word set is twenty-odd sheets and nobody
+should discover that from the printer: *print this board* (the root page) and
+*print every page*, the latter labelled with the sheet count.
+
 ---
 
 ## 15. MVP Scope

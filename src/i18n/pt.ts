@@ -297,6 +297,12 @@ export const PT: Record<StringKey, string> = {
   'settings.restoreBuiltIn': 'Restaurar os conjuntos originais',
   'settings.restoreArmed': 'Toque de novo para restaurar',
 
+  'settings.printing': 'Imprimir',
+  'settings.printHint': 
+    'Imprima sua prancha em papel — a reserva que um aparelho não consegue ser. Aguenta bateria descarregada, vai para a banheira e a piscina, e não precisa de carregador. O que sai é a SUA prancha: seus botões, pictogramas, fotos e cores, nos mesmos lugares, para o layout que você já conhece continuar valendo.',
+  'settings.printBoard': 'Imprimir esta prancha',
+  'settings.printAll': 'Imprimir todas as páginas ({count} folhas)',
+
   'settings.install': 'Instalação',
   'settings.installed': 'Instalado ✓ — o SayThrough abre em tela cheia e funciona offline.',
   'settings.installHint':
@@ -355,6 +361,9 @@ export const PT: Record<StringKey, string> = {
   // ---- status messages ---------------------------------------------------
   'status.exporting': 'Exportando…',
   'status.exported': 'Exportado.',
+  'status.printing': 'Preparando as folhas…',
+  'status.printed': 'Enviado para a impressora.',
+  'status.printEmpty': 'Ainda não há nada nesta prancha para imprimir.',
   'status.restoring': 'Restaurando…',
   'status.restored': 'Restaurado.',
   'status.importing': 'Importando…',
