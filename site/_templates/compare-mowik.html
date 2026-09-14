@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/compare/">{{compare.crumb}}</a> › {{mowik.crumb}}</p>
+      <h1>{{mowik.h1}}</h1>
+      <p class="lead">{{mowik.lead}}</p>
+
+      <div class="callout"><p>{{mowik.short}}</p></div>
+
+      <h2>{{mowik.them.title}}</h2>
+      <p>{{mowik.them.body}}</p>
+      <ul>
+        <li>{{mowik.them.b1}}</li>
+        <li>{{mowik.them.b2}}</li>
+        <li>{{mowik.them.b3}}</li>
+        <li>{{mowik.them.b4}}</li>
+      </ul>
+
+      <h2>{{mowik.us.title}}</h2>
+      <ul>
+        <li>{{mowik.us.b1}}</li>
+        <li>{{mowik.us.b2}}</li>
+        <li>{{mowik.us.b3}}</li>
+        <li>{{mowik.us.b4}}</li>
+        <li>{{mowik.us.b5}}</li>
+      </ul>
+
+      <h2>{{mowik.table.title}}</h2>
+      <div class="table-wrap">
+        <table class="compare">
+          <thead><tr><th></th><th class="us">SayThrough</th><th>MÓWik</th></tr></thead>
+          <tbody>
+            <tr><th>{{compare.price}}</th><td class="price yes">{{compare.free}}</td><td class="price">{{mowik.price}}</td></tr>
+            <tr><th>{{compare.anyDevice}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{mowik.android}}</td></tr>
+            <tr><th>{{compare.offline}}</th><td class="yes">{{compare.yes}}</td><td class="yes">{{compare.yes}}</td></tr>
+            <tr><th>{{compare.noAccount}}</th><td class="yes">{{compare.yes}}</td><td class="yes">{{compare.yes}}</td></tr>
+            <tr><th>{{compare.openSymbols}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{compare.proprietary}}</td></tr>
+            <tr><th>{{compare.openStandard}}</th><td class="yes">.obf / .obz</td><td class="no">{{compare.no}}</td></tr>
+            <tr><th>{{compare.openSource}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{compare.no}}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fineprint">{{mowik.disclaimer}}</p>
+
+      <h2>{{mowik.polish.title}}</h2>
+      <p>{{mowik.polish.body}}</p>
+
+      <h2>{{mowik.who.title}}</h2>
+      <p>{{mowik.who.stay}}</p>
+      <p>{{mowik.who.switch}}</p>
+
+      <div class="callout">
+        <p>{{mowik.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{cta.button}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/core-words/">{{guides.coreWords.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

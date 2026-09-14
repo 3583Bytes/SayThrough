@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › {{faq.crumb}}</p>
+      <h1>{{faq.h1}}</h1>
+      <p class="lead">{{faq.lead}}</p>
+
+      <h2>{{faq.cost.title}}</h2>
+      <div class="qa">
+        <h3>{{faq.q.free}}</h3>
+        <p>{{faq.a.free}}</p>
+        <h3>{{faq.q.catch}}</h3>
+        <p>{{faq.a.catch}}</p>
+        <h3>{{faq.q.pros}}</h3>
+        <p>{{faq.a.pros}}</p>
+      </div>
+
+      <h2>{{faq.starting.title}}</h2>
+      <div class="qa">
+        <h3>{{faq.q.speech}}</h3>
+        <p>{{faq.a.speech}}</p>
+        <h3>{{faq.q.age}}</h3>
+        <p>{{faq.a.age}}</p>
+        <h3>{{faq.q.assessment}}</h3>
+        <p>{{faq.a.assessment}}</p>
+        <h3>{{faq.q.which}}</h3>
+        <p>{{faq.a.which}}</p>
+      </div>
+
+      <h2>{{faq.using.title}}</h2>
+      <div class="qa">
+        <h3>{{faq.q.devices}}</h3>
+        <p>{{faq.a.devices}}</p>
+        <h3>{{faq.q.offline}}</h3>
+        <p>{{faq.a.offline}}</p>
+        <h3>{{faq.q.switch}}</h3>
+        <p>{{faq.a.switch}}</p>
+        <h3>{{faq.q.languages}}</h3>
+        <p>{{faq.a.languages}}</p>
+      </div>
+
+      <h2>{{faq.data.title}}</h2>
+      <div class="qa">
+        <h3>{{faq.q.privacy}}</h3>
+        <p>{{faq.a.privacy}}</p>
+        <h3>{{faq.q.import}}</h3>
+        <p>{{faq.a.import}}</p>
+        <h3>{{faq.q.stops}}</h3>
+        <p>{{faq.a.stops}}</p>
+      </div>
+
+      <div class="callout">
+        <p>{{faq.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{cta.button}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/contact/">{{nav.contact}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

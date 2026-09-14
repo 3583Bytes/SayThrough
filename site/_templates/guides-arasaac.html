@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{arasaac.crumb}}</p>
+      <h1>{{arasaac.h1}}</h1>
+      <p class="lead">{{arasaac.lead}}</p>
+
+      <h2>{{arasaac.what.title}}</h2>
+      <p>{{arasaac.what.body}}</p>
+
+      <h2>{{arasaac.licence.title}}</h2>
+      <p>{{arasaac.licence.body}}</p>
+      <ul>
+        <li>{{arasaac.licence.b1}}</li>
+        <li>{{arasaac.licence.b2}}</li>
+        <li>{{arasaac.licence.b3}}</li>
+      </ul>
+      <p class="fineprint">{{arasaac.licence.note}}</p>
+
+      <h2>{{arasaac.vs.title}}</h2>
+      <p>{{arasaac.vs.body}}</p>
+
+      <h2>{{arasaac.search.title}}</h2>
+      <p>{{arasaac.search.body}}</p>
+
+      <h2>{{arasaac.use.title}}</h2>
+      <ol>
+        <li>{{arasaac.use.s1}}</li>
+        <li>{{arasaac.use.s2}}</li>
+        <li>{{arasaac.use.s3}}</li>
+      </ol>
+
+      <h2>{{arasaac.mulberry.title}}</h2>
+      <p>{{arasaac.mulberry.body}}</p>
+
+      <div class="callout">
+        <p>{{arasaac.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/core-words/">{{guides.coreWords.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

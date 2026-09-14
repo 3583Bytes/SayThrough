@@ -84,6 +84,17 @@ const PAGES = [
     crumbs: [{ key: 'compare.crumb', url: '/compare/' }, { key: 'proloquo.crumb' }],
   },
   {
+    // Poland's dominant paid AAC app, and the one a Polish parent is actually
+    // choosing between. Published in Polish only — see `languages`.
+    template: 'compare-mowik.html',
+    out: 'compare/mowik-alternative/index.html',
+    url: '/compare/mowik-alternative/',
+    meta: 'meta.mowik',
+    article: true,
+    languages: ['pl'],
+    crumbs: [{ key: 'compare.crumb', url: '/compare/' }, { key: 'mowik.crumb' }],
+  },
+  {
     template: 'guides-index.html',
     out: 'guides/index.html',
     url: '/guides/',
@@ -138,6 +149,48 @@ const PAGES = [
     article: true,
     crumbs: [{ key: 'guides.crumb', url: '/guides/' }, { key: 'install.crumb' }],
   },
+  {
+    template: 'guides-modeling.html',
+    out: 'guides/modeling/index.html',
+    url: '/guides/modeling/',
+    meta: 'meta.modeling',
+    article: true,
+    crumbs: [{ key: 'guides.crumb', url: '/guides/' }, { key: 'modeling.crumb' }],
+  },
+  {
+    template: 'guides-schools.html',
+    out: 'guides/schools/index.html',
+    url: '/guides/schools/',
+    meta: 'meta.schools',
+    article: true,
+    crumbs: [{ key: 'guides.crumb', url: '/guides/' }, { key: 'schools.crumb' }],
+  },
+  {
+    template: 'guides-arasaac.html',
+    out: 'guides/arasaac-symbols/index.html',
+    url: '/guides/arasaac-symbols/',
+    meta: 'meta.arasaac',
+    article: true,
+    crumbs: [{ key: 'guides.crumb', url: '/guides/' }, { key: 'arasaac.crumb' }],
+  },
+  {
+    template: 'contact.html',
+    out: 'contact/index.html',
+    url: '/contact/',
+    meta: 'meta.contact',
+    crumbs: [{ key: 'contact.crumb' }],
+  },
+  {
+    // Question-shaped copy is what this field's demand actually looks like,
+    // and what AI answers quote. Deliberately NOT marked up as FAQPage —
+    // Google restricted those rich results to government and health sites in
+    // 2023, so the schema would be pure decoration.
+    template: 'faq.html',
+    out: 'faq/index.html',
+    url: '/faq/',
+    meta: 'meta.faq',
+    crumbs: [{ key: 'faq.crumb' }],
+  },
   // 404 is served by GitHub Pages from the root only, so it is English-only
   // and carries the switcher for anyone who lands there in another language.
   { template: '404.html', out: '404.html', url: null, meta: 'meta.notFound' },
@@ -152,6 +205,22 @@ for (const { code } of LANGUAGES) {
   )
 }
 
+// A market-scoped page's copy lives only in the language files that publish
+// it, so those keys are exempt from the parity check below. Every page names
+// its keys the same way — `meta.mowik.*` for the head, `mowik.*` for the body
+// — so the prefixes can be derived rather than listed a second time.
+const marketKeys = new Map() // language code → prefixes allowed only there
+for (const page of PAGES) {
+  if (!page.languages) continue
+  const name = page.meta.replace(/^meta\./, '')
+  for (const code of page.languages) {
+    if (!marketKeys.has(code)) marketKeys.set(code, [])
+    marketKeys.get(code).push(`meta.${name}.`, `${name}.`)
+  }
+}
+const isMarketKey = (code, key) =>
+  (marketKeys.get(code) ?? []).some((prefix) => key.startsWith(prefix))
+
 // English is canonical: a key missing from another language would render as a
 // literal `{{key}}` on a live page, so fail the build instead.
 const canonicalKeys = Object.keys(content.en).filter((k) => !k.startsWith('_'))
@@ -162,7 +231,7 @@ for (const { code } of LANGUAGES) {
     if (typeof content[code][key] !== 'string') missing.push(`${code}: ${key}`)
   }
   for (const key of Object.keys(content[code])) {
-    if (!key.startsWith('_') && !canonicalKeys.includes(key)) {
+    if (!key.startsWith('_') && !canonicalKeys.includes(key) && !isMarketKey(code, key)) {
       missing.push(`${code}: ${key} (not in en.json)`)
     }
   }
@@ -310,18 +379,31 @@ function render(template, vars) {
   return out
 }
 
-/** Reciprocal hreflang set, plus x-default pointing at English. */
-function hreflangFor(pageUrl) {
-  if (!pageUrl) return ''
+/** Which languages a page is published in. Most are published in all of them. */
+const langsFor = (page) =>
+  LANGUAGES.filter((l) => !page.languages || page.languages.includes(l.code))
+
+/**
+ * Reciprocal hreflang set, plus x-default pointing at English.
+ *
+ * A page published in a single language gets NO alternates: hreflang describes
+ * translations that exist, and pointing it at a URL that was never written is
+ * worse than saying nothing. Its self-canonical carries the whole claim.
+ */
+function hreflangFor(page) {
+  const langs = langsFor(page)
+  if (!page.url || langs.length < 2) return ''
   const links = []
-  for (const l of LANGUAGES) {
+  for (const l of langs) {
     for (const tag of l.hreflangs) {
       links.push(
-        `    <link rel="alternate" hreflang="${tag}" href="${ORIGIN}${l.prefix}${pageUrl}" />`,
+        `    <link rel="alternate" hreflang="${tag}" href="${ORIGIN}${l.prefix}${page.url}" />`,
       )
     }
   }
-  links.push(`    <link rel="alternate" hreflang="x-default" href="${ORIGIN}${pageUrl}" />`)
+  if (langs.some((l) => l.code === 'en')) {
+    links.push(`    <link rel="alternate" hreflang="x-default" href="${ORIGIN}${page.url}" />`)
+  }
   return `\n${links.join('\n')}`
 }
 
@@ -334,12 +416,15 @@ function hreflangFor(pageUrl) {
  * wrapped to three lines and the call-to-action was pushed off the edge. The
  * full name stays the accessible name either way.
  */
-function switcherFor(language, pageUrl) {
-  if (!pageUrl) pageUrl = '/'
+function switcherFor(language, page) {
+  const pageUrl = page.url ?? '/'
+  const published = new Set(langsFor(page).map((l) => l.code))
   const inner = (l) =>
     `<span class="lang-full">${l.label}</span><span class="lang-short" aria-hidden="true">${l.short}</span>`
   const items = LANGUAGES.map((l) => {
-    const href = `${l.prefix}${pageUrl}`
+    // A page that only exists in one market still needs a working switcher —
+    // send the other languages to their home page rather than to a 404.
+    const href = published.has(l.code) ? `${l.prefix}${pageUrl}` : `${l.prefix}/`
     return l.code === language.code
       ? `<span class="lang-current" aria-current="true" aria-label="${l.label}">${inner(l)}</span>`
       : `<a href="${href}" hreflang="${l.hreflangs[0]}" lang="${l.htmlLang}" aria-label="${l.label}">${inner(l)}</a>`
@@ -450,6 +535,10 @@ for (const language of LANGUAGES) {
     // 404 exists once, at the root, because that is the only path Pages serves
     // it from — skip it for the prefixed languages.
     if (!page.url && language.code !== 'en') continue
+    // `languages` narrows a page to the markets it is actually about. A
+    // comparison against a competitor nobody outside Poland has heard of is a
+    // thin page in English, not a translation worth having.
+    if (page.languages && !page.languages.includes(language.code)) continue
 
     const template = await readFile(join(site, '_templates', page.template), 'utf8')
     const canonical = `${ORIGIN}${language.prefix}${page.url ?? '/'}`
@@ -467,8 +556,8 @@ for (const language of LANGUAGES) {
       // `{{p}}/guides/` rather than a bare path.
       p: language.prefix,
       canonical,
-      hreflang: hreflangFor(page.url),
-      switcher: switcherFor(language, page.url),
+      hreflang: hreflangFor(page),
+      switcher: switcherFor(language, page),
       ogLocale: language.htmlLang.replace('-', '_'),
       // Guides and comparisons are editorial content, not the product page.
       ogType: page.article ? 'article' : 'website',

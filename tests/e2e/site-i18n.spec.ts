@@ -139,6 +139,43 @@ test.describe('localised marketing pages', () => {
   })
 })
 
+// A page can vanish from the build simply by being dropped from PAGES in
+// build-site.mjs, and nothing else notices: the templates and copy stay in the
+// repo, and a `dist/` left over from an earlier build still serves the stale
+// file locally. This crawl is what makes that fail — it follows every internal
+// link from the home page of every language and insists the target exists.
+test.describe('site integrity', () => {
+  test('every internal link resolves, in every language', async ({ page }) => {
+    const seen = new Set<string>()
+    const queue = ['/', '/es/', '/pl/', '/pt/']
+    const broken: string[] = []
+
+    while (queue.length) {
+      const path = queue.shift()!
+      if (seen.has(path)) continue
+      seen.add(path)
+
+      const response = await page.goto(path)
+      if (response?.status() !== 200) {
+        broken.push(`${path} → ${response?.status()}`)
+        continue
+      }
+
+      const links = await page.locator('a[href^="/"]').evaluateAll((els) =>
+        els
+          .map((e) => e.getAttribute('href') ?? '')
+          .map((h) => h.split('#')[0].split('?')[0])
+          .filter((h) => h && !h.startsWith('/app')),
+      )
+      for (const link of links) if (!seen.has(link)) queue.push(link)
+    }
+
+    expect(broken, 'internal links pointing at pages that are not built').toEqual([])
+    // A floor rather than an exact count, so adding a page does not fail this.
+    expect(seen.size).toBeGreaterThan(50)
+  })
+})
+
 // Structured data and images: the two things a crawler uses to tell a real
 // product from a page that merely claims to be one.
 test.describe('structured data', () => {
@@ -180,6 +217,23 @@ test.describe('structured data', () => {
     for (const alt of await images.evaluateAll((els) => els.map((e) => e.getAttribute('alt')))) {
       expect(alt?.length ?? 0).toBeGreaterThan(30)
     }
+  })
+
+  test('a market-scoped page is published in that market only', async ({ page }) => {
+    // The Mówik comparison exists in Polish and nowhere else: an English page
+    // about a competitor nobody outside Poland has heard of is a thin page,
+    // not a translation. It therefore declares NO hreflang alternates — those
+    // describe translations that exist — and its switcher has to send the
+    // other languages somewhere real rather than to a 404.
+    await page.goto('/pl/compare/mowik-alternative/')
+    await expect(page.locator('h1')).toHaveText('Darmowa alternatywa dla MÓWika')
+    await expect(page.locator('link[rel=alternate]')).toHaveCount(0)
+    await expect(page.locator('.lang-switch a[lang="en"]').first()).toHaveAttribute('href', '/')
+
+    expect((await page.request.get('/compare/mowik-alternative/')).status()).toBe(404)
+    const xml = await (await page.request.get('/sitemap.xml')).text()
+    expect(xml).toContain('https://saythrough.com/pl/compare/mowik-alternative/')
+    expect(xml).not.toContain('https://saythrough.com/compare/mowik-alternative/')
   })
 
   test('the core word list is generated from the app\'s own vocabulary', async ({ page }) => {

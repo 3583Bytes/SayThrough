@@ -30,15 +30,24 @@ async function resolve(rawUrl) {
     .replace(/^\/+/, '')
   if (r === '') r = 'index.html'
   else if (r.endsWith('/')) r += 'index.html'
+  // Only extension-less paths under /app/ are client-side routes worth handing
+  // the SPA shell. A missing asset must 404 rather than come back as the shell
+  // with the asset's own content type — that turns a missing symbol or bundle
+  // into a passing request, which is exactly the failure a test is looking for.
+  const isApp = r.startsWith('app/') && extname(r) === ''
   const candidates = [
-    join(DIST, r),
-    join(DIST, r, 'index.html'),
-    // fall back: /app/* → the app SPA shell; everything else → marketing 404
-    r.startsWith('app/') ? join(DIST, 'app', 'index.html') : join(DIST, '404.html'),
+    { path: join(DIST, r), status: 200 },
+    { path: join(DIST, r, 'index.html'), status: 200 },
+    // fall back: /app/* → the app SPA shell; everything else → marketing 404.
+    // GitHub Pages serves 404.html with a real 404 status, so mirror that —
+    // answering 200 here would hide a missing page from any test that checks.
+    isApp
+      ? { path: join(DIST, 'app', 'index.html'), status: 200 }
+      : { path: join(DIST, '404.html'), status: 404 },
   ]
-  for (const path of candidates) {
+  for (const { path, status } of candidates) {
     try {
-      return { path, body: await readFile(path) }
+      return { path, status, body: await readFile(path) }
     } catch {}
   }
   return null
@@ -52,6 +61,7 @@ http
       res.end('not found')
       return
     }
+    res.statusCode = hit.status
     res.setHeader('Content-Type', TYPES[extname(hit.path)] ?? 'application/octet-stream')
     res.end(hit.body)
   })

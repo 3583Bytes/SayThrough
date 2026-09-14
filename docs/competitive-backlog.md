@@ -389,6 +389,36 @@ So the constraint was never the markup — it was surface area and citations.
   the one ARASAAC itself uses. Polish carries **komunikacja alternatywna i
   wspomagająca** alongside the acronym.
 - [x] Portuguese declares a bare `pt` hreflang beside `pt-BR`.
+- [x] Every title trimmed under 60 characters and every description under 160,
+  across all four languages — 38 of the 52 (language × page) pairs were over
+  the point where results truncate. Keyword order was already right; this was
+  purely about not stopping mid-phrase in the moment someone chooses to click.
+
+- [x] Three further guides: `/guides/modeling/` (aided language stimulation),
+  `/guides/schools/` (AAC on no budget), and `/guides/arasaac-symbols/` —
+  which doubles as the hook for the ARASAAC outreach below.
+- [x] `/faq/` — fourteen questions across cost, starting out, using it, and
+  data/lock-in. Question-shaped copy is what this field's demand actually
+  looks like and what AI answers quote.
+- [x] `/pl/compare/mowik-alternative/` — MÓWik is Poland's dominant paid AAC
+  app and the one a Polish parent is actually choosing between. Published in
+  **Polish only**: `PAGES` entries now take a `languages` field, and a
+  market-scoped page emits no hreflang alternates, points its switcher at the
+  other languages' home pages, and keeps its copy keys out of the other
+  language files. An English page about MÓWik would be a thin page, not a
+  translation.
+
+**Outstanding — buildable, blocked on a decision or on facts:**
+
+- [ ] A changelog or release-notes page. Free crawl freshness, and it answers
+  the loudest unspoken objection to a free AAC tool: *is anyone still working
+  on this?* **Blocked:** the repo has no tags and sits at 0.1.0, so there is
+  no release history to generate from and no basis for inventing one. Needs a
+  decision on what counts as a release first.
+- [ ] A Livox (Brazil) comparison. **Blocked on facts:** Livox is free to
+  download but subscription-gated, and no current price is publicly
+  verifiable — the whole value of a comparison page is the price contrast, so
+  it is not worth writing on a guess.
 
 **Outstanding — off-page, and worth more than anything above.** All manual,
 none of it buildable:

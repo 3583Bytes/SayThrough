@@ -21,6 +21,10 @@ const PAGES = [
   '/guides/aac-and-speech/',
   '/guides/access-methods/',
   '/guides/install/',
+  '/guides/modeling/',
+  '/guides/schools/',
+  '/guides/arasaac-symbols/',
+  '/faq/',
 ]
 
 async function expectReadable(page: Page, where: string) {

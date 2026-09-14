@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{modeling.crumb}}</p>
+      <h1>{{modeling.h1}}</h1>
+      <p class="lead">{{modeling.lead}}</p>
+
+      <div class="callout"><p>{{modeling.short}}</p></div>
+
+      <h2>{{modeling.what.title}}</h2>
+      <p>{{modeling.what.body}}</p>
+
+      <h2>{{modeling.why.title}}</h2>
+      <p>{{modeling.why.body}}</p>
+
+      <h2>{{modeling.how.title}}</h2>
+      <ol>
+        <li>{{modeling.how.s1}}</li>
+        <li>{{modeling.how.s2}}</li>
+        <li>{{modeling.how.s3}}</li>
+        <li>{{modeling.how.s4}}</li>
+        <li>{{modeling.how.s5}}</li>
+      </ol>
+
+      <h2>{{modeling.mistakes.title}}</h2>
+      <ul>
+        <li>{{modeling.mistakes.b1}}</li>
+        <li>{{modeling.mistakes.b2}}</li>
+        <li>{{modeling.mistakes.b3}}</li>
+        <li>{{modeling.mistakes.b4}}</li>
+      </ul>
+
+      <h2>{{modeling.day.title}}</h2>
+      <p>{{modeling.day.body}}</p>
+      <ul>
+        <li>{{modeling.day.b1}}</li>
+        <li>{{modeling.day.b2}}</li>
+        <li>{{modeling.day.b3}}</li>
+      </ul>
+
+      <h2>{{modeling.long.title}}</h2>
+      <p>{{modeling.long.body}}</p>
+
+      <div class="callout">
+        <p>{{modeling.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/core-words/">{{guides.coreWords.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

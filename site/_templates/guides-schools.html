@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{schools.crumb}}</p>
+      <h1>{{schools.h1}}</h1>
+      <p class="lead">{{schools.lead}}</p>
+
+      <div class="callout"><p>{{schools.short}}</p></div>
+
+      <h2>{{schools.cost.title}}</h2>
+      <p>{{schools.cost.body}}</p>
+
+      <h2>{{schools.rollout.title}}</h2>
+      <ol>
+        <li>{{schools.rollout.s1}}</li>
+        <li>{{schools.rollout.s2}}</li>
+        <li>{{schools.rollout.s3}}</li>
+        <li>{{schools.rollout.s4}}</li>
+      </ol>
+
+      <h2>{{schools.it.title}}</h2>
+      <ul>
+        <li>{{schools.it.b1}}</li>
+        <li>{{schools.it.b2}}</li>
+        <li>{{schools.it.b3}}</li>
+        <li>{{schools.it.b4}}</li>
+      </ul>
+
+      <h2>{{schools.classroom.title}}</h2>
+      <p>{{schools.classroom.body}}</p>
+      <ul>
+        <li>{{schools.classroom.b1}}</li>
+        <li>{{schools.classroom.b2}}</li>
+        <li>{{schools.classroom.b3}}</li>
+      </ul>
+
+      <h2>{{schools.funding.title}}</h2>
+      <p>{{schools.funding.body}}</p>
+
+      <h2>{{schools.limits.title}}</h2>
+      <p>{{schools.limits.body}}</p>
+
+      <div class="callout">
+        <p>{{schools.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/install/">{{guides.install.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>
