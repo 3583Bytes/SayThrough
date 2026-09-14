@@ -5,11 +5,42 @@ import { expect, test, type Page } from '@playwright/test'
 // wiring that decides whether the localised pages are ever found, and the
 // rule that detection SUGGESTS rather than redirects.
 
+// The H1 carries the search query and the old line survives as the tagline
+// beneath it — both are asserted, because dropping the tagline would lose the
+// voice of the page and weakening the H1 would lose the query.
 const LANGS = [
-  { prefix: '', htmlLang: 'en', hreflang: 'en', label: 'English', h1: 'A free voice for everyone.' },
-  { prefix: '/es', htmlLang: 'es', hreflang: 'es', label: 'Español', h1: 'Una voz gratuita para todos.' },
-  { prefix: '/pl', htmlLang: 'pl', hreflang: 'pl', label: 'Polski', h1: 'Darmowy głos dla każdego.' },
-  { prefix: '/pt', htmlLang: 'pt-BR', hreflang: 'pt-BR', label: 'Português', h1: 'Uma voz gratuita para todo mundo.' },
+  {
+    prefix: '',
+    htmlLang: 'en',
+    hreflang: 'en',
+    label: 'English',
+    h1: 'A free AAC app for nonspeaking people.',
+    tagline: 'A free voice for everyone.',
+  },
+  {
+    prefix: '/es',
+    htmlLang: 'es',
+    hreflang: 'es',
+    label: 'Español',
+    h1: 'Una aplicación de CAA gratuita para personas sin habla.',
+    tagline: 'Una voz gratuita para todos.',
+  },
+  {
+    prefix: '/pl',
+    htmlLang: 'pl',
+    hreflang: 'pl',
+    label: 'Polski',
+    h1: 'Darmowa aplikacja AAC dla osób niemówiących.',
+    tagline: 'Darmowy głos dla każdego.',
+  },
+  {
+    prefix: '/pt',
+    htmlLang: 'pt-BR',
+    hreflang: 'pt-BR',
+    label: 'Português',
+    h1: 'Um aplicativo de CAA gratuito para pessoas não falantes.',
+    tagline: 'Uma voz gratuita para todo mundo.',
+  },
 ]
 
 test.describe('localised marketing pages', () => {
@@ -18,6 +49,7 @@ test.describe('localised marketing pages', () => {
       await page.goto(`${lang.prefix}/`)
       await expect(page.locator('html')).toHaveAttribute('lang', lang.htmlLang)
       await expect(page.locator('h1')).toHaveText(lang.h1)
+      await expect(page.locator('.hero-tagline')).toHaveText(lang.tagline)
       await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
         'href',
         `https://saythrough.com${lang.prefix}/`,
@@ -34,8 +66,10 @@ test.describe('localised marketing pages', () => {
         els.map((e) => e.getAttribute('hreflang')),
       )
       // All four languages plus x-default — the set Google needs to serve the
-      // right page rather than treating them as duplicates.
-      expect(alternates.sort()).toEqual(['en', 'es', 'pl', 'pt-BR', 'x-default'])
+      // right page rather than treating them as duplicates. Portuguese carries
+      // a bare `pt` as well as `pt-BR`, so a pt-PT visitor matches the page
+      // instead of falling through to English.
+      expect(alternates.sort()).toEqual(['en', 'es', 'pl', 'pt', 'pt-BR', 'x-default'])
     }
   })
 
@@ -90,12 +124,72 @@ test.describe('localised marketing pages', () => {
     expect(href).toBe('/app/?lang=pt')
   })
 
-  test('the sitemap lists every language of every page', async ({ page }) => {
+  test('the sitemap lists every language of every page, with a lastmod', async ({ page }) => {
     const xml = await (await page.request.get('/sitemap.xml')).text()
     for (const lang of LANGS) {
-      expect(xml).toContain(`<loc>https://saythrough.com${lang.prefix}/</loc>`)
-      expect(xml).toContain(`<loc>https://saythrough.com${lang.prefix}/guides/quick-start/</loc>`)
+      for (const url of ['/', '/guides/quick-start/', '/compare/td-snap-alternative/']) {
+        expect(xml).toContain(`<loc>https://saythrough.com${lang.prefix}${url}</loc>`)
+      }
     }
+    // `lastmod` is the one sitemap hint Google actually uses; `changefreq` and
+    // `priority` are documented as ignored and were guesses anyway.
+    expect(xml).toMatch(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/)
+    expect(xml).not.toContain('<changefreq>')
+    expect(xml).not.toContain('<priority>')
+  })
+})
+
+// Structured data and images: the two things a crawler uses to tell a real
+// product from a page that merely claims to be one.
+test.describe('structured data', () => {
+  async function schemaTypes(page: Page) {
+    return page.locator('script[type="application/ld+json"]').evaluateAll((els) =>
+      els.flatMap((e) => {
+        const parsed = JSON.parse(e.textContent ?? '')
+        return (Array.isArray(parsed) ? parsed : [parsed]).map((n) => n['@type'])
+      }),
+    )
+  }
+
+  test('every page carries Organization and WebSite', async ({ page }) => {
+    for (const path of ['/', '/es/guides/', '/pl/compare/', '/pt/guides/core-words/']) {
+      await page.goto(path)
+      const types = await schemaTypes(page)
+      expect(types).toContain('Organization')
+      expect(types).toContain('WebSite')
+    }
+  })
+
+  test('the home page describes the app, guides describe an article', async ({ page }) => {
+    await page.goto('/')
+    expect(await schemaTypes(page)).toContain('SoftwareApplication')
+
+    await page.goto('/guides/core-words/')
+    const types = await schemaTypes(page)
+    // Breadcrumbs are rendered visibly, so they are also marked up — the trail
+    // is authored once in build-site.mjs and used for both.
+    expect(types).toContain('BreadcrumbList')
+    expect(types).toContain('Article')
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article')
+  })
+
+  test('screenshots carry real alt text', async ({ page }) => {
+    await page.goto('/')
+    const images = page.locator('.shot img')
+    expect(await images.count()).toBeGreaterThan(0)
+    for (const alt of await images.evaluateAll((els) => els.map((e) => e.getAttribute('alt')))) {
+      expect(alt?.length ?? 0).toBeGreaterThan(30)
+    }
+  })
+
+  test('the core word list is generated from the app\'s own vocabulary', async ({ page }) => {
+    // The list exists to be linkable and citable, so it has to be the real
+    // vocabulary — and it has to be the vocabulary of the language it is on.
+    await page.goto('/guides/core-words/')
+    await expect(page.locator('.cw', { hasText: /^want$/ })).toHaveCount(1)
+
+    await page.goto('/pl/guides/core-words/')
+    await expect(page.locator('.cw', { hasText: /^chcę$/ })).toHaveCount(1)
   })
 })
 

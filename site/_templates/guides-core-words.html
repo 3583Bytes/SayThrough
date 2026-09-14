@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{coreWords.crumb}}</p>
+      <h1>{{coreWords.h1}}</h1>
+      <p class="lead">{{coreWords.lead}}</p>
+
+      <h2>{{coreWords.what.title}}</h2>
+      <p>{{coreWords.what.body}}</p>
+
+      <h2>{{coreWords.why.title}}</h2>
+      <p>{{coreWords.why.body}}</p>
+      <ul>
+        <li>{{coreWords.why.b1}}</li>
+        <li>{{coreWords.why.b2}}</li>
+        <li>{{coreWords.why.b3}}</li>
+      </ul>
+
+      <h2>{{coreWords.list.title}}</h2>
+      <p>{{coreWords.list.body}}</p>
+      <p class="fineprint">{{coreWords.list.key}}</p>
+
+      <div class="cw-wrap">
+{{coreWordTable}}
+      </div>
+
+      <h2>{{coreWords.sizes.title}}</h2>
+      <p>{{coreWords.sizes.body}}</p>
+
+      <h2>{{coreWords.teach.title}}</h2>
+      <ol>
+        <li>{{coreWords.teach.s1}}</li>
+        <li>{{coreWords.teach.s2}}</li>
+        <li>{{coreWords.teach.s3}}</li>
+        <li>{{coreWords.teach.s4}}</li>
+      </ol>
+
+      <div class="callout">
+        <p>{{coreWords.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/what-is-aac/">{{guides.whatIsAac.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

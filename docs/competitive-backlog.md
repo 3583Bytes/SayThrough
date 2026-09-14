@@ -354,6 +354,75 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
 
 ---
 
+## 5. Discovery (search & referral)
+
+Audited 2026-09-14 by running the queries the site is built to win. The
+finding that reordered everything: for *"free AAC app"*, *"TD Snap
+alternative"* and their equivalents in Spanish and Polish, the results are
+almost entirely **third-party roundups and directories**, not vendor sites.
+So the constraint was never the markup — it was surface area and citations.
+
+**Shipped in that pass (on-page, all four languages):**
+
+- [x] `/compare/` hub plus `/compare/td-snap-alternative/` and
+  `/compare/proloquo2go-alternative/` — the highest-intent asset was an
+  anchor on the home page and could not rank for the query people type.
+  Each page is two-sided on purpose: one-sided comparisons don't rank and do
+  attract trademark complaints.
+- [x] Four new guides: core words (with the real list), AAC and speech,
+  access methods, installing. Each maps to a live query cluster.
+- [x] `/guides/core-words/` publishes the actual vocabulary, **generated from
+  `src/data/coreWords.*.json`** — it cannot drift from the product, and a
+  word list is the most linkable thing a site in this field can publish.
+- [x] H1 and title carry the query; the old line survives as the tagline.
+- [x] Real screenshots with descriptive alt text — the site previously
+  shipped zero images, which cost it image search and the "this is a real
+  product" signal.
+- [x] Organization + WebSite sitewide, BreadcrumbList on every breadcrumbed
+  page, Article with git-derived dates on every guide, enriched
+  SoftwareApplication. There was no date anywhere on the site before, so no
+  freshness signal at all.
+- [x] `lastmod` in the sitemap; dropped `changefreq`/`priority`, which
+  Google documents as ignored.
+- [x] In-prose internal links to the guides (every route in was a nav item).
+- [x] Spanish carries **SAAC** alongside CAA — the term Spain searches and
+  the one ARASAAC itself uses. Polish carries **komunikacja alternatywna i
+  wspomagająca** alongside the acronym.
+- [x] Portuguese declares a bare `pt` hreflang beside `pt-BR`.
+
+**Outstanding — off-page, and worth more than anything above.** All manual,
+none of it buildable:
+
+- [ ] **Search Console + Bing Webmaster Tools**, verified by DNS TXT so it
+  survives every Pages deploy; submit the sitemap. Nothing here is
+  measurable until this exists, and indexation of `/es/`, `/pl/`, `/pt/`
+  has never been confirmed.
+- [ ] **AlternativeTo** — list against TD Snap, Proloquo2Go, LetMeTalk,
+  Cboard. Their TD Snap page is the top result for our best query.
+- [ ] **ARASAAC materials catalogue** — an Aragón government domain that
+  explicitly lists software built on its pictograms, and the single
+  highest-authority link available to this project. We already comply with
+  the CC BY-NC-SA attribution.
+- [ ] Mulberry Symbols; Open Board Format / CoughDrop community listings.
+- [ ] Curated GitHub lists (awesome-a11y, open-source education).
+- [ ] Email the roundup authors who already outrank every vendor —
+  pomocautyzm.org, specjalni.pl and mockomunikacji.com in Polish, and the
+  equivalents in English and Spanish. Lead with the Polish board being
+  authored in Polish, cases and all; that is the detail they care about.
+- [ ] Communities: r/slp, r/AAC, r/Autism_Parenting, ASHA, the AAC Facebook
+  groups. Post as the author, disclose it, ask for vocabulary feedback —
+  which is true, and is the framing that gets welcomed rather than removed.
+- [ ] University AAC programme free-resource pages (`.edu` links, and those
+  maintainers are actively looking for free tools).
+- [ ] F-Droid, once the Phase 2 Android build ships.
+
+**Deliberately not done:** `aggregateRating` in the schema (we have no real
+reviews, and inventing them is a manual-action risk), and `FAQPage` markup
+(Google restricted those rich results to government and health sites in
+2023 — the FAQ *content* is still worth writing, the markup is not).
+
+---
+
 ## Appendix — competitor one-liners
 
 - **TD Snap** ($9.99/mo): iPad-first; Core First/Motor Plan/Express/Text/

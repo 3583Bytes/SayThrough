@@ -5,7 +5,23 @@ import { AUDIT, type Issue } from './contrastAudit'
 // it regresses independently of the app. It is also the first thing a parent
 // or SLP sees, and its primary call-to-action was the worst-contrast element
 // anywhere in the project (2.78:1 light, 2.36:1 dark) before this ran.
-const PAGES = ['/', '/contact/', '/guides/', '/guides/quick-start/', '/guides/what-is-aac/']
+const PAGES = [
+  '/',
+  '/contact/',
+  '/compare/',
+  '/compare/td-snap-alternative/',
+  '/compare/proloquo2go-alternative/',
+  '/guides/',
+  '/guides/quick-start/',
+  '/guides/what-is-aac/',
+  // The core-word list paints several hundred labels onto the Fitzgerald
+  // pastels, which are light in both themes — so its ink must NOT follow the
+  // theme, and this is what catches it if it ever does.
+  '/guides/core-words/',
+  '/guides/aac-and-speech/',
+  '/guides/access-methods/',
+  '/guides/install/',
+]
 
 async function expectReadable(page: Page, where: string) {
   const issues = (await page.evaluate(AUDIT)) as Issue[]

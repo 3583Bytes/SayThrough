@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{aacSpeech.crumb}}</p>
+      <h1>{{aacSpeech.h1}}</h1>
+      <p class="lead">{{aacSpeech.lead}}</p>
+
+      <div class="callout"><p>{{aacSpeech.short}}</p></div>
+
+      <h2>{{aacSpeech.research.title}}</h2>
+      <p>{{aacSpeech.research.body}}</p>
+      <ul>
+        <li>{{aacSpeech.research.b1}}</li>
+        <li>{{aacSpeech.research.b2}}</li>
+        <li>{{aacSpeech.research.b3}}</li>
+      </ul>
+      <p>{{aacSpeech.research.close}}</p>
+
+      <h2>{{aacSpeech.why.title}}</h2>
+      <p>{{aacSpeech.why.body}}</p>
+
+      <h2>{{aacSpeech.wait.title}}</h2>
+      <p>{{aacSpeech.wait.body}}</p>
+
+      <h2>{{aacSpeech.old.title}}</h2>
+      <p>{{aacSpeech.old.body}}</p>
+
+      <h2>{{aacSpeech.do.title}}</h2>
+      <ol>
+        <li>{{aacSpeech.do.s1}}</li>
+        <li>{{aacSpeech.do.s2}}</li>
+        <li>{{aacSpeech.do.s3}}</li>
+      </ol>
+
+      <h2>{{aacSpeech.sources.title}}</h2>
+      <ul class="sources">
+        <li>{{aacSpeech.sources.s1}}</li>
+        <li>{{aacSpeech.sources.s2}}</li>
+        <li>{{aacSpeech.sources.s3}}</li>
+      </ul>
+      <p class="fineprint">{{aacSpeech.notAdvice}}</p>
+
+      <div class="callout">
+        <p>{{aacSpeech.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/core-words/">{{guides.coreWords.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

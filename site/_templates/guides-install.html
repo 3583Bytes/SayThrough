@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{install.crumb}}</p>
+      <h1>{{install.h1}}</h1>
+      <p class="lead">{{install.lead}}</p>
+
+      <div class="callout"><p>{{install.why}}</p></div>
+
+      <h2>{{install.ios.title}}</h2>
+      <ol>
+        <li>{{install.ios.s1}}</li>
+        <li>{{install.ios.s2}}</li>
+        <li>{{install.ios.s3}}</li>
+      </ol>
+      <p>{{install.ios.note}}</p>
+
+      <h2>{{install.chrome.title}}</h2>
+      <ol>
+        <li>{{install.chrome.s1}}</li>
+        <li>{{install.chrome.s2}}</li>
+        <li>{{install.chrome.s3}}</li>
+      </ol>
+      <p>{{install.chrome.note}}</p>
+
+      <h2>{{install.android.title}}</h2>
+      <ol>
+        <li>{{install.android.s1}}</li>
+        <li>{{install.android.s2}}</li>
+      </ol>
+
+      <h2>{{install.schools.title}}</h2>
+      <p>{{install.schools.body}}</p>
+      <ul>
+        <li>{{install.schools.b1}}</li>
+        <li>{{install.schools.b2}}</li>
+        <li>{{install.schools.b3}}</li>
+      </ul>
+
+      <h2>{{install.offline.title}}</h2>
+      <p>{{install.offline.body}}</p>
+
+      <div class="callout">
+        <p>{{install.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/quick-start/">{{whatIsAac.quickCta}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

@@ -81,7 +81,13 @@ p { margin: 0 0 1em; }
   margin: 0 0 0.6em;
 }
 .lead { font-size: 1.18rem; color: var(--muted); max-width: 720px; }
-.center .lead { margin-left: auto; margin-right: auto; }
+/* `.lead` is capped at 720px, so centering its TEXT is not enough — the box
+   itself has to be centered or it sits flush left in the 1120px container and
+   reads as misaligned. Covers `.center` on an ancestor and on the lead itself;
+   the second form was missing, which left the comparison section's lead
+   visibly off to the left. */
+.center .lead,
+.lead.center { margin-inline: auto; }
 
 /* Header */
 .site-header {
@@ -302,3 +308,84 @@ table.compare tbody th { font-weight: 600; }
   .nav-spacer { display: none; }
   .lang-nav { margin-left: auto; }
 }
+
+/* ---- Hero tagline ------------------------------------------------------- */
+/* The H1 carries the query; this is the line it used to be. */
+.hero-tagline {
+  margin: 10px 0 0;
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Screenshots -------------------------------------------------------- */
+/* Real product images with real alt text — the site shipped with none, which
+   cost it image search and the "this is an actual product" signal. */
+.shot { margin: 40px 0 0; }
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+.shot figcaption {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.93rem;
+  text-align: center;
+  max-width: 62ch;
+  margin-inline: auto;
+}
+.shot--narrow { max-width: 760px; margin-inline: auto; text-align: left; }
+
+/* ---- Core word list ----------------------------------------------------- */
+/* Generated from src/data/coreWords.*.json, so the page cannot drift from the
+   product. Colours are the Fitzgerald key the app itself uses. */
+.cw-wrap { margin-top: 24px; }
+.cw-group { margin-top: 26px; }
+.cw-group h3 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.cw-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-variant-numeric: tabular-nums;
+}
+.cw-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cw-list li { margin: 0; }
+.cw {
+  background: var(--cw-bg, var(--surface-2));
+  /* The Fitzgerald pastels are light in both themes, exactly as they are on a
+     board — so the label stays dark ink rather than following the theme. */
+  color: #17202a;
+  border: 1px solid rgba(23, 32, 42, 0.14);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+/* ---- Article furniture -------------------------------------------------- */
+.fineprint { color: var(--muted); font-size: 0.88rem; margin-top: 12px; }
+.article ul.sources { padding-left: 1.1em; }
+.article ul.sources li { color: var(--muted); font-size: 0.92rem; line-height: 1.55; }

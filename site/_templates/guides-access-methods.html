@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/guides/">{{guides.crumb}}</a> › {{access.crumb}}</p>
+      <h1>{{access.h1}}</h1>
+      <p class="lead">{{access.lead}}</p>
+
+      <h2>{{access.touch.title}}</h2>
+      <p>{{access.touch.body}}</p>
+
+      <h2>{{access.dwell.title}}</h2>
+      <p>{{access.dwell.body}}</p>
+      <ul>
+        <li>{{access.dwell.b1}}</li>
+        <li>{{access.dwell.b2}}</li>
+      </ul>
+
+      <h2>{{access.scan.title}}</h2>
+      <p>{{access.scan.body}}</p>
+      <ul>
+        <li>{{access.scan.b1}}</li>
+        <li>{{access.scan.b2}}</li>
+        <li>{{access.scan.b3}}</li>
+      </ul>
+      <div class="callout"><p>{{access.scan.tip}}</p></div>
+
+      <h2>{{access.choose.title}}</h2>
+      <p>{{access.choose.body}}</p>
+
+      <h2>{{access.setup.title}}</h2>
+      <ol>
+        <li>{{access.setup.s1}}</li>
+        <li>{{access.setup.s2}}</li>
+        <li>{{access.setup.s3}}</li>
+      </ol>
+      <p>{{access.setup.close}}</p>
+
+      <div class="callout">
+        <p>{{access.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{whatIsAac.openCta}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/install/">{{guides.install.link}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

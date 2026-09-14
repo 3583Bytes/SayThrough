@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+{{> head}}
+  </head>
+  <body>
+{{> header}}
+    <main class="article">
+      <p class="breadcrumb"><a href="{{p}}/">{{crumb.home}}</a> › <a href="{{p}}/compare/">{{compare.crumb}}</a> › {{proloquo.crumb}}</p>
+      <h1>{{proloquo.h1}}</h1>
+      <p class="lead">{{proloquo.lead}}</p>
+
+      <div class="callout"><p>{{proloquo.short}}</p></div>
+
+      <h2>{{proloquo.them.title}}</h2>
+      <p>{{proloquo.them.body}}</p>
+      <ul>
+        <li>{{proloquo.them.b1}}</li>
+        <li>{{proloquo.them.b2}}</li>
+        <li>{{proloquo.them.b3}}</li>
+        <li>{{proloquo.them.b4}}</li>
+      </ul>
+
+      <h2>{{proloquo.us.title}}</h2>
+      <ul>
+        <li>{{proloquo.us.b1}}</li>
+        <li>{{proloquo.us.b2}}</li>
+        <li>{{proloquo.us.b3}}</li>
+        <li>{{proloquo.us.b4}}</li>
+        <li>{{proloquo.us.b5}}</li>
+      </ul>
+
+      <h2>{{proloquo.table.title}}</h2>
+      <div class="table-wrap">
+        <table class="compare">
+          <thead><tr><th></th><th class="us">SayThrough</th><th>Proloquo2Go</th></tr></thead>
+          <tbody>
+            <tr><th>{{compare.price}}</th><td class="price yes">{{compare.free}}</td><td class="price">{{compare.oneTime}}</td></tr>
+            <tr><th>{{compare.anyDevice}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{compare.iosOnly}}</td></tr>
+            <tr><th>{{compare.noAccount}}</th><td class="yes">{{compare.yes}}</td><td class="yes">{{compare.yes}}</td></tr>
+            <tr><th>{{compare.offline}}</th><td class="yes">{{compare.yes}}</td><td class="yes">{{compare.yes}}</td></tr>
+            <tr><th>{{compare.openSymbols}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{compare.proprietary}}</td></tr>
+            <tr><th>{{compare.openStandard}}</th><td class="yes">.obf / .obz</td><td class="no">{{compare.limited}}</td></tr>
+            <tr><th>{{compare.freePros}}</th><td class="yes">{{compare.yes}}</td><td class="yes">{{compare.yes}}</td></tr>
+            <tr><th>{{compare.openSource}}</th><td class="yes">{{compare.yes}}</td><td class="no">{{compare.no}}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fineprint">{{compare.disclaimer}}</p>
+
+      <h2>{{proloquo.move.title}}</h2>
+      <p>{{proloquo.move.body}}</p>
+      <p>{{proloquo.move.caveat}}</p>
+
+      <h2>{{proloquo.who.title}}</h2>
+      <p>{{proloquo.who.stay}}</p>
+      <p>{{proloquo.who.switch}}</p>
+
+      <div class="callout">
+        <p>{{proloquo.try}}</p>
+        <p style="margin-top:12px"><a class="btn btn-primary" href="{{appHref}}">{{cta.button}}</a> &nbsp; <a class="btn btn-ghost" href="{{p}}/guides/quick-start/">{{whatIsAac.quickCta}}</a></p>
+      </div>
+    </main>
+{{> footer}}
+{{> scripts}}
+  </body>
+</html>

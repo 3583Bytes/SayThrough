@@ -6,15 +6,29 @@
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": "https://saythrough.com/#app",
         "name": "SayThrough",
         "applicationCategory": "EducationalApplication",
         "applicationSubCategory": "Augmentative and Alternative Communication (AAC)",
         "operatingSystem": "Web, iOS, Android",
+        "browserRequirements": "Requires a modern browser. Installs as a PWA; works offline.",
         "description": "{{schema.description}}",
         "url": "https://saythrough.com/",
+        "downloadUrl": "https://saythrough.com/app/",
+        "installUrl": "https://saythrough.com/app/",
+        "softwareHelp": "https://saythrough.com/guides/",
         "inLanguage": ["en", "es", "pl", "pt-BR"],
         "availableLanguage": ["English", "Espa\u00f1ol", "Polski", "Portugu\u00eas"],
         "isAccessibleForFree": true,
+        "license": "https://github.com/3583bytes/saythrough/blob/main/LICENSE",
+        "codeRepository": "https://github.com/3583bytes/saythrough",
+        "screenshot": [
+          "https://saythrough.com/img/home-board.png",
+          "https://saythrough.com/img/topic-message.png"
+        ],
+        "featureList": "{{schema.featureList}}",
+        "author": { "@id": "https://saythrough.com/#organization" },
+        "publisher": { "@id": "https://saythrough.com/#organization" },
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
       }
     </script>
@@ -41,6 +55,7 @@
           <div>
             <p class="eyebrow">{{hero.eyebrow}}</p>
             <h1>{{hero.title}}</h1>
+            <p class="hero-tagline">{{hero.tagline}}</p>
             <p class="lead">{{hero.lead}}</p>
             <div class="hero-cta">
               <a class="btn btn-primary btn-lg" href="{{appHref}}">{{hero.ctaPrimary}}</a>
@@ -88,6 +103,15 @@
           <h2>{{what.title}}</h2>
           <p class="lead">{{what.lead}}</p>
           <p><a class="btn btn-ghost" href="{{p}}/guides/what-is-aac/">{{what.cta}}</a></p>
+
+          <figure class="shot shot--narrow">
+            <picture>
+              <source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/img/topic-message-dark.webp" />
+              <source type="image/webp" srcset="/img/topic-message.webp 1x, /img/topic-message@2x.webp 2x" />
+              <img src="/img/topic-message.png" width="1280" height="960" loading="lazy" decoding="async" alt="{{shots.topic.alt}}" />
+            </picture>
+            <figcaption>{{shots.topic.caption}}</figcaption>
+          </figure>
         </div>
       </section>
 
@@ -110,6 +134,15 @@
               <div><h3>{{how.step3.title}}</h3><p>{{how.step3.body}}</p></div>
             </div>
           </div>
+
+          <figure class="shot">
+            <picture>
+              <source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/img/home-board-dark.webp" />
+              <source type="image/webp" srcset="/img/home-board.webp 1x, /img/home-board@2x.webp 2x" />
+              <img src="/img/home-board.png" width="1280" height="960" loading="lazy" decoding="async" alt="{{shots.home.alt}}" />
+            </picture>
+            <figcaption>{{shots.home.caption}}</figcaption>
+          </figure>
         </div>
       </section>
 
@@ -212,6 +245,10 @@
               </tbody>
             </table>
           </div>
+          <p class="center" style="margin-top:18px">
+            <a class="btn btn-ghost" href="{{p}}/compare/td-snap-alternative/">{{compare.ctaTdSnap}}</a> &nbsp;
+            <a class="btn btn-ghost" href="{{p}}/compare/proloquo2go-alternative/">{{compare.ctaProloquo}}</a>
+          </p>
           <p class="center" style="margin-top:14px;color:var(--muted);font-size:.9rem">{{compare.disclaimer}}</p>
         </div>
       </section>
