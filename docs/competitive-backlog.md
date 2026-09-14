@@ -455,12 +455,20 @@ existing for their own sake.
 **Outstanding — off-page, and worth more than anything above.** All manual,
 none of it buildable:
 
-- [ ] **Search Console + Bing Webmaster Tools**, verified by DNS TXT so it
-  survives every Pages deploy; submit the sitemap. Nothing here is
-  measurable until this exists, and indexation of `/es/`, `/pl/`, `/pt/`
-  has never been confirmed.
+- [x] **Google Search Console** — set up. Two things to do in it now that the
+  site is four times bigger: re-submit `sitemap.xml` (21 → 69 URLs) and read
+  the Pages report for whether `/es/`, `/pl/` and `/pt/` are actually indexed.
+  That last one has never been confirmed and is the cheapest answer available.
+- [ ] **Bing Webmaster Tools** — not set up. It can import the Search Console
+  property wholesale, so it is a few minutes, and it feeds Copilot as well as
+  Bing.
 - [ ] **AlternativeTo** — list against TD Snap, Proloquo2Go, LetMeTalk,
-  Cboard. Their TD Snap page is the top result for our best query.
+  Cboard. Their TD Snap page is the top result for our best query. **Two
+  separate jobs, and the small one is the better one:** "Add as alternative"
+  on each competitor's existing page is immediate, while a brand-new app
+  listing sits in a review backlog for months. An account must also be seven
+  days old before it may submit, so register first and do everything else
+  while that clock runs.
 - [ ] **ARASAAC materials catalogue** — an Aragón government domain that
   explicitly lists software built on its pictograms, and the single
   highest-authority link available to this project. We already comply with
