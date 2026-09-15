@@ -26,6 +26,14 @@ const LANGS = [
     tagline: 'Una voz gratuita para todos.',
   },
   {
+    prefix: '/it',
+    htmlLang: 'it',
+    hreflang: 'it',
+    label: 'Italiano',
+    h1: 'Un\'app di CAA gratuita per chi non parla.',
+    tagline: 'Una voce gratuita per tutti.',
+  },
+  {
     prefix: '/pl',
     htmlLang: 'pl',
     hreflang: 'pl',
@@ -69,7 +77,7 @@ test.describe('localised marketing pages', () => {
       // right page rather than treating them as duplicates. Portuguese carries
       // a bare `pt` as well as `pt-BR`, so a pt-PT visitor matches the page
       // instead of falling through to English.
-      expect(alternates.sort()).toEqual(['en', 'es', 'pl', 'pt', 'pt-BR', 'x-default'])
+      expect(alternates.sort()).toEqual(['en', 'es', 'it', 'pl', 'pt', 'pt-BR', 'x-default'])
     }
   })
 

@@ -87,7 +87,7 @@ export function MessageBar({ scanHighlightIds }: { scanHighlightIds?: Set<string
         >
           {tokens.length === 0 && (
             <Text style={[styles.emptyHint, { color: theme.textMuted }]}>
-              Tap buttons to build a message…
+              {t('message.placeholder')}
             </Text>
           )}
           {tokens.map((token) => {

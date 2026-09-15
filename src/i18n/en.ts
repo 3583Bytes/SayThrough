@@ -51,6 +51,7 @@ export const EN = {
   'onboarding.startTalking': 'Start talking',
 
   // ---- message bar (§6) --------------------------------------------------
+  'message.placeholder': 'Tap buttons to build a message…',
   'message.speak': 'Speak',
   'message.speakLabel': 'Speak message',
   'message.deleteLast': 'Delete last word',

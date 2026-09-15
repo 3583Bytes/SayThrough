@@ -25,7 +25,7 @@ const root = join(here, '..', '..')
 // SayThrough's Portuguese board is Brazilian throughout — pt-BR lexicon,
 // pt_BR-faber voice, `você` taking the third person. Asking ARASAAC for `pt`
 // would label the picker in the wrong Portuguese.
-export const LOCALES = { en: 'en', es: 'es', pl: 'pl', pt: 'br' }
+export const LOCALES = { en: 'en', es: 'es', it: 'it', pl: 'pl', pt: 'br' }
 
 const FALLBACK = 'en' // keywords used when a pictogram has none in a language
 const MAX_KEYWORDS = 6

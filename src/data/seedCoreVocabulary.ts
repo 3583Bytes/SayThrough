@@ -3,10 +3,12 @@ import { type LanguageCode, SUPPORTED_LANGUAGES, langCode } from '../i18n'
 import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
 import coreWordsEsJson from './coreWords.es.json'
+import coreWordsItJson from './coreWords.it.json'
 import coreWordsPlJson from './coreWords.pl.json'
 import coreWordsPtJson from './coreWords.pt.json'
 import coreWordsJson from './coreWords.json'
 import seedSymbolMapEsJson from './seedSymbolMap.es.json'
+import seedSymbolMapItJson from './seedSymbolMap.it.json'
 import seedSymbolMapPlJson from './seedSymbolMap.pl.json'
 import seedSymbolMapPtJson from './seedSymbolMap.pt.json'
 import seedSymbolMapJson from './seedSymbolMap.json'
@@ -52,6 +54,7 @@ interface SizeLayout {
 const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
   en: coreWordsJson.sizes as unknown as Record<string, SizeLayout>,
   es: coreWordsEsJson.sizes as unknown as Record<string, SizeLayout>,
+  it: coreWordsItJson.sizes as unknown as Record<string, SizeLayout>,
   pl: coreWordsPlJson.sizes as unknown as Record<string, SizeLayout>,
   pt: coreWordsPtJson.sizes as unknown as Record<string, SizeLayout>,
 }
@@ -59,6 +62,7 @@ const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
 const SYMBOL_MAPS: Record<LanguageCode, Record<string, string>> = {
   en: seedSymbolMapJson as Record<string, string>,
   es: seedSymbolMapEsJson as Record<string, string>,
+  it: seedSymbolMapItJson as Record<string, string>,
   pl: seedSymbolMapPlJson as Record<string, string>,
   pt: seedSymbolMapPtJson as Record<string, string>,
 }
@@ -80,6 +84,11 @@ const CHROME: Record<
     back: 'Atrás', more: 'Más', home: 'Inicio',
     quickPhrases: 'Frases rápidas',
     quickDescription: 'Frases guardadas que se dicen con un solo toque (§19.5)',
+  },
+  it: {
+    back: 'Indietro', more: 'Altro', home: 'Home',
+    quickPhrases: 'Frasi rapide',
+    quickDescription: 'Frasi complete con un solo tocco',
   },
   pl: {
     back: 'Wstecz', more: 'Więcej', home: 'Start',
@@ -646,6 +655,26 @@ const QUICK_PHRASES: Record<LanguageCode, Array<[string, PartOfSpeech]>> = {
   // Polish stock phrases deliberately avoid the past tense: it is marked for
   // the speaker's gender, so a single fixed set would misgender half its
   // users. Everything here is present tense or nominal.
+  it: [
+    ['Ciao!', 'social'],
+    ['Arrivederci!', 'social'],
+    ['Come stai?', 'question'],
+    ['Grazie!', 'social'],
+    ['Per favore!', 'social'],
+    ['Mi piace!', 'social'],
+    ['Mi aiuti?', 'little'],
+    ['Ho bisogno di una pausa.', 'little'],
+    ['Posso averne ancora?', 'question'],
+    ['Devo andare in bagno.', 'little'],
+    ['Che ridere!', 'social'],
+    ['Che bello!', 'social'],
+    ['Non mi piace.', 'descriptor'],
+    ['Guarda qui!', 'social'],
+    ['Non volevo dire questo.', 'descriptor'],
+    ["Qualcos'altro.", 'descriptor'],
+    ['Vieni qui per favore!', 'social'],
+    ['Qualcosa non va!', 'question'],
+  ],
   pl: [
     ['Cześć!', 'social'],
     ['Do widzenia!', 'social'],

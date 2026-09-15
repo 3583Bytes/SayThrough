@@ -60,6 +60,7 @@ export const PT: Record<StringKey, string> = {
   'onboarding.startTalking': 'Começar a falar',
 
   // ---- message bar -------------------------------------------------------
+  'message.placeholder': 'Toque nos botões para montar uma mensagem…',
   'message.speak': 'Falar',
   'message.speakLabel': 'Falar a mensagem',
   'message.deleteLast': 'Apagar a última palavra',

@@ -23,6 +23,7 @@ const BASE = process.env.EXPO_PUBLIC_BASE_URL ?? ''
 const VOICES: Record<LanguageCode, { model: string; espeak: string }> = {
   en: { model: 'en_US-hfc_female-medium', espeak: 'en-us' },
   es: { model: 'es_ES-sharvard-medium', espeak: 'es' },
+  it: { model: 'it_IT-serena-high', espeak: 'it' },
   pl: { model: 'pl_PL-gosia-medium', espeak: 'pl' },
   pt: { model: 'pt_BR-faber-medium', espeak: 'pt-br' },
 }

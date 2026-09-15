@@ -43,7 +43,7 @@ describe('language codes', () => {
   it('offers each language under its own name', () => {
     // A picker that says "Spanish" is no use to someone who reads Spanish.
     expect(SUPPORTED_LANGUAGES.map((l) => l.label)).toEqual([
-      'English', 'Español', 'Polski', 'Português',
+      'English', 'Español', 'Italiano', 'Polski', 'Português',
     ])
   })
 })

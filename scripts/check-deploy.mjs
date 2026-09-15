@@ -25,6 +25,7 @@ const CHECKS = [
   ...[
     ['en', 'water'],
     ['es', 'agua'],
+    ['it', 'acqua'],
     ['pl', 'woda'],
     ['pt', 'água'],
   ].map(([lang, probe]) => ({
@@ -47,6 +48,7 @@ const CHECKS = [
   })),
   { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon (en)' },
   { path: '/app/prediction/es.txt', required: true, label: 'prediction lexicon (es)' },
+  { path: '/app/prediction/it.txt', required: true, label: 'prediction lexicon (it)' },
   { path: '/app/prediction/pl.txt', required: true, label: 'prediction lexicon (pl)' },
   { path: '/app/prediction/pt.txt', required: true, label: 'prediction lexicon (pt)' },
   { path: '/app/ort/ort.wasm.min.js', required: true, label: 'ONNX runtime' },

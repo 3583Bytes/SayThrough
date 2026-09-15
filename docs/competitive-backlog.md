@@ -348,8 +348,28 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
    far the grammar sits from the three already built. Portuguese and Italian
    ~~would now be cheap — the Spanish engine ports~~ (Portuguese done). Italian
    and Catalan remain cheap on the Romance side; German and the other Slavic
-   languages get most of Polish's case machinery for free. Ukrainian is the
-   biggest remaining reach-per-effort, gated on Cyrillic keyboard work.
+   languages get most of Polish's case machinery for free. ~~Ukrainian is the
+   biggest remaining reach-per-effort, gated on Cyrillic keyboard work.~~
+   **Corrected 2026-09-14:** the gate is not the keyboard, it is upstream
+   symbol data. Measured against our 24 expanded-core symbols, ARASAAC returns
+   a Ukrainian keyword for **0 of 24** (de/it/fr/ca/ru/ar return 24/24, ro/nl
+   23/24), and a search for *хотіти* 404s where *volere* and *wollen* return
+   four results each. Shipping Ukrainian would make the symbol picker
+   English-only for Ukrainian users — precisely the defect §0 just fixed for
+   Polish. The unlock is contributing Ukrainian keywords upstream to ARASAAC,
+   which is outreach rather than app work, and would pair well with §5.
+   **Italian shipped 2026-09-15** — engine, boards (26/197/513), 303 UI
+   strings, contractions, lexicon (30,006 words), symbol index and the `/it/`
+   site tree. The coverage bet paid: ARASAAC needed only **2 borrowed English
+   keywords** for Italian against Polish's 1,089. Two bugs surfaced on the way
+   and are worth remembering — the header overflowed at 1120px once the
+   switcher reached five chips (every new language costs one), and the
+   message-bar placeholder turned out to be hardcoded English, so it had been
+   showing untranslated to Spanish, Polish and Portuguese users all along.
+   **Next language should be French:** the Spanish morphology engine ports,
+   ARASAAC coverage is 24/24 and heavily adopted in Italian special education,
+   far bigger reach, genuinely underserved, and the Romance port has now been
+   proven twice. Expect more morphology work than Italian needed.
 4. **Then:** VSD → recorded audio / pronunciation → cloud sync / SLP tools.
 
 ---

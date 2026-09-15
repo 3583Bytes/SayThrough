@@ -51,6 +51,19 @@ const TABLES: Partial<Record<string, Table>> = {
       o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas',
     },
   },
+  // Italian fuses five prepositions with every form of the definite article,
+  // and like Portuguese the fusion is obligatory rather than stylistic: `vado
+  // a il parco` is not clumsy, it is wrong, and `al parco` is the only form.
+  // `con` is left out on purpose — `col` has largely fallen out of written
+  // use and `con il` is the ordinary modern form, so fusing it would make the
+  // board sound dated rather than correct.
+  it: {
+    di: { il: 'del', lo: 'dello', la: 'della', i: 'dei', gli: 'degli', le: 'delle' },
+    a: { il: 'al', lo: 'allo', la: 'alla', i: 'ai', gli: 'agli', le: 'alle' },
+    da: { il: 'dal', lo: 'dallo', la: 'dalla', i: 'dai', gli: 'dagli', le: 'dalle' },
+    in: { il: 'nel', lo: 'nello', la: 'nella', i: 'nei', gli: 'negli', le: 'nelle' },
+    su: { il: 'sul', lo: 'sullo', la: 'sulla', i: 'sui', gli: 'sugli', le: 'sulle' },
+  },
   // Spanish has only the two, and they are included so the board stays correct
   // if a user adds `el` to a page themselves.
   es: {

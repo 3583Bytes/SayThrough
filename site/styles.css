@@ -262,11 +262,17 @@ table.compare tbody th { font-weight: 600; }
    nav labels are longest in Portuguese and Polish, so they go first — each
    one is repeated in the footer and the three in-page anchors are reachable
    by scrolling, so nothing becomes unreachable. A header that overflows its
-   own box is broken for everyone. */
-@media (max-width: 1179px) {
+   own box is broken for everyone.
+
+   These thresholds moved up ~60px when Italian brought the switcher to five
+   chips. The failure it caused is worth recording: at 1120px the Spanish
+   call to action ("Abrir la aplicación") was pushed past the header's right
+   edge — the widest label in the language whose switcher is also widest.
+   Every new language costs one chip, so expect to move these again. */
+@media (max-width: 1319px) {
   .nav-links { gap: 16px; margin-left: 4px; }
 }
-@media (max-width: 1119px) {
+@media (max-width: 1199px) {
   .nav-links { display: none; }
 }
 

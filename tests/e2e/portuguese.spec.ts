@@ -91,9 +91,12 @@ test.describe('contractions (§19.7)', () => {
     await expect(messageBar(page)).toContainText('na')
 
     // Delete-last-word removes the whole contraction, because it IS one word.
+    // Asserted against the empty-state placeholder rather than by searching
+    // for `em`: a two-letter substring matches inside ordinary words (it is
+    // in "mens**agem**"), so that check only ever passed because the
+    // placeholder used to be hardcoded English.
     await page.getByLabel('Apagar a última palavra').click()
-    await expect(messageBar(page)).not.toContainText('na')
-    await expect(messageBar(page)).not.toContainText('em')
+    await expect(messageBar(page)).toContainText('Toque nos botões para montar uma mensagem')
   })
 
   test('a + o fuses to ao', async ({ page }) => {
