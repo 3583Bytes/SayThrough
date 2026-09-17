@@ -2,9 +2,9 @@
 // build output at the root, alongside the Expo app under dist/app/. Runs last
 // in `npm run build`.
 //
-// §19.7 — the site ships in the same five languages as the app. The pages are
-// GENERATED rather than hand-authored per language: five languages × sixteen
-// pages is eighty files, and keeping those in sync by hand guarantees
+// §19.7 — the site ships in the same six languages as the app. The pages are
+// GENERATED rather than hand-authored per language: six languages × sixteen
+// pages is ninety-six files, and keeping those in sync by hand guarantees
 // drift. Same shape as the app's i18n — `_content/en.json` is canonical and
 // the build fails on a key that any language is missing.
 //
@@ -37,6 +37,7 @@ const GITHUB = 'https://github.com/3583bytes/saythrough'
 // content stays Brazilian either way — this is a matching hint, not a claim.
 const LANGUAGES = [
   { code: 'en', prefix: '', htmlLang: 'en', hreflangs: ['en'], label: 'English', short: 'EN' },
+  { code: 'de', prefix: '/de', htmlLang: 'de', hreflangs: ['de'], label: 'Deutsch', short: 'DE' },
   { code: 'es', prefix: '/es', htmlLang: 'es', hreflangs: ['es'], label: 'Español', short: 'ES' },
   { code: 'it', prefix: '/it', htmlLang: 'it', hreflangs: ['it'], label: 'Italiano', short: 'IT' },
   { code: 'pl', prefix: '/pl', htmlLang: 'pl', hreflangs: ['pl'], label: 'Polski', short: 'PL' },

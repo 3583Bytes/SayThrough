@@ -22,6 +22,7 @@ const BASE = process.env.EXPO_PUBLIC_BASE_URL ?? ''
 // user never downloads the English one.
 const VOICES: Record<LanguageCode, { model: string; espeak: string }> = {
   en: { model: 'en_US-hfc_female-medium', espeak: 'en-us' },
+  de: { model: 'de_DE-thorsten-high', espeak: 'de' },
   es: { model: 'es_ES-sharvard-medium', espeak: 'es' },
   it: { model: 'it_IT-serena-high', espeak: 'it' },
   pl: { model: 'pl_PL-gosia-medium', espeak: 'pl' },

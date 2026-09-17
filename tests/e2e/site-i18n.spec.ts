@@ -18,6 +18,14 @@ const LANGS = [
     tagline: 'A free voice for everyone.',
   },
   {
+    prefix: '/de',
+    htmlLang: 'de',
+    hreflang: 'de',
+    label: 'Deutsch',
+    h1: 'Eine kostenlose UK-App für Menschen ohne Lautsprache.',
+    tagline: 'Eine kostenlose Stimme für alle.',
+  },
+  {
     prefix: '/es',
     htmlLang: 'es',
     hreflang: 'es',
@@ -68,7 +76,7 @@ test.describe('localised marketing pages', () => {
   }
 
   test('every page declares the full reciprocal hreflang set', async ({ page }) => {
-    for (const path of ['/', '/es/', '/pl/guides/', '/pt/guides/what-is-aac/']) {
+    for (const path of ['/', '/de/', '/es/', '/pl/guides/', '/pt/guides/what-is-aac/']) {
       await page.goto(path)
       const alternates = await page.locator('link[rel=alternate]').evaluateAll((els) =>
         els.map((e) => e.getAttribute('hreflang')),
@@ -77,7 +85,7 @@ test.describe('localised marketing pages', () => {
       // right page rather than treating them as duplicates. Portuguese carries
       // a bare `pt` as well as `pt-BR`, so a pt-PT visitor matches the page
       // instead of falling through to English.
-      expect(alternates.sort()).toEqual(['en', 'es', 'it', 'pl', 'pt', 'pt-BR', 'x-default'])
+      expect(alternates.sort()).toEqual(['de', 'en', 'es', 'it', 'pl', 'pt', 'pt-BR', 'x-default'])
     }
   })
 
@@ -102,7 +110,11 @@ test.describe('localised marketing pages', () => {
     // The regression this guards: four endonyms in the header squeezed the
     // call-to-action until its label wrapped, which made it taller than the
     // fixed-height header and clipped its top edge.
-    for (const path of ['/', '/es/', '/pl/', '/pt/']) {
+    // Derived from LANGS, not a hardcoded list: the label lengths ARE the
+    // variable under test, so a new language has to be covered automatically.
+    // The hardcoded version silently skipped Italian and German, which are
+    // exactly the ones with the longest nav labels.
+    for (const path of LANGS.map((l) => `${l.prefix}/`)) {
       for (const width of [1440, 1280, 1120, 1024, 900, 700, 480, 360]) {
         await page.setViewportSize({ width, height: 400 })
         await page.goto(path)

@@ -2,11 +2,13 @@ import { POS_COLORS, PartOfSpeech, UI_COLORS } from '../constants/colors'
 import { type LanguageCode, SUPPORTED_LANGUAGES, langCode } from '../i18n'
 import type { Storage } from '../storage/types'
 import type { Button, ButtonAction, Page, PageSet } from '../types/models'
+import coreWordsDeJson from './coreWords.de.json'
 import coreWordsEsJson from './coreWords.es.json'
 import coreWordsItJson from './coreWords.it.json'
 import coreWordsPlJson from './coreWords.pl.json'
 import coreWordsPtJson from './coreWords.pt.json'
 import coreWordsJson from './coreWords.json'
+import seedSymbolMapDeJson from './seedSymbolMap.de.json'
 import seedSymbolMapEsJson from './seedSymbolMap.es.json'
 import seedSymbolMapItJson from './seedSymbolMap.it.json'
 import seedSymbolMapPlJson from './seedSymbolMap.pl.json'
@@ -53,6 +55,7 @@ interface SizeLayout {
 // page differ by design. See scripts/vocabulary/build-spanish-core.mjs.
 const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
   en: coreWordsJson.sizes as unknown as Record<string, SizeLayout>,
+  de: coreWordsDeJson.sizes as unknown as Record<string, SizeLayout>,
   es: coreWordsEsJson.sizes as unknown as Record<string, SizeLayout>,
   it: coreWordsItJson.sizes as unknown as Record<string, SizeLayout>,
   pl: coreWordsPlJson.sizes as unknown as Record<string, SizeLayout>,
@@ -61,6 +64,7 @@ const LAYOUTS: Record<LanguageCode, Record<string, SizeLayout>> = {
 
 const SYMBOL_MAPS: Record<LanguageCode, Record<string, string>> = {
   en: seedSymbolMapJson as Record<string, string>,
+  de: seedSymbolMapDeJson as Record<string, string>,
   es: seedSymbolMapEsJson as Record<string, string>,
   it: seedSymbolMapItJson as Record<string, string>,
   pl: seedSymbolMapPlJson as Record<string, string>,
@@ -79,6 +83,11 @@ const CHROME: Record<
     back: 'Back', more: 'More', home: 'Home',
     quickPhrases: 'Quick Phrases',
     quickDescription: 'Pre-stored phrases spoken with one tap (§19.5)',
+  },
+  de: {
+    back: 'Zurück', more: 'Mehr', home: 'Start',
+    quickPhrases: 'Schnellsätze',
+    quickDescription: 'Ganze Sätze mit einem Tipp',
   },
   es: {
     back: 'Atrás', more: 'Más', home: 'Inicio',
@@ -631,6 +640,26 @@ const QUICK_PHRASES: Record<LanguageCode, Array<[string, PartOfSpeech]>> = {
     ['Something else.', 'descriptor'],
     ['Come here please!', 'social'],
     ['Something is wrong!', 'question'],
+  ],
+  de: [
+    ['Hallo!', 'social'],
+    ['Tschüss!', 'social'],
+    ['Wie geht es dir?', 'question'],
+    ['Danke!', 'social'],
+    ['Bitte!', 'social'],
+    ['Das mag ich!', 'social'],
+    ['Ich brauche Hilfe.', 'little'],
+    ['Ich brauche eine Pause.', 'little'],
+    ['Kann ich mehr haben?', 'question'],
+    ['Ich muss aufs Klo.', 'little'],
+    ['Das ist lustig!', 'social'],
+    ['Das ist toll!', 'social'],
+    ['Das mag ich nicht.', 'descriptor'],
+    ['Schau mal!', 'social'],
+    ['So habe ich das nicht gemeint.', 'descriptor'],
+    ['Etwas anderes.', 'descriptor'],
+    ['Komm bitte her!', 'social'],
+    ['Etwas stimmt nicht!', 'question'],
   ],
   es: [
     ['¡Hola!', 'social'],

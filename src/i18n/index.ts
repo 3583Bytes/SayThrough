@@ -1,4 +1,5 @@
 import { EN, type StringKey } from './en'
+import { DE } from './de'
 import { ES } from './es'
 import { IT } from './it'
 import { PL } from './pl'
@@ -8,7 +9,7 @@ import { PT } from './pt'
 // seed generator can translate without pulling React state in. The hook that
 // binds this to the active profile lives in `src/hooks/useT.ts`.
 
-export type LanguageCode = 'en' | 'es' | 'it' | 'pl' | 'pt'
+export type LanguageCode = 'de' | 'en' | 'es' | 'it' | 'pl' | 'pt'
 
 export interface LanguageOption {
   code: LanguageCode
@@ -20,6 +21,7 @@ export interface LanguageOption {
 
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: 'en', label: 'English', bcp47: 'en-US' },
+  { code: 'de', label: 'Deutsch', bcp47: 'de-DE' },
   { code: 'es', label: 'Español', bcp47: 'es-ES' },
   { code: 'it', label: 'Italiano', bcp47: 'it-IT' },
   { code: 'pl', label: 'Polski', bcp47: 'pl-PL' },
@@ -28,7 +30,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 
 export const DEFAULT_LANGUAGE: LanguageCode = 'en'
 
-const TABLES: Record<LanguageCode, Record<StringKey, string>> = { en: EN, es: ES, it: IT, pl: PL, pt: PT }
+const TABLES: Record<LanguageCode, Record<StringKey, string>> = { de: DE, en: EN, es: ES, it: IT, pl: PL, pt: PT }
 
 /**
  * BCP-47 tag → supported language code. Anything unrecognised falls back to

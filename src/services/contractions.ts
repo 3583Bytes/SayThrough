@@ -51,6 +51,23 @@ const TABLES: Partial<Record<string, Table>> = {
       o: 'pelo', a: 'pela', os: 'pelos', as: 'pelas',
     },
   },
+  // German fuses a preposition with a following article too, and unlike
+  // Italian's the fusion is strongly preferred rather than strictly required:
+  // `in dem Haus` is grammatical, it just is not what anyone says. `im Haus`
+  // is, so a board that produces the unfused pair sounds stilted every time.
+  //
+  // Only the fusions that are standard in writing are here. `aufs`, `durchs`
+  // and `ums` are left out: they are ordinary in speech but colloquial on the
+  // page, and a communication device should not make its user sound casual
+  // when they did not choose to.
+  de: {
+    in: { dem: 'im', das: 'ins' },
+    an: { dem: 'am', das: 'ans' },
+    zu: { dem: 'zum', der: 'zur' },
+    bei: { dem: 'beim' },
+    von: { dem: 'vom' },
+    für: { das: 'fürs' },
+  },
   // Italian fuses five prepositions with every form of the definite article,
   // and like Portuguese the fusion is obligatory rather than stylistic: `vado
   // a il parco` is not clumsy, it is wrong, and `al parco` is the only form.

@@ -49,7 +49,7 @@
     "test": "jest",
     "e2e": "npm run build && playwright test",
     "og-image": "node scripts/gen-og-image.mjs",
-    "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en && node scripts/prediction/download-lexicon.mjs es && node scripts/prediction/build-lexicon.mjs es && node scripts/prediction/download-lexicon.mjs it && node scripts/prediction/build-lexicon.mjs it && node scripts/prediction/download-lexicon.mjs pl && node scripts/prediction/build-lexicon.mjs pl && node scripts/prediction/download-lexicon.mjs pt && node scripts/prediction/build-lexicon.mjs pt",
+    "lexicon": "node scripts/prediction/download-lexicon.mjs en && node scripts/prediction/build-lexicon.mjs en && node scripts/prediction/download-lexicon.mjs de && node scripts/prediction/build-lexicon.mjs de && node scripts/prediction/download-lexicon.mjs es && node scripts/prediction/build-lexicon.mjs es && node scripts/prediction/download-lexicon.mjs it && node scripts/prediction/build-lexicon.mjs it && node scripts/prediction/download-lexicon.mjs pl && node scripts/prediction/build-lexicon.mjs pl && node scripts/prediction/download-lexicon.mjs pt && node scripts/prediction/build-lexicon.mjs pt",
     "voice": "node scripts/voice/download-voice.mjs",
     "voice:es": "node scripts/voice/download-voice.mjs es_ES-sharvard-medium",
     "lint": "tsc --noEmit",
@@ -66,7 +66,9 @@
     "portuguese-core": "node scripts/vocabulary/build-portuguese-core.mjs && node scripts/vocabulary/build-portuguese-symbols.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "voice:it": "node scripts/voice/download-voice.mjs it_IT-serena-high",
-    "italian-core": "node scripts/vocabulary/build-italian-core.mjs && node scripts/vocabulary/build-italian-symbols.mjs"
+    "italian-core": "node scripts/vocabulary/build-italian-core.mjs && node scripts/vocabulary/build-italian-symbols.mjs",
+    "voice:de": "node scripts/voice/download-voice.mjs de_DE-thorsten-high",
+    "german-core": "node scripts/vocabulary/build-german-core.mjs && node scripts/vocabulary/build-german-symbols.mjs"
   },
   "private": true
 }

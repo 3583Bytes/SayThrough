@@ -13,9 +13,10 @@
 // authored.
 (function () {
   var KEY = 'saythrough-site-lang'
-  var LANGS = ['en', 'es', 'it', 'pl', 'pt']
+  var LANGS = ['en', 'de', 'es', 'it', 'pl', 'pt']
   // The banner speaks the language it is OFFERING, not the one on screen.
   var COPY = {
+    de: { text: 'Diese Seite gibt es auch auf Deutsch.', go: 'Auf Deutsch ansehen', close: 'Schließen' },
     es: { text: 'Esta página también está en español.', go: 'Ver en español', close: 'Cerrar' },
     it: { text: 'Questa pagina è disponibile anche in italiano.', go: 'Vedi in italiano', close: 'Chiudi' },
     pl: { text: 'Ta strona jest też po polsku.', go: 'Zobacz po polsku', close: 'Zamknij' },
@@ -41,7 +42,7 @@
     if (link) return link.getAttribute('href')
     // No switcher (or no entry for this language): fall back to the same path
     // under the other prefix, which is right for every ordinary page.
-    var path = location.pathname.replace(/^\/(es|it|pl|pt)(?=\/|$)/, '') || '/'
+    var path = location.pathname.replace(/^\/(de|es|it|pl|pt)(?=\/|$)/, '') || '/'
     return (lang === 'en' ? '' : '/' + lang) + path + location.search + location.hash
   }
 

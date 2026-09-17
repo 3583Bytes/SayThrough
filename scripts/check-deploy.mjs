@@ -23,6 +23,7 @@ const CHECKS = [
   // passes a length check and leaves the picker unusable in that language,
   // which is the exact bug these files were split to fix.
   ...[
+    ['de', 'wasser'],
     ['en', 'water'],
     ['es', 'agua'],
     ['it', 'acqua'],
@@ -46,6 +47,7 @@ const CHECKS = [
       return `${list.length} symbols`
     },
   })),
+  { path: '/app/prediction/de.txt', required: true, label: 'prediction lexicon (de)' },
   { path: '/app/prediction/en.txt', required: true, label: 'prediction lexicon (en)' },
   { path: '/app/prediction/es.txt', required: true, label: 'prediction lexicon (es)' },
   { path: '/app/prediction/it.txt', required: true, label: 'prediction lexicon (it)' },

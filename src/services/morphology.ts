@@ -1,6 +1,7 @@
 import type { PartOfSpeech } from '../constants/colors'
 import { langCode } from '../i18n'
 import { spanishWordForms } from './morphology.es'
+import { germanWordForms } from './morphology.de'
 import { italianWordForms } from './morphology.it'
 import { polishWordForms } from './morphology.pl'
 import { portugueseWordForms } from './morphology.pt'
@@ -201,6 +202,8 @@ export function wordForms(
       return spanishWordForms(word, pos, context)
     case 'pl':
       return polishWordForms(word, pos, context)
+    case 'de':
+      return germanWordForms(word, pos, context)
     case 'it':
       return italianWordForms(word, pos, context)
     case 'pt':

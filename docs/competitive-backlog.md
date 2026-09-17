@@ -366,6 +366,16 @@ that make us clearly better** (Tier 2) are where the backlog focuses.
    switcher reached five chips (every new language costs one), and the
    message-bar placeholder turned out to be hardcoded English, so it had been
    showing untranslated to Spanish, Polish and Portuguese users all along.
+   **German shipped 2026-09-17**, chosen over French by the user. The
+   full-catalogue measurement (the one that actually predicts cost, unlike the
+   24-word sample that picked Italian) put German at **2 upstream gaps**, tied
+   with Italian and far better than French's 108 or Polish's 1,089 — and it has
+   `de_DE-thorsten-high`. The costs landed where predicted: separable verbs
+   needed a design decision (modal + infinitive; the conjugated form keeps its
+   particle as one token, clause-final placement is deliberately not
+   attempted), and gender had to be tabled for all 215 board nouns after a
+   check showed 108 silently defaulting to masculine. A unit test now fails if
+   a board noun has no gender.
    **Next language should be French:** the Spanish morphology engine ports,
    ARASAAC coverage is 24/24 and heavily adopted in Italian special education,
    far bigger reach, genuinely underserved, and the Romance port has now been
